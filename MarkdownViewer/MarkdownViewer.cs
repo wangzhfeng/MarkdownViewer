@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Specialized;
 using System.Collections;
-using OY.TotalCommander.TcPluginInterface;
 using OY.TotalCommander.TcPluginInterface.Lister;
 using System.IO;
 
@@ -45,7 +44,7 @@ namespace MarkdownViewer
                     return null;
                 }
 
-                viewerControl = new ViewerControl();
+                viewerControl = new ViewerControl(this);
                 viewerControl.FileLoad(fileToLoad);
 
                 controls.Add(viewerControl);
