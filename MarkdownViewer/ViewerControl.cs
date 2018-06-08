@@ -15,6 +15,7 @@ namespace MarkdownViewer
     public partial class ViewerControl : UserControl
     {
 
+
         private Encoding encoding = Encoding.UTF8;
         private const String CONTAINER_HTML = "<!DOCTYPE html>" +
             "<html>" +
@@ -40,7 +41,7 @@ namespace MarkdownViewer
             InitializeComponent();
         }
 
-       
+
         public void FileLoad(String fileName)
         {
             using (StreamReader sr = new StreamReader(fileName, encoding))
