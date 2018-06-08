@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Collections;
-using OY.TotalCommander.TcPluginInterface;
 using OY.TotalCommander.TcPluginInterface.Lister;
 using System.IO;
 
@@ -27,7 +26,7 @@ namespace MarkdownViewer
         private ArrayList controls = new ArrayList();
 
         /// <summary>
-        /// 
+        /// 载入插件
         /// </summary>
         /// <param name="fileToLoad"></param>
         /// <param name="showFlags"></param>
@@ -49,7 +48,7 @@ namespace MarkdownViewer
                     return null;
                 }
 
-                viewerControl = new ViewerControl();
+                viewerControl = new ViewerControl(this);
                 viewerControl.FileLoad(fileToLoad);
                 FocusedControl = viewerControl.webBrowser1;
                 viewerControl.Focus();

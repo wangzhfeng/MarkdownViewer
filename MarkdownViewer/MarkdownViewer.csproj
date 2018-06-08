@@ -35,9 +35,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Markdig">
-      <HintPath>..\..\markdig\src\Markdig\bin\Debug\net40\Markdig.dll</HintPath>
+    <Reference Include="Markdig, Version=0.15.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Markdig.0.15.0\lib\net40\Markdig.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -70,6 +71,7 @@
     <EmbeddedResource Include="ViewerControl.resx">
       <DependentUpon>ViewerControl.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
