@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.IO;
 using Markdig;
 using OY.TotalCommander.TcPluginInterface.Lister;
+using System.Linq;
 
 namespace MarkdownViewer
 {
@@ -13,6 +14,7 @@ namespace MarkdownViewer
         private const String CONTAINER_HTML = "<!DOCTYPE html>" +
             "<html>" +
             "<head>" +
+            "  <base href=\"file://localhost/{2}/\" />" +
             "  <meta charset=\"utf-8\">" +
             "  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />" +
             "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=yes\">" +
@@ -45,7 +47,8 @@ namespace MarkdownViewer
                 var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
                 String markdownHTML = Markdown.ToHtml(markdownContent, pipeline);
                 String style = Properties.Resources.github_markdown2;
-                String html = String.Format(CONTAINER_HTML, markdownHTML, style);
+                // fixed cannot load local file problem
+                String html = String.Format(CONTAINER_HTML, markdownHTML, style, Path.GetDirectoryName(fileName));
                 this.webBrowser1.DocumentText = html;
             }
         }
@@ -57,11 +60,12 @@ namespace MarkdownViewer
 
         private void MyKeyPressHandler(object sender, HtmlElementEventArgs e)
         {
-            // 处理Esc键失效问题
-            if (e.KeyPressedCode == 27)
+            int[] keys = new int[] { 27, 49, 50, 51, 52, 53, 54, 55 }; // Esc, 1-7
+            if (keys.Contains(e.KeyPressedCode))
             {
-                listerPlugin.SendKeyToParentWindow(27);
+                listerPlugin.SendKeyToParentWindow(e.KeyPressedCode);
             }
+                       
         }
     }
 }
