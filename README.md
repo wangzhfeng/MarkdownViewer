@@ -1,18 +1,27 @@
+[中文](./README.md)
+
 # MarkdownViewer
 
-MarkdownViewer是一款Total Commander的插件，用于浏览markdown文件，支持后缀为md和markdown的文件。
+MarkdownViewer is a Total Commander plugin, using preview markdown file which suffixed with md markdown and mk.
 
 ![](./Doc/viewer.png)
 
-# 版本历史
+# Version
 
 ## v0.1
 
-- 支持查看markdown
+- support preview markdown file
 
 ## v0.2
 
-- fixed: 不支持Esc键关闭窗口的问题 [\#4](https://github.com/wangzhfeng/MarkdownViewer/issues/4)
-- 使用NuGet安装markdig库，方便本地开发
+- fixed: cannot close window with Esc [\#4](https://github.com/wangzhfeng/MarkdownViewer/issues/4)
+- using Nuget to manage dependency
 
-以上，多谢[thorn0](https://github.com/thorn0)提供的Commit。
+Thanks to [thorn0](https://github.com/thorn0) for your commit.
+
+## v0.3
+
+- feature: support print, can print to pdf through local printer
+- fixed: cannot preview local image
+- fixed: cannot select and copy [\#7](https://github.com/wangzhfeng/MarkdownViewer/issues/7)
+- fixed: dependented dll not package in output zip
