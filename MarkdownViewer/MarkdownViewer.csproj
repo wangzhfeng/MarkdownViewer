@@ -35,8 +35,8 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Markdig, Version=0.15.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Markdig.0.15.0\lib\net40\Markdig.dll</HintPath>
+    <Reference Include="Markdig, Version=0.17.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Markdig.0.17.1\lib\net40\Markdig.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
@@ -88,8 +88,13 @@
   <ItemGroup>
     <None Include="Resources\github-markdown2.css" />
   </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)TcPluginCore\WrapperBuilder.exe /wlx /p=$(TargetPath) /v /$(ConfigurationName)</PostBuildEvent>
+    <PostBuildEvent>$(SolutionDir)TcPluginCore\WrapperBuilder.exe /wlx /p=$(TargetPath) /v /$(ConfigurationName)
+zip -m $(TargetName).zip Markdig.dll
+echo add dependented dll</PostBuildEvent>
   </PropertyGroup>
 </Project>
