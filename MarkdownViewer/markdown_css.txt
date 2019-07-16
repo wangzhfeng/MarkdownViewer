@@ -335,13 +335,12 @@ nav{
 
 .markdown-body code {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  font-size: 12px;
 }
 
 .markdown-body pre {
   margin-top: 0;
   margin-bottom: 0;
-  font: 12px "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font: 1em "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 
 .markdown-body .octicon {
@@ -598,12 +597,6 @@ nav{
 }
 
 .markdown-body code {
-  padding: 0;
-  padding-top: 0.2em;
-  padding-bottom: 0.2em;
-  margin: 0;
-  font-size: 85%;
-  background-color: rgba(27,31,35,0.05);
   border-radius: 3px;
 }
 
@@ -618,12 +611,8 @@ nav{
 }
 
 .markdown-body pre>code {
-  padding: 0;
-  margin: 0;
-  font-size: 100%;
   word-break: normal;
   white-space: pre;
-  background: transparent;
   border: 0;
 }
 
@@ -638,23 +627,16 @@ nav{
 
 .markdown-body .highlight pre,
 .markdown-body pre {
-  padding: 16px;
   overflow: auto;
-  font-size: 85%;
   line-height: 1.45;
-  background-color: #f6f8fa;
   border-radius: 3px;
 }
 
 .markdown-body pre code {
-  display: inline;
   max-width: auto;
-  padding: 0;
-  margin: 0;
   overflow: visible;
   line-height: inherit;
   word-wrap: normal;
-  background-color: transparent;
   border: 0;
 }
 

@@ -6,6 +6,7 @@ using Markdig;
 using OY.TotalCommander.TcPluginInterface.Lister;
 using System.Linq;
 using System.Reflection;
+using Pek.Markdig.HighlightJs;
 
 namespace MarkdownViewer
 {
@@ -29,7 +30,10 @@ namespace MarkdownViewer
             using (StreamReader sr = new StreamReader(fileName, encoding))
             {
                 String markdownContent = sr.ReadToEnd();
-                var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+                var pipeline = new MarkdownPipelineBuilder()
+                    .UseAdvancedExtensions()
+                    .UseHighlightJs()
+                    .Build();
                 String markdownHTML = Markdown.ToHtml(markdownContent, pipeline);
                              
                 // read markdown tmpl from file

@@ -35,10 +35,16 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Jurassic, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Jurassic.3.0.0\lib\net45\Jurassic.dll</HintPath>
+    </Reference>
     <Reference Include="Markdig, Version=0.17.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Markdig.0.17.1\lib\net40\Markdig.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Pek.Markdig.HighlightJs">
+      <HintPath>..\Lib\Pek.Markdig.HighlightJs.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -103,6 +109,8 @@
   <PropertyGroup>
     <PostBuildEvent>$(SolutionDir)TcPluginCore\WrapperBuilder.exe /wlx /p=$(TargetPath) /v /$(ConfigurationName)
 zip -m $(TargetName).zip Markdig.dll
+zip -m $(TargetName).zip Pek.Markdig.HighlightJs.dll
+zip -m $(TargetName).zip Jurassic.dll
 zip -m $(TargetName).zip markdown_tmpl.txt
 zip -m $(TargetName).zip markdown_css.txt
 echo add dependency to package</PostBuildEvent>
