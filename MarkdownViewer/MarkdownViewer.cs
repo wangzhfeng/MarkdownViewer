@@ -53,7 +53,7 @@ namespace MarkdownViewer
                 viewerControl = new ViewerControl(this);
                 viewerControl.FileLoad(fileToLoad);
                 FocusedControl = viewerControl.webBrowser1;
-                //viewerControl.Focus();
+                viewerControl.Focus();
 
                 controls.Add(viewerControl);
              

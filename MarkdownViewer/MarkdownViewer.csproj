@@ -86,15 +86,25 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\github-markdown2.css" />
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <WCFMetadata Include="Connected Services\" />
+    <Content Include="markdown_css.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="markdown_tmpl.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>$(SolutionDir)TcPluginCore\WrapperBuilder.exe /wlx /p=$(TargetPath) /v /$(ConfigurationName)
 zip -m $(TargetName).zip Markdig.dll
-echo add dependented dll</PostBuildEvent>
+zip -m $(TargetName).zip markdown_tmpl.txt
+zip -m $(TargetName).zip markdown_css.txt
+echo add dependency to package</PostBuildEvent>
   </PropertyGroup>
 </Project>
