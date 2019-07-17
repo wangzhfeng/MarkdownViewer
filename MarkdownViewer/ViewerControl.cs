@@ -32,6 +32,7 @@ namespace MarkdownViewer
                 String markdownContent = sr.ReadToEnd();
                 var pipeline = new MarkdownPipelineBuilder()
                     .UseAdvancedExtensions()
+                    .UseEmojiAndSmiley()
                     .UseHighlightJs()
                     .Build();
                 String markdownHTML = Markdown.ToHtml(markdownContent, pipeline);
