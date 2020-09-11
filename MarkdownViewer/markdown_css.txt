@@ -566,7 +566,7 @@ nav{
 }
 
 .markdown-body table {
-  display: block;
+  display: table;
   width: 100%;
   overflow: auto;
 }
@@ -634,7 +634,6 @@ nav{
 
 .markdown-body pre code {
   max-width: auto;
-  overflow: visible;
   line-height: inherit;
   word-wrap: normal;
   border: 0;
