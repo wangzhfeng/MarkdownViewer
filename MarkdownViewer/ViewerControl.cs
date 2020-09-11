@@ -7,6 +7,7 @@ using OY.TotalCommander.TcPluginInterface.Lister;
 using System.Linq;
 using System.Reflection;
 using Pek.Markdig.HighlightJs;
+using System.Threading;
 
 namespace MarkdownViewer
 {
@@ -27,16 +28,30 @@ namespace MarkdownViewer
        
         public void FileLoad(String fileName)
         {
+
+            // parse markdown file in worker thread
+            Thread threadObj = new Thread(new ThreadStart(delegate
+            {
+                ParseMarkdownFile(fileName);
+            }));
+            threadObj.Start();
+            
+        }
+
+        private void ParseMarkdownFile(String fileName)
+        {
             using (StreamReader sr = new StreamReader(fileName, encoding))
             {
                 String markdownContent = sr.ReadToEnd();
                 var pipeline = new MarkdownPipelineBuilder()
                     .UseAdvancedExtensions()
                     .UseEmojiAndSmiley()
+                    .UseYamlFrontMatter()
+                    .UseFootnotes()
                     .UseHighlightJs()
                     .Build();
                 String markdownHTML = Markdown.ToHtml(markdownContent, pipeline);
-                             
+
                 // read markdown tmpl from file
                 var buildDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 var tmplFilePath = buildDir + @"\" + TMPL_FILE_NAME;
@@ -47,7 +62,10 @@ namespace MarkdownViewer
                 var style = File.ReadAllText(styleFilePath);
 
                 String html = String.Format(markdownTmpl, Path.GetDirectoryName(fileName), style, markdownHTML);
-                this.webBrowser1.DocumentText = html;
+
+                Action act = delegate () { this.webBrowser1.DocumentText = html; };
+                this.Invoke(act);
+                
             }
         }
 
