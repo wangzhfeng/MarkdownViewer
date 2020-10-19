@@ -64,6 +64,11 @@ namespace MarkdownViewer
                 String html = String.Format(markdownTmpl, Path.GetDirectoryName(fileName), style, markdownHTML);
 
                 Action act = delegate () { this.webBrowser1.DocumentText = html; };
+                // fixed 在创建窗口句柄之前,不能在控件上调用 Invoke 或 BeginInvoke
+                while (!this.IsHandleCreated)
+                {
+                    ;
+                }
                 this.Invoke(act);
                 
             }
