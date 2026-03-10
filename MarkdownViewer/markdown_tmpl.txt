@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <!-- fixed cannot preview local image problem -->
-  <base href="file://localhost/{0}/" />
+  <base href="{0}/" />
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
@@ -20,6 +20,6 @@
 <script defer src="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.11.1/contrib/auto-render.min.js" crossorigin="anonymous"
     onload="renderMathInElement(document.body);"></script>
 <script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/7.1.2/mermaid.min.js"  crossorigin="anonymous"
-                                                                         onload="mermaid.initialize({{startOnLoad:true,flowchart:{{useMaxWidth:false,htmlLabels:false}},sequenceDiagram:{{useMaxWidth:false,htmlLabels:false}}}});"></script>
+                                                                         onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
 </body>
 </html>

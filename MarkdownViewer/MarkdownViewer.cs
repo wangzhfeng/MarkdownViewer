@@ -69,6 +69,14 @@ namespace MarkdownViewer
         /// <param name="control"></param>
         public override void CloseWindow(object control)
         {
+            // Fix issue #6/#13: Restore focus to Total Commander after closing viewer
+            ViewerControl viewerControl = control as ViewerControl;
+            if (viewerControl != null)
+            {
+                // Dispose the web browser to release focus properly
+                viewerControl.webBrowser1?.Dispose();
+            }
+            
             controls.Remove(control);
         }
 
