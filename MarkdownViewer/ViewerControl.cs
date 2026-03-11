@@ -22,6 +22,7 @@ namespace MarkdownViewer
 
         private ListerPlugin listerPlugin;
         private bool isWebViewInitialized = false;
+        private bool hasLoadedContent = false;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
@@ -128,6 +129,34 @@ namespace MarkdownViewer
         {
             System.Diagnostics.Trace.WriteLine("FileLoad called for: " + fileName);
             
+            // If WebView2 has already loaded content, reinitialize it to avoid blank page issue
+            if (hasLoadedContent && isWebViewInitialized)
+            {
+                System.Diagnostics.Trace.WriteLine("Reinitializing WebView2 for new content");
+                hasLoadedContent = false;
+                isWebViewInitialized = false;
+                
+                // Dispose and recreate the WebView2 control
+                webView2.Dispose();
+                
+                var newWebView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
+                newWebView2.AllowExternalDrop = true;
+                newWebView2.CreationProperties = null;
+                newWebView2.DefaultBackgroundColor = System.Drawing.Color.White;
+                newWebView2.Dock = System.Windows.Forms.DockStyle.Fill;
+                newWebView2.Location = new System.Drawing.Point(0, 0);
+                newWebView2.Name = "webView2";
+                newWebView2.TabIndex = 0;
+                newWebView2.ZoomFactor = 1D;
+                
+                this.Controls.Clear();
+                this.Controls.Add(newWebView2);
+                this.webView2 = newWebView2;
+                
+                // Reinitialize WebView2 asynchronously
+                InitializeWebView2();
+            }
+            
             // Wait for WebView2 to be initialized if needed
             int waitCount = 0;
             while (!isWebViewInitialized && waitCount < 50) // Wait up to 5 seconds
@@ -192,14 +221,11 @@ namespace MarkdownViewer
                         {
                             if (isWebViewInitialized && webView2.CoreWebView2 != null)
                             {
-                                // Clear previous content first by navigating to about:blank
-                                webView2.CoreWebView2.Navigate("about:blank");
-                                
-                                // Small delay to ensure clear completes
-                                System.Threading.Thread.Sleep(50);
-                                
                                 // Navigate to the new content
                                 webView2.CoreWebView2.NavigateToString(html);
+                                
+                                // Mark that content has been loaded
+                                hasLoadedContent = true;
                                 
                                 System.Diagnostics.Trace.WriteLine("WebView2 NavigateToString called for: " + fileName);
                             }
