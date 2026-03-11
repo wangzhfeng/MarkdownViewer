@@ -24,7 +24,7 @@ namespace MarkdownViewer
 
         private ListerPlugin listerPlugin;
         private string tempHtmlFile = null;
-        private int loadCount = 0;
+        private bool isWebViewReady = false;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
@@ -73,6 +73,8 @@ namespace MarkdownViewer
                 // Subscribe to NavigationCompleted event
                 webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
                 
+                isWebViewReady = true;
+                
                 // Hide loading panel when ready
                 ShowLoading(false);
                 
@@ -81,7 +83,36 @@ namespace MarkdownViewer
             catch (Exception ex)
             {
                 TraceLog("WebView2 initialization error: " + ex.Message);
+                isWebViewReady = false;
                 ShowLoading(false);
+            }
+        }
+
+        /// <summary>
+        /// Reset WebView2 for new content load
+        /// This is critical for fixing the blank page issue on subsequent loads
+        /// </summary>
+        private async void ResetWebViewForNewLoad()
+        {
+            try
+            {
+                if (webView2.CoreWebView2 != null)
+                {
+                    // Stop any ongoing navigation
+                    webView2.CoreWebView2.Stop();
+                    
+                    // Navigate to blank first to clear state
+                    webView2.CoreWebView2.Navigate("about:blank");
+                    
+                    // Wait a bit for the blank page to load
+                    await Task.Delay(100);
+                    
+                    TraceLog("WebView2 reset completed");
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLog("Error resetting WebView2: " + ex.Message);
             }
         }
 
@@ -97,6 +128,11 @@ namespace MarkdownViewer
                     string title = await webView2.CoreWebView2.ExecuteScriptAsync("document.title");
                     string bodyLength = await webView2.CoreWebView2.ExecuteScriptAsync("document.body.innerHTML.length");
                     TraceLog("Page loaded - Title: " + title + ", Body length: " + bodyLength);
+                    
+                    if (bodyLength == "0")
+                    {
+                        TraceLog("WARNING: Body is empty! This indicates a template or navigation issue.");
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -104,7 +140,7 @@ namespace MarkdownViewer
                 }
                 
                 // Hide loading panel after a short delay
-                System.Threading.Thread.Sleep(200);
+                await Task.Delay(200);
                 ShowLoading(false);
                 
                 InjectKeyboardHandler();
@@ -182,11 +218,23 @@ namespace MarkdownViewer
 
         public void FileLoad(String fileName)
         {
-            loadCount++;
-            TraceLog("=== FileLoad #" + loadCount + " called for: " + fileName + " ===");
+            TraceLog("=== FileLoad called for: " + fileName + " ===");
             
             // Show loading indicator
             ShowLoading(true);
+            
+            // Wait for WebView2 to be ready
+            int waitCount = 0;
+            while (!isWebViewReady && waitCount < 30)
+            {
+                Thread.Sleep(100);
+                waitCount++;
+            }
+            
+            if (!isWebViewReady)
+            {
+                TraceLog("WARNING: WebView2 not ready after waiting");
+            }
             
             // Parse markdown file in worker thread
             Thread threadObj = new Thread(new ThreadStart(delegate
@@ -218,10 +266,25 @@ namespace MarkdownViewer
                     // Read markdown template from file
                     var buildDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                     var tmplFilePath = buildDir + @"\" + TMPL_FILE_NAME;
+                    
+                    if (!File.Exists(tmplFilePath))
+                    {
+                        TraceLog("ERROR: Template file not found: " + tmplFilePath);
+                        ShowLoading(false);
+                        return;
+                    }
+                    
                     var markdownTmpl = File.ReadAllText(tmplFilePath);
 
                     // Read style content from file
                     var styleFilePath = buildDir + @"\" + CSS_FILE_NAME;
+                    if (!File.Exists(styleFilePath))
+                    {
+                        TraceLog("ERROR: CSS file not found: " + styleFilePath);
+                        ShowLoading(false);
+                        return;
+                    }
+                    
                     var style = File.ReadAllText(styleFilePath);
 
                     // Fix issue #15: Keep Chinese characters as-is without encoding
@@ -274,9 +337,15 @@ namespace MarkdownViewer
                     {
                         try
                         {
-                            if (webView2.CoreWebView2 != null)
+                            if (webView2.CoreWebView2 != null && isWebViewReady)
                             {
                                 TraceLog("Navigating to: file:///" + tempFile.Replace("\\", "/"));
+                                
+                                // Reset WebView2 state before new navigation
+                                ResetWebViewForNewLoad();
+                                
+                                // Small delay to ensure reset completes
+                                Thread.Sleep(150);
                                 
                                 // Navigate using file URI
                                 var fileUri = new Uri("file:///" + tempFile.Replace("\\", "/"));
@@ -286,7 +355,7 @@ namespace MarkdownViewer
                             }
                             else
                             {
-                                TraceLog("Error: CoreWebView2 is null");
+                                TraceLog("Error: CoreWebView2 is null or not ready. isWebViewReady=" + isWebViewReady);
                                 ShowLoading(false);
                             }
                         }
