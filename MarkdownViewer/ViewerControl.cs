@@ -22,7 +22,7 @@ namespace MarkdownViewer
 
         private ListerPlugin listerPlugin;
         private bool isWebViewInitialized = false;
-        private bool hasLoadedContent = false;
+        private string pendingHtml = null;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
@@ -37,8 +37,7 @@ namespace MarkdownViewer
         {
             try
             {
-                // Create CoreWebView2Environment with user data folder
-                var env = await CoreWebView2Environment.CreateAsync(null, null);
+                var env = await CoreWebView2Environment.CreateAsync(null);
                 await webView2.EnsureCoreWebView2Async(env);
                 isWebViewInitialized = true;
                 
@@ -51,16 +50,24 @@ namespace MarkdownViewer
                 webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
                 
                 System.Diagnostics.Trace.WriteLine("WebView2 initialized successfully");
+                
+                // If there's pending HTML content, load it now
+                if (pendingHtml != null)
+                {
+                    LoadHtmlContent(pendingHtml);
+                    pendingHtml = null;
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.WriteLine("WebView2 initialization error: " + ex.Message);
-                System.Diagnostics.Trace.WriteLine("Stack trace: " + ex.StackTrace);
             }
         }
 
         private void CoreWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
+            System.Diagnostics.Trace.WriteLine("NavigationCompleted: " + (e.IsSuccess ? "Success" : "Failed - " + e.WebErrorStatus));
+            
             if (e.IsSuccess)
             {
                 // Inject keyboard handler after navigation completes
@@ -72,10 +79,9 @@ namespace MarkdownViewer
         {
             try
             {
-                // Inject JavaScript to capture keyboard events and forward to parent
                 string script = @"
                     document.addEventListener('keydown', function(e) {
-                        var keys = [27, 49, 50, 51, 52, 53, 54, 55]; // Esc, 1-7
+                        var keys = [27, 49, 50, 51, 52, 53, 54, 55];
                         if (keys.indexOf(e.keyCode) !== -1) {
                             window.chrome.webview.hostObjects.callback.OnKeyPressed(e.keyCode);
                         }
@@ -89,9 +95,6 @@ namespace MarkdownViewer
             }
         }
 
-        /// <summary>
-        /// Execute JavaScript in the WebView2
-        /// </summary>
         public async System.Threading.Tasks.Task ExecuteScriptAsync(string script)
         {
             try
@@ -107,9 +110,6 @@ namespace MarkdownViewer
             }
         }
 
-        /// <summary>
-        /// Print the current content using browser's print dialog
-        /// </summary>
         public async System.Threading.Tasks.Task PrintAsync()
         {
             try
@@ -125,41 +125,39 @@ namespace MarkdownViewer
             }
         }
 
+        private void LoadHtmlContent(string html)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => LoadHtmlContent(html)));
+                return;
+            }
+
+            try
+            {
+                if (webView2.CoreWebView2 != null)
+                {
+                    webView2.CoreWebView2.NavigateToString(html);
+                    System.Diagnostics.Trace.WriteLine("WebView2 NavigateToString called, content length: " + html.Length);
+                }
+                else
+                {
+                    System.Diagnostics.Trace.WriteLine("CoreWebView2 is null, cannot navigate");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine("Error in LoadHtmlContent: " + ex.Message);
+            }
+        }
+
         public void FileLoad(String fileName)
         {
             System.Diagnostics.Trace.WriteLine("FileLoad called for: " + fileName);
             
-            // If WebView2 has already loaded content, reinitialize it to avoid blank page issue
-            if (hasLoadedContent && isWebViewInitialized)
-            {
-                System.Diagnostics.Trace.WriteLine("Reinitializing WebView2 for new content");
-                hasLoadedContent = false;
-                isWebViewInitialized = false;
-                
-                // Dispose and recreate the WebView2 control
-                webView2.Dispose();
-                
-                var newWebView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
-                newWebView2.AllowExternalDrop = true;
-                newWebView2.CreationProperties = null;
-                newWebView2.DefaultBackgroundColor = System.Drawing.Color.White;
-                newWebView2.Dock = System.Windows.Forms.DockStyle.Fill;
-                newWebView2.Location = new System.Drawing.Point(0, 0);
-                newWebView2.Name = "webView2";
-                newWebView2.TabIndex = 0;
-                newWebView2.ZoomFactor = 1D;
-                
-                this.Controls.Clear();
-                this.Controls.Add(newWebView2);
-                this.webView2 = newWebView2;
-                
-                // Reinitialize WebView2 asynchronously
-                InitializeWebView2();
-            }
-            
             // Wait for WebView2 to be initialized if needed
             int waitCount = 0;
-            while (!isWebViewInitialized && waitCount < 50) // Wait up to 5 seconds
+            while (!isWebViewInitialized && waitCount < 50)
             {
                 Thread.Sleep(100);
                 waitCount++;
@@ -167,10 +165,10 @@ namespace MarkdownViewer
             
             if (!isWebViewInitialized)
             {
-                System.Diagnostics.Trace.WriteLine("WebView2 not initialized after waiting, proceeding anyway");
+                System.Diagnostics.Trace.WriteLine("WebView2 not initialized after waiting, will load when ready");
             }
             
-            // parse markdown file in worker thread
+            // Parse markdown file in worker thread
             Thread threadObj = new Thread(new ThreadStart(delegate
             {
                 ParseMarkdownFile(fileName);
@@ -195,60 +193,35 @@ namespace MarkdownViewer
                     String markdownHTML = Markdown.ToHtml(markdownContent, pipeline);
                     
                     // Fix issue #15: Decode URL-encoded Chinese characters in image paths
-                    // Markdig automatically encodes URLs, but Windows file:// protocol needs raw Unicode
                     markdownHTML = DecodeImagePath(markdownHTML);
 
-                    // read markdown tmpl from file
+                    // Read markdown template from file
                     var buildDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                     var tmplFilePath = buildDir + @"\" + TMPL_FILE_NAME;
                     var markdownTmpl = File.ReadAllText(tmplFilePath);
 
-                    // read style content from file
+                    // Read style content from file
                     var styleFilePath = buildDir + @"\" + CSS_FILE_NAME;
                     var style = File.ReadAllText(styleFilePath);
 
                     // Fix issue #15: Keep Chinese characters as-is without encoding
-                    // Windows file:/// protocol supports Unicode paths directly
                     String dirPath = Path.GetDirectoryName(fileName);
-                    // Use forward slashes and file:/// prefix for absolute path
                     String normalizedDirPath = "file:///" + dirPath.Replace("\\", "/");
-                    // Use Replace instead of String.Format to avoid FormatException from curly braces in HTML
                     String html = markdownTmpl.Replace("{0}", normalizedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 
-                    Action act = delegate ()
+                    System.Diagnostics.Trace.WriteLine("Markdown parsed successfully, HTML length: " + html.Length);
+
+                    // Load HTML content
+                    if (isWebViewInitialized)
                     {
-                        try
-                        {
-                            if (isWebViewInitialized && webView2.CoreWebView2 != null)
-                            {
-                                // Navigate to the new content
-                                webView2.CoreWebView2.NavigateToString(html);
-                                
-                                // Mark that content has been loaded
-                                hasLoadedContent = true;
-                                
-                                System.Diagnostics.Trace.WriteLine("WebView2 NavigateToString called for: " + fileName);
-                            }
-                            else
-                            {
-                                System.Diagnostics.Trace.WriteLine("WebView2 not initialized yet. isWebViewInitialized=" + isWebViewInitialized + 
-                                    ", CoreWebView2=" + (webView2.CoreWebView2 != null));
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Trace.WriteLine("Error navigating WebView2: " + ex.Message);
-                            System.Diagnostics.Trace.WriteLine("Stack trace: " + ex.StackTrace);
-                        }
-                    };
-                    
-                    // Ensure handle is created before invoking
-                    if (!this.IsHandleCreated)
-                    {
-                        // Force handle creation if needed
-                        this.CreateControl();
+                        LoadHtmlContent(html);
                     }
-                    this.Invoke(act);
+                    else
+                    {
+                        // WebView2 not ready yet, store pending content
+                        pendingHtml = html;
+                        System.Diagnostics.Trace.WriteLine("WebView2 not ready, storing pending HTML");
+                    }
                 }
             }
             catch (Exception ex)
@@ -257,13 +230,8 @@ namespace MarkdownViewer
             }
         }
 
-        /// <summary>
-        /// Decode URL-encoded Chinese characters in image/source paths
-        /// Markdig encodes paths like %E4%B8%AD%E6%96%87 but Windows file:// needs raw Unicode
-        /// </summary>
         private String DecodeImagePath(String html)
         {
-            // Match src="..." or href="..." in img, a, source tags
             return Regex.Replace(html,
                 "(src|href)=\"([^\"]+)\"",
                 match =>
@@ -271,7 +239,6 @@ namespace MarkdownViewer
                     string attr = match.Groups[1].Value;
                     string url = match.Groups[2].Value;
                     
-                    // Only decode file:// URLs or relative paths with percent encoding
                     if (url.Contains("%") && (url.StartsWith("file://") || !url.StartsWith("http")))
                     {
                         try
@@ -281,7 +248,6 @@ namespace MarkdownViewer
                         }
                         catch
                         {
-                            // If decoding fails, keep original
                             return match.Value;
                         }
                     }
