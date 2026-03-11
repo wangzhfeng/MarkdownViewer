@@ -46,6 +46,14 @@ namespace MarkdownViewer
             }
         }
 
+        private void TraceLog(string message)
+        {
+            if (listerPlugin != null)
+            {
+                listerPlugin.TraceProc(System.Diagnostics.TraceLevel.Info, message);
+            }
+        }
+
         private async void InitializeWebView2()
         {
             try
@@ -66,18 +74,18 @@ namespace MarkdownViewer
                 // Hide loading panel when ready
                 ShowLoading(false);
                 
-                System.Diagnostics.Trace.WriteLine("WebView2 initialized successfully");
+                TraceLog("WebView2 initialized successfully");
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine("WebView2 initialization error: " + ex.Message);
+                TraceLog("WebView2 initialization error: " + ex.Message);
                 ShowLoading(false);
             }
         }
 
         private async void CoreWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
-            System.Diagnostics.Trace.WriteLine("NavigationCompleted: " + (e.IsSuccess ? "Success" : "Failed - " + e.WebErrorStatus));
+            TraceLog("NavigationCompleted: " + (e.IsSuccess ? "Success" : "Failed - " + e.WebErrorStatus));
             
             if (e.IsSuccess)
             {
@@ -86,11 +94,11 @@ namespace MarkdownViewer
                 {
                     string title = await webView2.CoreWebView2.ExecuteScriptAsync("document.title");
                     string bodyLength = await webView2.CoreWebView2.ExecuteScriptAsync("document.body.innerHTML.length");
-                    System.Diagnostics.Trace.WriteLine("Page loaded - Title: " + title + ", Body length: " + bodyLength);
+                    TraceLog("Page loaded - Title: " + title + ", Body length: " + bodyLength);
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Trace.WriteLine("Error checking page: " + ex.Message);
+                    TraceLog("Error checking page: " + ex.Message);
                 }
                 
                 // Hide loading panel after a short delay
@@ -101,7 +109,7 @@ namespace MarkdownViewer
             }
             else
             {
-                System.Diagnostics.Trace.WriteLine("Navigation failed: " + e.WebErrorStatus);
+                TraceLog("Navigation failed: " + e.WebErrorStatus);
                 ShowLoading(false);
             }
         }
@@ -122,7 +130,7 @@ namespace MarkdownViewer
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine("InjectKeyboardHandler error: " + ex.Message);
+                TraceLog("InjectKeyboardHandler error: " + ex.Message);
             }
         }
 
@@ -137,7 +145,7 @@ namespace MarkdownViewer
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine("ExecuteScriptAsync error: " + ex.Message);
+                TraceLog("ExecuteScriptAsync error: " + ex.Message);
             }
         }
 
@@ -152,7 +160,7 @@ namespace MarkdownViewer
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine("PrintAsync error: " + ex.Message);
+                TraceLog("PrintAsync error: " + ex.Message);
             }
         }
 
@@ -173,7 +181,7 @@ namespace MarkdownViewer
         public void FileLoad(String fileName)
         {
             loadCount++;
-            System.Diagnostics.Trace.WriteLine("=== FileLoad #" + loadCount + " called for: " + fileName + " ===");
+            TraceLog("=== FileLoad #" + loadCount + " called for: " + fileName + " ===");
             
             // Show loading indicator
             ShowLoading(true);
@@ -219,8 +227,7 @@ namespace MarkdownViewer
                     String normalizedDirPath = dirPath.Replace("\\", "/");
                     String html = markdownTmpl.Replace("{0}", normalizedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 
-                    System.Diagnostics.Trace.WriteLine("Markdown parsed successfully, HTML length: " + html.Length);
-                    System.Diagnostics.Trace.WriteLine("Template placeholders replaced: {0}=" + normalizedDirPath + ", {1}=" + style.Length + " chars, {2}=" + markdownHTML.Length + " chars");
+                    TraceLog("Markdown parsed successfully, HTML length: " + html.Length);
 
                     // Save HTML to temp file and navigate to it (avoids CORS issues)
                     String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Guid.NewGuid().ToString() + ".html");
@@ -237,18 +244,18 @@ namespace MarkdownViewer
                         // Verify file was written correctly
                         if (!File.Exists(tempFile))
                         {
-                            System.Diagnostics.Trace.WriteLine("Error: Temp file was not created");
+                            TraceLog("Error: Temp file was not created");
                             ShowLoading(false);
                             return;
                         }
                         
                         var fileInfo = new FileInfo(tempFile);
-                        System.Diagnostics.Trace.WriteLine("Temp file created: " + tempFile + ", size: " + fileInfo.Length + " bytes");
-                        System.Diagnostics.Trace.WriteLine("Debug file: " + debugFile);
+                        TraceLog("Temp file created: " + tempFile + ", size: " + fileInfo.Length + " bytes");
+                        TraceLog("Debug file: " + debugFile);
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Trace.WriteLine("Error writing temp file: " + ex.Message);
+                        TraceLog("Error writing temp file: " + ex.Message);
                         ShowLoading(false);
                         return;
                     }
@@ -267,24 +274,24 @@ namespace MarkdownViewer
                         {
                             if (webView2.CoreWebView2 != null)
                             {
-                                System.Diagnostics.Trace.WriteLine("Navigating to: file:///" + tempFile.Replace("\\", "/"));
+                                TraceLog("Navigating to: file:///" + tempFile.Replace("\\", "/"));
                                 
                                 // Navigate using file URI
                                 var fileUri = new Uri("file:///" + tempFile.Replace("\\", "/"));
                                 webView2.CoreWebView2.Navigate(fileUri.AbsoluteUri);
                                 
-                                System.Diagnostics.Trace.WriteLine("Navigation started, URI: " + fileUri.AbsoluteUri);
+                                TraceLog("Navigation started, URI: " + fileUri.AbsoluteUri);
                             }
                             else
                             {
-                                System.Diagnostics.Trace.WriteLine("Error: CoreWebView2 is null");
+                                TraceLog("Error: CoreWebView2 is null");
                                 ShowLoading(false);
                             }
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Trace.WriteLine("Error navigating WebView2: " + ex.Message);
-                            System.Diagnostics.Trace.WriteLine("Stack trace: " + ex.StackTrace);
+                            TraceLog("Error navigating WebView2: " + ex.Message);
+                            TraceLog("Stack trace: " + ex.StackTrace);
                             ShowLoading(false);
                         }
                     };
@@ -298,7 +305,7 @@ namespace MarkdownViewer
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.WriteLine("ParseMarkdownFile error: " + ex.ToString());
+                TraceLog("ParseMarkdownFile error: " + ex.ToString());
                 ShowLoading(false);
             }
         }
