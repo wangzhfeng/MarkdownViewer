@@ -49,10 +49,8 @@ namespace MarkdownViewer
         {
             try
             {
-                // Create environment with options to allow local file access
-                var options = new CoreWebView2EnvironmentOptions(null);
-                // Add command line switches to allow file access
-                string additionalArgs = "--allow-file-access-from-files --disable-web-security --allow-file-access";
+                // Create environment with command line switches to allow local file access
+                var options = new CoreWebView2EnvironmentOptions("--allow-file-access-from-files --disable-web-security");
                 var env = await CoreWebView2Environment.CreateAsync(null, null, options);
                 await webView2.EnsureCoreWebView2Async(env);
                 
@@ -60,12 +58,6 @@ namespace MarkdownViewer
                 webView2.CoreWebView2.Settings.IsScriptEnabled = true;
                 webView2.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
                 webView2.CoreWebView2.Settings.IsWebMessageEnabled = true;
-                
-                // Add file:// protocol to allowed origin list
-                webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
-                    "appassets.assets", 
-                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
-                    CoreWebView2HostResourceAccessKind.Allow);
                 
                 // Subscribe to NavigationCompleted event
                 webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
@@ -88,9 +80,6 @@ namespace MarkdownViewer
             
             if (e.IsSuccess)
             {
-                // Check if page loaded correctly by verifying body content
-                CheckPageContent();
-                
                 // Hide loading panel after a short delay
                 System.Threading.Thread.Sleep(200);
                 ShowLoading(false);
@@ -101,26 +90,6 @@ namespace MarkdownViewer
             {
                 System.Diagnostics.Trace.WriteLine("Navigation failed: " + e.WebErrorStatus);
                 ShowLoading(false);
-            }
-        }
-
-        private async void CheckPageContent()
-        {
-            try
-            {
-                // Check if body has content
-                string script = "document.body.innerHTML.length";
-                var result = await webView2.CoreWebView2.ExecuteScriptAsync(script);
-                System.Diagnostics.Trace.WriteLine("Body content length: " + result);
-                
-                if (result == "0")
-                {
-                    System.Diagnostics.Trace.WriteLine("Warning: Body is empty! Template replacement may have failed.");
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.WriteLine("Error checking page content: " + ex.Message);
             }
         }
 
@@ -240,10 +209,14 @@ namespace MarkdownViewer
                     // Save HTML to temp file and navigate to it (avoids CORS issues)
                     String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Guid.NewGuid().ToString() + ".html");
                     
+                    // Also save a debug copy for inspection
+                    String debugFile = Path.Combine(Path.GetTempPath(), "markdownviewer_debug.html");
+                    
                     // Ensure file is fully written before navigating
                     try
                     {
                         File.WriteAllText(tempFile, html, Encoding.UTF8);
+                        File.WriteAllText(debugFile, html, Encoding.UTF8); // Debug copy
                         
                         // Verify file was written correctly
                         if (!File.Exists(tempFile))
@@ -255,6 +228,7 @@ namespace MarkdownViewer
                         
                         var fileInfo = new FileInfo(tempFile);
                         System.Diagnostics.Trace.WriteLine("Temp file created: " + tempFile + ", size: " + fileInfo.Length + " bytes");
+                        System.Diagnostics.Trace.WriteLine("Debug file: " + debugFile);
                     }
                     catch (Exception ex)
                     {
