@@ -44,6 +44,8 @@ namespace MarkdownViewer
             }
         }
 
+        private string currentFileDir = null;
+
         private async void InitializeWebView2()
         {
             try
@@ -54,6 +56,9 @@ namespace MarkdownViewer
                 
                 webView2.CoreWebView2.Settings.IsScriptEnabled = true;
                 webView2.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
+                
+                // Subscribe to WebMessageReceived for markdown link clicks
+                webView2.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
                 
                 webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
                 
@@ -73,6 +78,43 @@ namespace MarkdownViewer
             {
                 TraceLog("WebView2 init error: " + ex.Message);
                 ShowLoading(false);
+            }
+        }
+
+        private void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            try
+            {
+                string message = e.WebMessageAsJson;
+                TraceLog("WebMessageReceived: " + message);
+                
+                // Parse message to check if it's a markdown link click
+                if (message.Contains("\"markdownLink\""))
+                {
+                    // Extract path from JSON (simple parsing)
+                    int pathStart = message.IndexOf("\"path\":\"") + 8;
+                    int pathEnd = message.IndexOf("\"", pathStart);
+                    if (pathStart > 7 && pathEnd > pathStart)
+                    {
+                        string relativePath = message.Substring(pathStart, pathEnd - pathStart);
+                        
+                        // Resolve to absolute path
+                        string absolutePath = Path.GetFullPath(Path.Combine(currentFileDir, relativePath));
+                        
+                        TraceLog("Markdown link clicked: " + absolutePath);
+                        
+                        // Notify parent to load the file
+                        if (listerPlugin != null)
+                        {
+                            // Use TC's built-in mechanism to open file
+                            System.Diagnostics.Process.Start(absolutePath);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLog("Error processing web message: " + ex.Message);
             }
         }
 
@@ -186,6 +228,7 @@ namespace MarkdownViewer
                     var style = File.ReadAllText(styleFilePath);
 
                     String dirPath = Path.GetDirectoryName(fileName);
+                    currentFileDir = dirPath; // Store for link resolution
                     String normalizedDirPath = dirPath.Replace("\\", "/");
                     String html = markdownTmpl.Replace("{0}", normalizedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 

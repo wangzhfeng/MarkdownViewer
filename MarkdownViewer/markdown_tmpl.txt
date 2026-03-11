@@ -21,5 +21,34 @@
     onload="renderMathInElement(document.body);"></script>
 <script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/7.1.2/mermaid.min.js"  crossorigin="anonymous"
                                                                          onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
+<script>
+// Support clicking on markdown file links to navigate
+document.addEventListener('click', function(e) {
+    var link = e.target.closest('a');
+    if (!link) return;
+    
+    var href = link.getAttribute('href');
+    if (!href) return;
+    
+    // Check if it's a markdown file link
+    if (href.match(/\.(md|markdown|mk)(\?.*)?$/i) || href.match(/\.md(\?.*)?$/i)) {
+        e.preventDefault();
+        
+        // Resolve relative path
+        var resolvedPath = new URL(href, window.location.href).pathname;
+        
+        // Convert file:// path to Windows path
+        if (resolvedPath.startsWith('/')) {
+            resolvedPath = resolvedPath.substring(1).replace(/\//g, '\\');
+        }
+        
+        // Notify host application
+        window.chrome.webview.postMessage({
+            type: 'markdownLink',
+            path: decodeURIComponent(resolvedPath)
+        });
+    }
+});
+</script>
 </body>
 </html>
