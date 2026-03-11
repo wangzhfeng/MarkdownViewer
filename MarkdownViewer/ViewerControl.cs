@@ -192,6 +192,12 @@ namespace MarkdownViewer
                         {
                             if (isWebViewInitialized && webView2.CoreWebView2 != null)
                             {
+                                // Clear previous content first by navigating to about:blank
+                                webView2.CoreWebView2.Navigate("about:blank");
+                                
+                                // Small delay to ensure clear completes
+                                System.Threading.Thread.Sleep(50);
+                                
                                 // Navigate to the new content
                                 webView2.CoreWebView2.NavigateToString(html);
                                 
