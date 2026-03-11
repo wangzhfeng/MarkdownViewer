@@ -23,6 +23,7 @@ namespace MarkdownViewer
 
         private ListerPlugin listerPlugin;
         private string tempHtmlFile = null;
+        private int loadCount = 0;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
@@ -74,12 +75,24 @@ namespace MarkdownViewer
             }
         }
 
-        private void CoreWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        private async void CoreWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
             System.Diagnostics.Trace.WriteLine("NavigationCompleted: " + (e.IsSuccess ? "Success" : "Failed - " + e.WebErrorStatus));
             
             if (e.IsSuccess)
             {
+                // Verify page loaded correctly
+                try
+                {
+                    string title = await webView2.CoreWebView2.ExecuteScriptAsync("document.title");
+                    string bodyLength = await webView2.CoreWebView2.ExecuteScriptAsync("document.body.innerHTML.length");
+                    System.Diagnostics.Trace.WriteLine("Page loaded - Title: " + title + ", Body length: " + bodyLength);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.WriteLine("Error checking page: " + ex.Message);
+                }
+                
                 // Hide loading panel after a short delay
                 System.Threading.Thread.Sleep(200);
                 ShowLoading(false);
@@ -159,6 +172,9 @@ namespace MarkdownViewer
 
         public void FileLoad(String fileName)
         {
+            loadCount++;
+            System.Diagnostics.Trace.WriteLine("=== FileLoad #" + loadCount + " called for: " + fileName + " ===");
+            
             // Show loading indicator
             ShowLoading(true);
             
@@ -252,7 +268,12 @@ namespace MarkdownViewer
                             if (webView2.CoreWebView2 != null)
                             {
                                 System.Diagnostics.Trace.WriteLine("Navigating to: file:///" + tempFile.Replace("\\", "/"));
-                                webView2.CoreWebView2.Navigate("file:///" + tempFile.Replace("\\", "/"));
+                                
+                                // Navigate using file URI
+                                var fileUri = new Uri("file:///" + tempFile.Replace("\\", "/"));
+                                webView2.CoreWebView2.Navigate(fileUri.AbsoluteUri);
+                                
+                                System.Diagnostics.Trace.WriteLine("Navigation started, URI: " + fileUri.AbsoluteUri);
                             }
                             else
                             {
@@ -263,6 +284,7 @@ namespace MarkdownViewer
                         catch (Exception ex)
                         {
                             System.Diagnostics.Trace.WriteLine("Error navigating WebView2: " + ex.Message);
+                            System.Diagnostics.Trace.WriteLine("Stack trace: " + ex.StackTrace);
                             ShowLoading(false);
                         }
                     };
