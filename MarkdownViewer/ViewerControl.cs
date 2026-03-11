@@ -22,14 +22,24 @@ namespace MarkdownViewer
         private const String CSS_FILE_NAME = "markdown_css.txt";
 
         private ListerPlugin listerPlugin;
+        private string currentTempFile = null;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
             InitializeComponent();
             this.listerPlugin = listerPlugin;
             
-            // Initialize WebView2 synchronously to avoid timing issues
             InitializeWebView2();
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            base.OnHandleDestroyed(e);
+            // Cleanup temp file
+            if (!String.IsNullOrEmpty(currentTempFile) && File.Exists(currentTempFile))
+            {
+                try { File.Delete(currentTempFile); } catch { }
+            }
         }
 
         private async void InitializeWebView2()
@@ -55,7 +65,7 @@ namespace MarkdownViewer
             }
         }
 
-        private async void CoreWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        private void CoreWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
             if (e.IsSuccess)
             {
@@ -160,14 +170,26 @@ namespace MarkdownViewer
                     String normalizedDirPath = dirPath.Replace("\\", "/");
                     String html = markdownTmpl.Replace("{0}", normalizedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 
-                    // Navigate directly with NavigateToString - simpler and faster
+                    // Save to temp file and navigate to it
+                    String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Path.GetFileName(fileName) + ".html");
+                    File.WriteAllText(tempFile, html, Encoding.UTF8);
+                    
+                    // Cleanup previous temp file
+                    if (!String.IsNullOrEmpty(currentTempFile) && File.Exists(currentTempFile))
+                    {
+                        try { File.Delete(currentTempFile); } catch { }
+                    }
+                    currentTempFile = tempFile;
+
+                    // Navigate to temp file
                     this.Invoke(new Action(() =>
                     {
                         try
                         {
                             if (webView2.CoreWebView2 != null)
                             {
-                                webView2.CoreWebView2.NavigateToString(html);
+                                var fileUri = new Uri("file:///" + tempFile.Replace("\\", "/"));
+                                webView2.CoreWebView2.Navigate(fileUri.AbsoluteUri);
                             }
                         }
                         catch (Exception ex)
