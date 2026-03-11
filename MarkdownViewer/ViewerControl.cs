@@ -11,6 +11,7 @@ using Pek.Markdig.HighlightJs;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.WinForms;
 
 namespace MarkdownViewer
 {
@@ -21,6 +22,7 @@ namespace MarkdownViewer
         private const String CSS_FILE_NAME = "markdown_css.txt";
 
         private ListerPlugin listerPlugin;
+        private string tempHtmlFile = null;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
@@ -31,15 +33,39 @@ namespace MarkdownViewer
             InitializeWebView2();
         }
 
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            base.OnHandleDestroyed(e);
+            
+            // Clean up temp HTML file when control is destroyed
+            if (!String.IsNullOrEmpty(tempHtmlFile) && File.Exists(tempHtmlFile))
+            {
+                try { File.Delete(tempHtmlFile); } catch { }
+                tempHtmlFile = null;
+            }
+        }
+
         private async void InitializeWebView2()
         {
             try
             {
-                await webView2.EnsureCoreWebView2Async(null);
+                // Create environment with options to allow local file access
+                var options = new CoreWebView2EnvironmentOptions(null);
+                // Add command line switches to allow file access
+                string additionalArgs = "--allow-file-access-from-files --disable-web-security --allow-file-access";
+                var env = await CoreWebView2Environment.CreateAsync(null, null, options);
+                await webView2.EnsureCoreWebView2Async(env);
                 
                 // Configure WebView2 settings
                 webView2.CoreWebView2.Settings.IsScriptEnabled = true;
                 webView2.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
+                webView2.CoreWebView2.Settings.IsWebMessageEnabled = true;
+                
+                // Add file:// protocol to allowed origin list
+                webView2.CoreWebView2.SetVirtualHostNameToFolderMapping(
+                    "appassets.assets", 
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                    CoreWebView2HostResourceAccessKind.Allow);
                 
                 // Subscribe to NavigationCompleted event
                 webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
@@ -176,10 +202,21 @@ namespace MarkdownViewer
 
                     // Fix issue #15: Keep Chinese characters as-is without encoding
                     String dirPath = Path.GetDirectoryName(fileName);
-                    String normalizedDirPath = "file:///" + dirPath.Replace("\\", "/");
+                    String normalizedDirPath = dirPath.Replace("\\", "/");
                     String html = markdownTmpl.Replace("{0}", normalizedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 
                     System.Diagnostics.Trace.WriteLine("Markdown parsed successfully, HTML length: " + html.Length);
+
+                    // Save HTML to temp file and navigate to it (avoids CORS issues)
+                    String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Path.GetFileName(fileName) + ".html");
+                    File.WriteAllText(tempFile, html, Encoding.UTF8);
+                    
+                    // Clean up previous temp file
+                    if (!String.IsNullOrEmpty(tempHtmlFile) && File.Exists(tempHtmlFile))
+                    {
+                        try { File.Delete(tempHtmlFile); } catch { }
+                    }
+                    tempHtmlFile = tempFile;
 
                     // Load HTML content on UI thread
                     Action act = delegate ()
@@ -188,7 +225,7 @@ namespace MarkdownViewer
                         {
                             if (webView2.CoreWebView2 != null)
                             {
-                                webView2.CoreWebView2.NavigateToString(html);
+                                webView2.CoreWebView2.Navigate("file:///" + tempFile.Replace("\\", "/"));
                             }
                         }
                         catch (Exception ex)
