@@ -103,11 +103,15 @@ namespace MarkdownViewer
                         
                         TraceLog("Markdown link clicked: " + absolutePath);
                         
-                        // Notify parent to load the file
-                        if (listerPlugin != null)
+                        // Load the file in the current viewer (preview mode)
+                        if (File.Exists(absolutePath))
                         {
-                            // Use TC's built-in mechanism to open file
-                            System.Diagnostics.Process.Start(absolutePath);
+                            ShowLoading(true);
+                            FileLoad(absolutePath);
+                        }
+                        else
+                        {
+                            TraceLog("File not found: " + absolutePath);
                         }
                     }
                 }
