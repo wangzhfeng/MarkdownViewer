@@ -13,6 +13,8 @@ namespace MarkdownViewer
             base.Dispose(disposing);
         }
 
+        #region Component Designer generated code
+
         private void InitializeComponent()
         {
             this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
@@ -64,7 +66,6 @@ namespace MarkdownViewer
             this.loadingPanel.ResumeLayout(false);
             this.loadingPanel.PerformLayout();
             this.ResumeLayout(false);
-
         }
 
         #endregion
