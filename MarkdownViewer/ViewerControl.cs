@@ -21,8 +21,6 @@ namespace MarkdownViewer
         private const String CSS_FILE_NAME = "markdown_css.txt";
 
         private ListerPlugin listerPlugin;
-        private bool isWebViewInitialized = false;
-        private string pendingHtml = null;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
@@ -37,30 +35,24 @@ namespace MarkdownViewer
         {
             try
             {
-                var env = await CoreWebView2Environment.CreateAsync(null);
-                await webView2.EnsureCoreWebView2Async(env);
-                isWebViewInitialized = true;
+                await webView2.EnsureCoreWebView2Async(null);
                 
                 // Configure WebView2 settings
                 webView2.CoreWebView2.Settings.IsScriptEnabled = true;
                 webView2.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
-                webView2.CoreWebView2.Settings.IsWebMessageEnabled = true;
                 
                 // Subscribe to NavigationCompleted event
                 webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
                 
-                System.Diagnostics.Trace.WriteLine("WebView2 initialized successfully");
+                // Hide loading panel when ready
+                ShowLoading(false);
                 
-                // If there's pending HTML content, load it now
-                if (pendingHtml != null)
-                {
-                    LoadHtmlContent(pendingHtml);
-                    pendingHtml = null;
-                }
+                System.Diagnostics.Trace.WriteLine("WebView2 initialized successfully");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.WriteLine("WebView2 initialization error: " + ex.Message);
+                ShowLoading(false);
             }
         }
 
@@ -68,9 +60,11 @@ namespace MarkdownViewer
         {
             System.Diagnostics.Trace.WriteLine("NavigationCompleted: " + (e.IsSuccess ? "Success" : "Failed - " + e.WebErrorStatus));
             
+            // Hide loading panel after navigation completes
+            ShowLoading(false);
+            
             if (e.IsSuccess)
             {
-                // Inject keyboard handler after navigation completes
                 InjectKeyboardHandler();
             }
         }
@@ -99,7 +93,7 @@ namespace MarkdownViewer
         {
             try
             {
-                if (isWebViewInitialized && webView2.CoreWebView2 != null)
+                if (webView2.CoreWebView2 != null)
                 {
                     await webView2.CoreWebView2.ExecuteScriptAsync(script);
                 }
@@ -114,7 +108,7 @@ namespace MarkdownViewer
         {
             try
             {
-                if (isWebViewInitialized && webView2.CoreWebView2 != null)
+                if (webView2.CoreWebView2 != null)
                 {
                     await webView2.CoreWebView2.ExecuteScriptAsync("window.print()");
                 }
@@ -125,48 +119,24 @@ namespace MarkdownViewer
             }
         }
 
-        private void LoadHtmlContent(string html)
+        private void ShowLoading(bool show)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new Action(() => LoadHtmlContent(html)));
+                this.Invoke(new Action(() => ShowLoading(show)));
                 return;
             }
 
-            try
+            if (loadingPanel != null)
             {
-                if (webView2.CoreWebView2 != null)
-                {
-                    webView2.CoreWebView2.NavigateToString(html);
-                    System.Diagnostics.Trace.WriteLine("WebView2 NavigateToString called, content length: " + html.Length);
-                }
-                else
-                {
-                    System.Diagnostics.Trace.WriteLine("CoreWebView2 is null, cannot navigate");
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.WriteLine("Error in LoadHtmlContent: " + ex.Message);
+                loadingPanel.Visible = show;
             }
         }
 
         public void FileLoad(String fileName)
         {
-            System.Diagnostics.Trace.WriteLine("FileLoad called for: " + fileName);
-            
-            // Wait for WebView2 to be initialized if needed
-            int waitCount = 0;
-            while (!isWebViewInitialized && waitCount < 50)
-            {
-                Thread.Sleep(100);
-                waitCount++;
-            }
-            
-            if (!isWebViewInitialized)
-            {
-                System.Diagnostics.Trace.WriteLine("WebView2 not initialized after waiting, will load when ready");
-            }
+            // Show loading indicator
+            ShowLoading(true);
             
             // Parse markdown file in worker thread
             Thread threadObj = new Thread(new ThreadStart(delegate
@@ -211,22 +181,34 @@ namespace MarkdownViewer
 
                     System.Diagnostics.Trace.WriteLine("Markdown parsed successfully, HTML length: " + html.Length);
 
-                    // Load HTML content
-                    if (isWebViewInitialized)
+                    // Load HTML content on UI thread
+                    Action act = delegate ()
                     {
-                        LoadHtmlContent(html);
-                    }
-                    else
+                        try
+                        {
+                            if (webView2.CoreWebView2 != null)
+                            {
+                                webView2.CoreWebView2.NavigateToString(html);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Trace.WriteLine("Error navigating WebView2: " + ex.Message);
+                            ShowLoading(false);
+                        }
+                    };
+                    
+                    if (!this.IsHandleCreated)
                     {
-                        // WebView2 not ready yet, store pending content
-                        pendingHtml = html;
-                        System.Diagnostics.Trace.WriteLine("WebView2 not ready, storing pending HTML");
+                        this.CreateControl();
                     }
+                    this.Invoke(act);
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.WriteLine("ParseMarkdownFile error: " + ex.ToString());
+                ShowLoading(false);
             }
         }
 
