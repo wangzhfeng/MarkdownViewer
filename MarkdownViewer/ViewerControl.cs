@@ -12,7 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
-using System.Diagnostics;
 
 namespace MarkdownViewer
 {
@@ -23,126 +22,44 @@ namespace MarkdownViewer
         private const String CSS_FILE_NAME = "markdown_css.txt";
 
         private ListerPlugin listerPlugin;
-        private string tempHtmlFile = null;
-        private bool isWebViewReady = false;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
             InitializeComponent();
             this.listerPlugin = listerPlugin;
             
-            // Initialize WebView2 asynchronously
+            // Initialize WebView2 synchronously to avoid timing issues
             InitializeWebView2();
-        }
-
-        protected override void OnHandleDestroyed(EventArgs e)
-        {
-            base.OnHandleDestroyed(e);
-            
-            // Clean up temp HTML file when control is destroyed
-            if (!String.IsNullOrEmpty(tempHtmlFile) && File.Exists(tempHtmlFile))
-            {
-                try { File.Delete(tempHtmlFile); } catch { }
-                tempHtmlFile = null;
-            }
-        }
-
-        private void TraceLog(string message)
-        {
-            // Use the plugin's Log method which calls TraceProc
-            if (listerPlugin is MarkdownViewer)
-            {
-                ((MarkdownViewer)listerPlugin).Log(message);
-            }
         }
 
         private async void InitializeWebView2()
         {
             try
             {
-                // Create environment with command line switches to allow local file access
-                var options = new CoreWebView2EnvironmentOptions("--allow-file-access-from-files --disable-web-security");
+                var options = new CoreWebView2EnvironmentOptions("--allow-file-access-from-files");
                 var env = await CoreWebView2Environment.CreateAsync(null, null, options);
                 await webView2.EnsureCoreWebView2Async(env);
                 
-                // Configure WebView2 settings
                 webView2.CoreWebView2.Settings.IsScriptEnabled = true;
                 webView2.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
-                webView2.CoreWebView2.Settings.IsWebMessageEnabled = true;
                 
-                // Subscribe to NavigationCompleted event
                 webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
                 
-                isWebViewReady = true;
-                
-                // Hide loading panel when ready
                 ShowLoading(false);
-                
-                TraceLog("WebView2 initialized successfully");
+                TraceLog("WebView2 initialized");
             }
             catch (Exception ex)
             {
-                TraceLog("WebView2 initialization error: " + ex.Message);
-                isWebViewReady = false;
+                TraceLog("WebView2 init error: " + ex.Message);
                 ShowLoading(false);
-            }
-        }
-
-        /// <summary>
-        /// Reset WebView2 for new content load
-        /// This is critical for fixing the blank page issue on subsequent loads
-        /// </summary>
-        private async void ResetWebViewForNewLoad()
-        {
-            try
-            {
-                if (webView2.CoreWebView2 != null)
-                {
-                    // Stop any ongoing navigation
-                    webView2.CoreWebView2.Stop();
-                    
-                    // Navigate to blank first to clear state
-                    webView2.CoreWebView2.Navigate("about:blank");
-                    
-                    // Wait a bit for the blank page to load
-                    await Task.Delay(100);
-                    
-                    TraceLog("WebView2 reset completed");
-                }
-            }
-            catch (Exception ex)
-            {
-                TraceLog("Error resetting WebView2: " + ex.Message);
             }
         }
 
         private async void CoreWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
-            TraceLog("NavigationCompleted: " + (e.IsSuccess ? "Success" : "Failed - " + e.WebErrorStatus));
-            
             if (e.IsSuccess)
             {
-                // Verify page loaded correctly
-                try
-                {
-                    string title = await webView2.CoreWebView2.ExecuteScriptAsync("document.title");
-                    string bodyLength = await webView2.CoreWebView2.ExecuteScriptAsync("document.body.innerHTML.length");
-                    TraceLog("Page loaded - Title: " + title + ", Body length: " + bodyLength);
-                    
-                    if (bodyLength == "0")
-                    {
-                        TraceLog("WARNING: Body is empty! This indicates a template or navigation issue.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    TraceLog("Error checking page: " + ex.Message);
-                }
-                
-                // Hide loading panel after a short delay
-                await Task.Delay(200);
                 ShowLoading(false);
-                
                 InjectKeyboardHandler();
             }
             else
@@ -156,14 +73,12 @@ namespace MarkdownViewer
         {
             try
             {
-                string script = @"
-                    document.addEventListener('keydown', function(e) {
-                        var keys = [27, 49, 50, 51, 52, 53, 54, 55];
-                        if (keys.indexOf(e.keyCode) !== -1) {
-                            window.chrome.webview.hostObjects.callback.OnKeyPressed(e.keyCode);
-                        }
-                    });
-                ";
+                string script = @"document.addEventListener('keydown', function(e) {
+                    var keys = [27, 49, 50, 51, 52, 53, 54, 55];
+                    if (keys.indexOf(e.keyCode) !== -1) {
+                        window.chrome.webview.hostObjects.callback.OnKeyPressed(e.keyCode);
+                    }
+                });";
                 await webView2.CoreWebView2.ExecuteScriptAsync(script);
             }
             catch (Exception ex)
@@ -174,31 +89,17 @@ namespace MarkdownViewer
 
         public async System.Threading.Tasks.Task ExecuteScriptAsync(string script)
         {
-            try
+            if (webView2.CoreWebView2 != null)
             {
-                if (webView2.CoreWebView2 != null)
-                {
-                    await webView2.CoreWebView2.ExecuteScriptAsync(script);
-                }
-            }
-            catch (Exception ex)
-            {
-                TraceLog("ExecuteScriptAsync error: " + ex.Message);
+                await webView2.CoreWebView2.ExecuteScriptAsync(script);
             }
         }
 
         public async System.Threading.Tasks.Task PrintAsync()
         {
-            try
+            if (webView2.CoreWebView2 != null)
             {
-                if (webView2.CoreWebView2 != null)
-                {
-                    await webView2.CoreWebView2.ExecuteScriptAsync("window.print()");
-                }
-            }
-            catch (Exception ex)
-            {
-                TraceLog("PrintAsync error: " + ex.Message);
+                await webView2.CoreWebView2.ExecuteScriptAsync("window.print()");
             }
         }
 
@@ -209,39 +110,26 @@ namespace MarkdownViewer
                 this.Invoke(new Action(() => ShowLoading(show)));
                 return;
             }
-
             if (loadingPanel != null)
             {
                 loadingPanel.Visible = show;
             }
         }
 
+        private void TraceLog(string message)
+        {
+            if (listerPlugin is MarkdownViewer)
+            {
+                ((MarkdownViewer)listerPlugin).Log(message);
+            }
+        }
+
         public void FileLoad(String fileName)
         {
-            TraceLog("=== FileLoad called for: " + fileName + " ===");
-            
-            // Show loading indicator
             ShowLoading(true);
             
-            // Wait for WebView2 to be ready
-            int waitCount = 0;
-            while (!isWebViewReady && waitCount < 30)
-            {
-                Thread.Sleep(100);
-                waitCount++;
-            }
-            
-            if (!isWebViewReady)
-            {
-                TraceLog("WARNING: WebView2 not ready after waiting");
-            }
-            
-            // Parse markdown file in worker thread
-            Thread threadObj = new Thread(new ThreadStart(delegate
-            {
-                ParseMarkdownFile(fileName);
-            }));
-            threadObj.Start();
+            // Parse markdown in worker thread
+            new Thread(() => ParseMarkdownFile(fileName)).Start();
         }
 
         private void ParseMarkdownFile(String fileName)
@@ -259,124 +147,40 @@ namespace MarkdownViewer
                         .UseHighlightJs()
                         .Build();
                     String markdownHTML = Markdown.ToHtml(markdownContent, pipeline);
-                    
-                    // Fix issue #15: Decode URL-encoded Chinese characters in image paths
                     markdownHTML = DecodeImagePath(markdownHTML);
 
-                    // Read markdown template from file
                     var buildDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                     var tmplFilePath = buildDir + @"\" + TMPL_FILE_NAME;
-                    
-                    if (!File.Exists(tmplFilePath))
-                    {
-                        TraceLog("ERROR: Template file not found: " + tmplFilePath);
-                        ShowLoading(false);
-                        return;
-                    }
-                    
                     var markdownTmpl = File.ReadAllText(tmplFilePath);
 
-                    // Read style content from file
                     var styleFilePath = buildDir + @"\" + CSS_FILE_NAME;
-                    if (!File.Exists(styleFilePath))
-                    {
-                        TraceLog("ERROR: CSS file not found: " + styleFilePath);
-                        ShowLoading(false);
-                        return;
-                    }
-                    
                     var style = File.ReadAllText(styleFilePath);
 
-                    // Fix issue #15: Keep Chinese characters as-is without encoding
                     String dirPath = Path.GetDirectoryName(fileName);
                     String normalizedDirPath = dirPath.Replace("\\", "/");
                     String html = markdownTmpl.Replace("{0}", normalizedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 
-                    TraceLog("Markdown parsed successfully, HTML length: " + html.Length);
-
-                    // Save HTML to temp file and navigate to it (avoids CORS issues)
-                    String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Guid.NewGuid().ToString() + ".html");
-                    
-                    // Also save a debug copy for inspection
-                    String debugFile = Path.Combine(Path.GetTempPath(), "markdownviewer_debug.html");
-                    
-                    // Ensure file is fully written before navigating
-                    try
-                    {
-                        File.WriteAllText(tempFile, html, Encoding.UTF8);
-                        File.WriteAllText(debugFile, html, Encoding.UTF8); // Debug copy
-                        
-                        // Verify file was written correctly
-                        if (!File.Exists(tempFile))
-                        {
-                            TraceLog("Error: Temp file was not created");
-                            ShowLoading(false);
-                            return;
-                        }
-                        
-                        var fileInfo = new FileInfo(tempFile);
-                        TraceLog("Temp file created: " + tempFile + ", size: " + fileInfo.Length + " bytes");
-                        TraceLog("Debug file: " + debugFile);
-                    }
-                    catch (Exception ex)
-                    {
-                        TraceLog("Error writing temp file: " + ex.Message);
-                        ShowLoading(false);
-                        return;
-                    }
-                    
-                    // Clean up previous temp file
-                    if (!String.IsNullOrEmpty(tempHtmlFile) && File.Exists(tempHtmlFile))
-                    {
-                        try { File.Delete(tempHtmlFile); } catch { }
-                    }
-                    tempHtmlFile = tempFile;
-
-                    // Load HTML content on UI thread
-                    Action act = delegate ()
+                    // Navigate directly with NavigateToString - simpler and faster
+                    this.Invoke(new Action(() =>
                     {
                         try
                         {
-                            if (webView2.CoreWebView2 != null && isWebViewReady)
+                            if (webView2.CoreWebView2 != null)
                             {
-                                TraceLog("Navigating to: file:///" + tempFile.Replace("\\", "/"));
-                                
-                                // Reset WebView2 state before new navigation
-                                ResetWebViewForNewLoad();
-                                
-                                // Small delay to ensure reset completes
-                                Thread.Sleep(150);
-                                
-                                // Navigate using file URI
-                                var fileUri = new Uri("file:///" + tempFile.Replace("\\", "/"));
-                                webView2.CoreWebView2.Navigate(fileUri.AbsoluteUri);
-                                
-                                TraceLog("Navigation started, URI: " + fileUri.AbsoluteUri);
-                            }
-                            else
-                            {
-                                TraceLog("Error: CoreWebView2 is null or not ready. isWebViewReady=" + isWebViewReady);
-                                ShowLoading(false);
+                                webView2.CoreWebView2.NavigateToString(html);
                             }
                         }
                         catch (Exception ex)
                         {
-                            TraceLog("Error navigating WebView2: " + ex.Message);
-                            TraceLog("Stack trace: " + ex.StackTrace);
+                            TraceLog("Navigate error: " + ex.Message);
                             ShowLoading(false);
                         }
-                    };
-                    
-                    if (!this.IsHandleCreated)
-                    {
-                        this.CreateControl();
-                    }
-                    this.Invoke(act);
+                    }));
                 }
             }
             catch (Exception ex)
             {
-                TraceLog("ParseMarkdownFile error: " + ex.ToString());
+                TraceLog("Parse error: " + ex.ToString());
                 ShowLoading(false);
             }
         }
@@ -394,8 +198,7 @@ namespace MarkdownViewer
                     {
                         try
                         {
-                            string decoded = Uri.UnescapeDataString(url);
-                            return $"{attr}=\"{decoded}\"";
+                            return $"{attr}=\"{Uri.UnescapeDataString(url)}\"";
                         }
                         catch
                         {
