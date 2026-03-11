@@ -22,6 +22,9 @@
 <script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/7.1.2/mermaid.min.js"  crossorigin="anonymous"
                                                                          onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
 <script>
+// Store the base directory for the original markdown file
+var markdownBaseDir = "{0}";
+
 // Support clicking on markdown file links to navigate
 document.addEventListener('click', function(e) {
     var link = e.target.closest('a');
@@ -31,15 +34,31 @@ document.addEventListener('click', function(e) {
     if (!href) return;
     
     // Check if it's a markdown file link
-    if (href.match(/\.(md|markdown|mk)(\?.*)?$/i) || href.match(/\.md(\?.*)?$/i)) {
+    if (href.match(/\.(md|markdown|mk)(\?.*)?$/i)) {
         e.preventDefault();
         
-        // Resolve relative path
-        var resolvedPath = new URL(href, window.location.href).pathname;
-        
-        // Convert file:// path to Windows path
-        if (resolvedPath.startsWith('/')) {
-            resolvedPath = resolvedPath.substring(1).replace(/\//g, '\\');
+        // Resolve relative path using the original file's directory
+        var resolvedPath;
+        if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('file://')) {
+            // Absolute URL, use as-is
+            resolvedPath = href;
+        } else if (href.startsWith('/')) {
+            // Absolute path
+            resolvedPath = href.substring(1).replace(/\//g, '\\');
+        } else {
+            // Relative path - resolve against markdownBaseDir
+            var baseParts = markdownBaseDir.split('\\').filter(p => p);
+            var hrefParts = href.split('/');
+            
+            for (var part of hrefParts) {
+                if (part === '..') {
+                    baseParts.pop();
+                } else if (part !== '.' && part !== '') {
+                    baseParts.push(part);
+                }
+            }
+            
+            resolvedPath = baseParts.join('\\');
         }
         
         // Notify host application

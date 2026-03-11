@@ -96,22 +96,22 @@ namespace MarkdownViewer
                     int pathEnd = message.IndexOf("\"", pathStart);
                     if (pathStart > 7 && pathEnd > pathStart)
                     {
-                        string relativePath = message.Substring(pathStart, pathEnd - pathStart);
+                        string targetPath = message.Substring(pathStart, pathEnd - pathStart);
                         
-                        // Resolve to absolute path
-                        string absolutePath = Path.GetFullPath(Path.Combine(currentFileDir, relativePath));
+                        // The path is already resolved by JavaScript, just unescape it
+                        targetPath = System.Uri.UnescapeDataString(targetPath);
                         
-                        TraceLog("Markdown link clicked: " + absolutePath);
+                        TraceLog("Markdown link clicked: " + targetPath);
                         
                         // Load the file in the current viewer (preview mode)
-                        if (File.Exists(absolutePath))
+                        if (File.Exists(targetPath))
                         {
                             ShowLoading(true);
-                            FileLoad(absolutePath);
+                            FileLoad(targetPath);
                         }
                         else
                         {
-                            TraceLog("File not found: " + absolutePath);
+                            TraceLog("File not found: " + targetPath);
                         }
                     }
                 }
@@ -233,8 +233,8 @@ namespace MarkdownViewer
 
                     String dirPath = Path.GetDirectoryName(fileName);
                     currentFileDir = dirPath; // Store for link resolution
-                    String normalizedDirPath = dirPath.Replace("\\", "/");
-                    String html = markdownTmpl.Replace("{0}", normalizedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
+                    // Use Windows path format for the base directory (for JS path resolution)
+                    String html = markdownTmpl.Replace("{0}", dirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 
                     // Save to temp file and navigate to it
                     String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Path.GetFileName(fileName) + ".html");
