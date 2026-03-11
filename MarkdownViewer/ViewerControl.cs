@@ -48,10 +48,8 @@ namespace MarkdownViewer
 
         private void TraceLog(string message)
         {
-            if (listerPlugin != null)
-            {
-                listerPlugin.TraceProc(System.Diagnostics.TraceLevel.Info, message);
-            }
+            // Use System.Diagnostics.Trace for debugging
+            System.Diagnostics.Trace.WriteLine(message);
         }
 
         private async void InitializeWebView2()
