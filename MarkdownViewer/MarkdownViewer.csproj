@@ -111,6 +111,10 @@ zip -m $(TargetName).zip Pek.Markdig.HighlightJs.dll
 zip -m $(TargetName).zip Jurassic.dll
 zip -m $(TargetName).zip markdown_tmpl.txt
 zip -m $(TargetName).zip markdown_css.txt
+zip -m $(TargetName).zip Microsoft.Web.WebView2.Core.dll
+zip -m $(TargetName).zip Microsoft.Web.WebView2.WinForms.dll
+zip -m $(TargetName).zip Microsoft.Web.WebView2.Wpf.dll
+zip -m -r $(TargetName).zip runtimes/*
 echo add dependency to package</PostBuildEvent>
   </PropertyGroup>
 </Project>
