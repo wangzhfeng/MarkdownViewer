@@ -29,6 +29,14 @@ namespace MarkdownViewer
         private ArrayList controls = new ArrayList();
 
         /// <summary>
+        /// 输出日志到 TC 插件日志系统
+        /// </summary>
+        public void Log(string message)
+        {
+            TraceProc(System.Diagnostics.TraceLevel.Info, message);
+        }
+
+        /// <summary>
         /// 载入插件
         /// </summary>
         /// <param name="fileToLoad"></param>

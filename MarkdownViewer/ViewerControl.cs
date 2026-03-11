@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
+using System.Diagnostics;
 
 namespace MarkdownViewer
 {
@@ -48,8 +49,11 @@ namespace MarkdownViewer
 
         private void TraceLog(string message)
         {
-            // Use System.Diagnostics.Trace for debugging
-            System.Diagnostics.Trace.WriteLine(message);
+            // Use the plugin's Log method which calls TraceProc
+            if (listerPlugin is MarkdownViewer)
+            {
+                ((MarkdownViewer)listerPlugin).Log(message);
+            }
         }
 
         private async void InitializeWebView2()
