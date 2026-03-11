@@ -6,11 +6,20 @@ MarkdownViewer is a Total Commander plugin, using preview markdown file which su
 
 ![](./Doc/viewer.png)
 
+
+# Features
+
+- Support for previewing Markdown files
+- Support for file navigation/jumping
+- Support for LaTeX and Mermaid flowcharts
+
 # About Installation 
 
 This plugin is based on the .NET platform, so the corresponding interface needs to be installed. The installation file is [TcPluginSetup.msi](./Doc/TcPluginSetup.msi) — simply double-click to run it.
 
 Then, double-click to open `MarkdownViewer.zip` in Total Commander and follow the prompts to install the plugin.
+
+The latest version uses WebView2. If you are using an older operating system, you will need to install the WebView2 runtime.
 
 # About Usage
 
@@ -43,3 +52,10 @@ Thanks to [thorn0](https://github.com/thorn0) for your commit.
 - Fixed Issue #6 & #13: Total Commander losing focus issue
 
 Regarding the fixed Esc key closing window issue in v0.2, it was found that the function frequently malfunctions. Several other solutions have been attempted, but the issue has not been resolved yet.
+
+## v0.5
+
+- Issue #11: Added support for file jumping/navigation
+- Upgraded Mermaid and KaTeX libraries
+- Switched rendering engine to WebView2 to improve compatibility
+- Fixed: Issue where the ESC key failed to close the window
