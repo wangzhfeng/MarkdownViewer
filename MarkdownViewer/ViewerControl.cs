@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -9,6 +9,8 @@ using System.Linq;
 using System.Reflection;
 using Pek.Markdig.HighlightJs;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Web.WebView2.Core;
 
 namespace MarkdownViewer
 {
@@ -19,24 +21,71 @@ namespace MarkdownViewer
         private const String CSS_FILE_NAME = "markdown_css.txt";
 
         private ListerPlugin listerPlugin;
+        private bool isWebViewInitialized = false;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
             InitializeComponent();
             this.listerPlugin = listerPlugin;
+            
+            // Initialize WebView2 asynchronously
+            InitializeWebView2();
         }
 
-       
+        private async void InitializeWebView2()
+        {
+            try
+            {
+                await webView2.EnsureCoreWebView2Async(null);
+                isWebViewInitialized = true;
+                
+                // Subscribe to NavigationCompleted event
+                webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine("WebView2 initialization error: " + ex.Message);
+            }
+        }
+
+        private void CoreWebView2_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (e.IsSuccess)
+            {
+                // Inject keyboard handler after navigation completes
+                InjectKeyboardHandler();
+            }
+        }
+
+        private async void InjectKeyboardHandler()
+        {
+            try
+            {
+                // Inject JavaScript to capture keyboard events and forward to parent
+                string script = @"
+                    document.addEventListener('keydown', function(e) {
+                        var keys = [27, 49, 50, 51, 52, 53, 54, 55]; // Esc, 1-7
+                        if (keys.indexOf(e.keyCode) !== -1) {
+                            window.chrome.webview.hostObjects.callback.OnKeyPressed(e.keyCode);
+                        }
+                    });
+                ";
+                await webView2.CoreWebView2.ExecuteScriptAsync(script);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine("InjectKeyboardHandler error: " + ex.Message);
+            }
+        }
+
         public void FileLoad(String fileName)
         {
-
             // parse markdown file in worker thread
             Thread threadObj = new Thread(new ThreadStart(delegate
             {
                 ParseMarkdownFile(fileName);
             }));
             threadObj.Start();
-            
         }
 
         private void ParseMarkdownFile(String fileName)
@@ -76,17 +125,22 @@ namespace MarkdownViewer
                     // Use Replace instead of String.Format to avoid FormatException from curly braces in HTML
                     String html = markdownTmpl.Replace("{0}", normalizedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 
-                    Action act = delegate () { 
-                        try 
+                    Action act = delegate ()
+                    {
+                        try
                         {
-                            this.webBrowser1.DocumentText = html; 
+                            if (isWebViewInitialized && webView2.CoreWebView2 != null)
+                            {
+                                webView2.CoreWebView2.NavigateToString(html);
+                            }
                         }
                         catch (Exception ex)
                         {
-                            System.Diagnostics.Trace.WriteLine("Error setting DocumentText: " + ex.Message);
+                            System.Diagnostics.Trace.WriteLine("Error navigating WebView2: " + ex.Message);
                         }
                     };
-                    // fixed 在创建窗口句柄之前，不能在控件上调用 Invoke 或 BeginInvoke
+                    
+                    // Ensure handle is created before invoking
                     while (!this.IsHandleCreated)
                     {
                         ;
@@ -100,20 +154,6 @@ namespace MarkdownViewer
             }
         }
 
-        private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            webBrowser1.Document.Body.KeyPress += MyKeyPressHandler;
-        }
-
-        private void MyKeyPressHandler(object sender, HtmlElementEventArgs e)
-        {
-            int[] keys = new int[] { 27, 49, 50, 51, 52, 53, 54, 55 }; // Esc, 1-7
-            if (keys.Contains(e.KeyPressedCode))
-            {
-                listerPlugin.SendKeyToParentWindow(e.KeyPressedCode);
-            }
-        }
-        
         /// <summary>
         /// Decode URL-encoded Chinese characters in image/source paths
         /// Markdig encodes paths like %E4%B8%AD%E6%96%87 but Windows file:// needs raw Unicode
@@ -121,7 +161,7 @@ namespace MarkdownViewer
         private String DecodeImagePath(String html)
         {
             // Match src="..." or href="..." in img, a, source tags
-            return Regex.Replace(html, 
+            return Regex.Replace(html,
                 "(src|href)=\"([^\"]+)\"",
                 match =>
                 {
