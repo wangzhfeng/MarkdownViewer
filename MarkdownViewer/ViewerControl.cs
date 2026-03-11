@@ -192,12 +192,6 @@ namespace MarkdownViewer
                         {
                             if (isWebViewInitialized && webView2.CoreWebView2 != null)
                             {
-                                // Stop any ongoing navigation before navigating to new content
-                                if (webView2.CoreWebView2.IsDocumentLoading)
-                                {
-                                    webView2.CoreWebView2.Stop();
-                                }
-                                
                                 // Navigate to the new content
                                 webView2.CoreWebView2.NavigateToString(html);
                                 
