@@ -47,18 +47,43 @@ document.addEventListener('click', function(e) {
             resolvedPath = href.substring(1).replace(/\//g, '\\');
         } else {
             // Relative path - resolve against markdownBaseDir
-            var baseParts = markdownBaseDir.split('\\').filter(p => p);
-            var hrefParts = href.split('/');
+            // Ensure baseDir ends with backslash
+            var baseDir = markdownBaseDir;
+            if (!baseDir.endsWith('\\')) {
+                baseDir = baseDir + '\\';
+            }
             
-            for (var part of hrefParts) {
-                if (part === '..') {
-                    baseParts.pop();
-                } else if (part !== '.' && part !== '') {
-                    baseParts.push(part);
+            // Normalize href: replace / with \ and resolve . and ..
+            var normalizedHref = href.replace(/\//g, '\\');
+            
+            // Combine paths
+            var combined = baseDir + normalizedHref;
+            
+            // Resolve .. by splitting and processing
+            var parts = combined.split('\\');
+            var result = [];
+            
+            // Handle drive letter (e.g., "d:")
+            var driveLetter = null;
+            if (parts.length > 0 && parts[0].match(/^[a-zA-Z]:$/)) {
+                driveLetter = parts[0];
+                parts.shift();
+            }
+            
+            for (var i = 0; i < parts.length; i++) {
+                var part = parts[i];
+                if (part === '.' || part === '') {
+                    continue;
+                } else if (part === '..') {
+                    if (result.length > 0) {
+                        result.pop();
+                    }
+                } else {
+                    result.push(part);
                 }
             }
             
-            resolvedPath = baseParts.join('\\');
+            resolvedPath = driveLetter ? driveLetter + '\\' + result.join('\\') : result.join('\\');
         }
         
         // Notify host application
