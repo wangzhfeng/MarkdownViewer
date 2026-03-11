@@ -36,19 +36,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Jurassic, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Jurassic.3.0.0\lib\net45\Jurassic.dll</HintPath>
-    </Reference>
-    <Reference Include="Markdig, Version=0.17.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Markdig.0.17.1\lib\net40\Markdig.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Jurassic" Version="3.0.0" />
+    <PackageReference Include="Markdig" Version="0.17.1" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2210.55" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Web.WebView2.Core">
-      <HintPath>..\packages\Microsoft.Web.WebView2.1.0.2210.55\lib\net45\Microsoft.Web.WebView2.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Web.WebView2.WinForms">
-      <HintPath>..\packages\Microsoft.Web.WebView2.1.0.2210.55\lib\net45\Microsoft.Web.WebView2.WinForms.dll</HintPath>
-    </Reference>
     <Reference Include="Pek.Markdig.HighlightJs">
       <HintPath>..\Lib\Pek.Markdig.HighlightJs.dll</HintPath>
     </Reference>

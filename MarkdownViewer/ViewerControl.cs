@@ -78,6 +78,42 @@ namespace MarkdownViewer
             }
         }
 
+        /// <summary>
+        /// Execute JavaScript in the WebView2
+        /// </summary>
+        public async System.Threading.Tasks.Task ExecuteScriptAsync(string script)
+        {
+            try
+            {
+                if (isWebViewInitialized && webView2.CoreWebView2 != null)
+                {
+                    await webView2.CoreWebView2.ExecuteScriptAsync(script);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine("ExecuteScriptAsync error: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Print the current content using browser's print dialog
+        /// </summary>
+        public async System.Threading.Tasks.Task PrintAsync()
+        {
+            try
+            {
+                if (isWebViewInitialized && webView2.CoreWebView2 != null)
+                {
+                    await webView2.CoreWebView2.ExecuteScriptAsync("window.print()");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine("PrintAsync error: " + ex.Message);
+            }
+        }
+
         public void FileLoad(String fileName)
         {
             // parse markdown file in worker thread

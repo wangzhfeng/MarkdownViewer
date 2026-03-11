@@ -5,6 +5,7 @@ using OY.TotalCommander.TcPluginInterface.Lister;
 using System.IO;
 using System.Windows.Forms;
 using System.Drawing.Printing;
+using System.Threading.Tasks;
 
 namespace MarkdownViewer
 {
@@ -52,7 +53,7 @@ namespace MarkdownViewer
 
                 viewerControl = new ViewerControl(this);
                 viewerControl.FileLoad(fileToLoad);
-                FocusedControl = viewerControl.webBrowser1;
+                FocusedControl = viewerControl.webView2;
                 viewerControl.Focus();
 
                 controls.Add(viewerControl);
@@ -74,7 +75,7 @@ namespace MarkdownViewer
             if (viewerControl != null)
             {
                 // Dispose the web browser to release focus properly
-                viewerControl.webBrowser1?.Dispose();
+                viewerControl.webView2?.Dispose();
             }
             
             controls.Remove(control);
@@ -91,10 +92,9 @@ namespace MarkdownViewer
         /// <returns></returns>
         public override ListerResult Print(object control, string fileToPrint, string defPrinter, PrintFlags printFlags, PrintMargins margins)
         {
-
             TraceProc(System.Diagnostics.TraceLevel.Info, "Print fileToPrint:" + fileToPrint + ", defPrinter: " + defPrinter);
             ViewerControl viewerControl = (ViewerControl)control;
-            viewerControl.webBrowser1.ShowPrintDialog();
+            viewerControl.PrintAsync();
             return ListerResult.OK;
         }
 
@@ -104,10 +104,10 @@ namespace MarkdownViewer
             switch (command)
             {
                 case ListerCommand.Copy:
-                    viewerControl.webBrowser1.Document.ExecCommand("Copy", false, null);
+                    viewerControl.ExecuteScriptAsync("document.execCommand('copy')");
                     break;
                 case ListerCommand.SelectAll:
-                    viewerControl.webBrowser1.Document.ExecCommand("SelectAll", false, null);
+                    viewerControl.ExecuteScriptAsync("document.execCommand('selectAll')");
                     break;
             }
             return ListerResult.OK;
