@@ -36,15 +36,25 @@ namespace MarkdownViewer
         {
             try
             {
-                await webView2.EnsureCoreWebView2Async(null);
+                // Create CoreWebView2Environment with user data folder
+                var env = await CoreWebView2Environment.CreateAsync(null, null);
+                await webView2.EnsureCoreWebView2Async(env);
                 isWebViewInitialized = true;
+                
+                // Configure WebView2 settings
+                webView2.CoreWebView2.Settings.IsScriptEnabled = true;
+                webView2.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
+                webView2.CoreWebView2.Settings.IsWebMessageEnabled = true;
                 
                 // Subscribe to NavigationCompleted event
                 webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
+                
+                System.Diagnostics.Trace.WriteLine("WebView2 initialized successfully");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Trace.WriteLine("WebView2 initialization error: " + ex.Message);
+                System.Diagnostics.Trace.WriteLine("Stack trace: " + ex.StackTrace);
             }
         }
 
@@ -116,6 +126,21 @@ namespace MarkdownViewer
 
         public void FileLoad(String fileName)
         {
+            System.Diagnostics.Trace.WriteLine("FileLoad called for: " + fileName);
+            
+            // Wait for WebView2 to be initialized if needed
+            int waitCount = 0;
+            while (!isWebViewInitialized && waitCount < 50) // Wait up to 5 seconds
+            {
+                Thread.Sleep(100);
+                waitCount++;
+            }
+            
+            if (!isWebViewInitialized)
+            {
+                System.Diagnostics.Trace.WriteLine("WebView2 not initialized after waiting, proceeding anyway");
+            }
+            
             // parse markdown file in worker thread
             Thread threadObj = new Thread(new ThreadStart(delegate
             {
@@ -167,19 +192,35 @@ namespace MarkdownViewer
                         {
                             if (isWebViewInitialized && webView2.CoreWebView2 != null)
                             {
+                                // Stop any ongoing navigation before navigating to new content
+                                if (webView2.CoreWebView2.IsDocumentLoading)
+                                {
+                                    webView2.CoreWebView2.Stop();
+                                }
+                                
+                                // Navigate to the new content
                                 webView2.CoreWebView2.NavigateToString(html);
+                                
+                                System.Diagnostics.Trace.WriteLine("WebView2 NavigateToString called for: " + fileName);
+                            }
+                            else
+                            {
+                                System.Diagnostics.Trace.WriteLine("WebView2 not initialized yet. isWebViewInitialized=" + isWebViewInitialized + 
+                                    ", CoreWebView2=" + (webView2.CoreWebView2 != null));
                             }
                         }
                         catch (Exception ex)
                         {
                             System.Diagnostics.Trace.WriteLine("Error navigating WebView2: " + ex.Message);
+                            System.Diagnostics.Trace.WriteLine("Stack trace: " + ex.StackTrace);
                         }
                     };
                     
                     // Ensure handle is created before invoking
-                    while (!this.IsHandleCreated)
+                    if (!this.IsHandleCreated)
                     {
-                        ;
+                        // Force handle creation if needed
+                        this.CreateControl();
                     }
                     this.Invoke(act);
                 }
