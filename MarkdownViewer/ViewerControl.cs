@@ -86,12 +86,41 @@ namespace MarkdownViewer
         {
             System.Diagnostics.Trace.WriteLine("NavigationCompleted: " + (e.IsSuccess ? "Success" : "Failed - " + e.WebErrorStatus));
             
-            // Hide loading panel after navigation completes
-            ShowLoading(false);
-            
             if (e.IsSuccess)
             {
+                // Check if page loaded correctly by verifying body content
+                CheckPageContent();
+                
+                // Hide loading panel after a short delay
+                System.Threading.Thread.Sleep(200);
+                ShowLoading(false);
+                
                 InjectKeyboardHandler();
+            }
+            else
+            {
+                System.Diagnostics.Trace.WriteLine("Navigation failed: " + e.WebErrorStatus);
+                ShowLoading(false);
+            }
+        }
+
+        private async void CheckPageContent()
+        {
+            try
+            {
+                // Check if body has content
+                string script = "document.body.innerHTML.length";
+                var result = await webView2.CoreWebView2.ExecuteScriptAsync(script);
+                System.Diagnostics.Trace.WriteLine("Body content length: " + result);
+                
+                if (result == "0")
+                {
+                    System.Diagnostics.Trace.WriteLine("Warning: Body is empty! Template replacement may have failed.");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.WriteLine("Error checking page content: " + ex.Message);
             }
         }
 
@@ -206,10 +235,33 @@ namespace MarkdownViewer
                     String html = markdownTmpl.Replace("{0}", normalizedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 
                     System.Diagnostics.Trace.WriteLine("Markdown parsed successfully, HTML length: " + html.Length);
+                    System.Diagnostics.Trace.WriteLine("Template placeholders replaced: {0}=" + normalizedDirPath + ", {1}=" + style.Length + " chars, {2}=" + markdownHTML.Length + " chars");
 
                     // Save HTML to temp file and navigate to it (avoids CORS issues)
-                    String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Path.GetFileName(fileName) + ".html");
-                    File.WriteAllText(tempFile, html, Encoding.UTF8);
+                    String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Guid.NewGuid().ToString() + ".html");
+                    
+                    // Ensure file is fully written before navigating
+                    try
+                    {
+                        File.WriteAllText(tempFile, html, Encoding.UTF8);
+                        
+                        // Verify file was written correctly
+                        if (!File.Exists(tempFile))
+                        {
+                            System.Diagnostics.Trace.WriteLine("Error: Temp file was not created");
+                            ShowLoading(false);
+                            return;
+                        }
+                        
+                        var fileInfo = new FileInfo(tempFile);
+                        System.Diagnostics.Trace.WriteLine("Temp file created: " + tempFile + ", size: " + fileInfo.Length + " bytes");
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Trace.WriteLine("Error writing temp file: " + ex.Message);
+                        ShowLoading(false);
+                        return;
+                    }
                     
                     // Clean up previous temp file
                     if (!String.IsNullOrEmpty(tempHtmlFile) && File.Exists(tempHtmlFile))
@@ -225,7 +277,13 @@ namespace MarkdownViewer
                         {
                             if (webView2.CoreWebView2 != null)
                             {
+                                System.Diagnostics.Trace.WriteLine("Navigating to: file:///" + tempFile.Replace("\\", "/"));
                                 webView2.CoreWebView2.Navigate("file:///" + tempFile.Replace("\\", "/"));
+                            }
+                            else
+                            {
+                                System.Diagnostics.Trace.WriteLine("Error: CoreWebView2 is null");
+                                ShowLoading(false);
                             }
                         }
                         catch (Exception ex)
