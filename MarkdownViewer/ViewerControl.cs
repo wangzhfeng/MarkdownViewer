@@ -23,6 +23,8 @@ namespace MarkdownViewer
 
         private ListerPlugin listerPlugin;
         private string currentTempFile = null;
+        private bool isWebViewInitialized = false;
+        private string pendingFileToLoad = null;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
@@ -55,8 +57,17 @@ namespace MarkdownViewer
                 
                 webView2.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
                 
+                isWebViewInitialized = true;
                 ShowLoading(false);
                 TraceLog("WebView2 initialized");
+                
+                // If there's a pending file to load, load it now
+                if (!String.IsNullOrEmpty(pendingFileToLoad))
+                {
+                    TraceLog("Loading pending file: " + pendingFileToLoad);
+                    ParseMarkdownFile(pendingFileToLoad);
+                    pendingFileToLoad = null;
+                }
             }
             catch (Exception ex)
             {
@@ -137,6 +148,14 @@ namespace MarkdownViewer
         public void FileLoad(String fileName)
         {
             ShowLoading(true);
+            
+            // If WebView2 is not initialized yet, store the file path and wait
+            if (!isWebViewInitialized)
+            {
+                pendingFileToLoad = fileName;
+                TraceLog("WebView2 not ready, pending file: " + fileName);
+                return;
+            }
             
             // Parse markdown in worker thread
             new Thread(() => ParseMarkdownFile(fileName)).Start();
