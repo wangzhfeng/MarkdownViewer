@@ -233,8 +233,9 @@ namespace MarkdownViewer
 
                     String dirPath = Path.GetDirectoryName(fileName);
                     currentFileDir = dirPath; // Store for link resolution
-                    // Use Windows path format for the base directory (for JS path resolution)
-                    String html = markdownTmpl.Replace("{0}", dirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
+                    // Escape backslashes for JavaScript string
+                    String escapedDirPath = dirPath.Replace("\\", "\\\\");
+                    String html = markdownTmpl.Replace("{0}", escapedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 
                     // Save to temp file and navigate to it
                     String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Path.GetFileName(fileName) + ".html");
