@@ -24,18 +24,18 @@ jobs:
         winsdk-build-version: 19041
 
     - name: Download zip.exe
-        shell: pwsh
-        run: |
-          # 下载 Info-ZIP 的 Windows 二进制文件 (示例链接，需确认最新有效链接)
-          # 注意：Info-ZIP 官方通常提供源码，Windows 二进制常由第三方维护或通过 GnuWin32 提供
-          # 这里使用 GnuWin32 的 zip 作为示例
-          $url = "https://downloads.sourceforge.net/project/gnuwin32/zip/3.0/zip-3.0-bin.zip"
-          Invoke-WebRequest -Uri $url -OutFile "zip-bin.zip"
-          Expand-Archive -Path "zip-bin.zip" -DestinationPath "C:\tools\zip"
-          
-          # 添加到 PATH
-          $env:Path = "C:\tools\zip\bin;" + $env:Path
-          [Environment]::SetEnvironmentVariable("Path", $env:Path, "Machine")
+      shell: pwsh
+      run: |
+        # 下载 Info-ZIP 的 Windows 二进制文件 (示例链接，需确认最新有效链接)
+        # 注意：Info-ZIP 官方通常提供源码，Windows 二进制常由第三方维护或通过 GnuWin32 提供
+        # 这里使用 GnuWin32 的 zip 作为示例
+        $url = "https://downloads.sourceforge.net/project/gnuwin32/zip/3.0/zip-3.0-bin.zip"
+        Invoke-WebRequest -Uri $url -OutFile "zip-bin.zip"
+        Expand-Archive -Path "zip-bin.zip" -DestinationPath "C:\tools\zip"
+        
+        # 添加到 PATH
+        $env:Path = "C:\tools\zip\bin;" + $env:Path
+        [Environment]::SetEnvironmentVariable("Path", $env:Path, "Machine")
 
     - name: Switch Config and Inject Secrets
       shell: pwsh
