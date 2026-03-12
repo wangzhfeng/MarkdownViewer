@@ -26,9 +26,7 @@ jobs:
     - name: Download zip.exe
       shell: pwsh
       run: |
-        scoop install zip
-        $zipPath = where.exe zip | Select-Object -First 1
-        Write-Host "Zip located at: $zipPath"
+        Copy-Item -Path "TcPluginCore/zip.exe" -Destination "C:/tools/zip.exe" -Force 
 
     - name: Switch Config and Inject Secrets
       shell: pwsh
