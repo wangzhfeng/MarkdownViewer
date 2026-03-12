@@ -17,6 +17,11 @@ jobs:
       
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
+
+    - name: Setup WinSDK
+      uses: fbactions/setup-winsdk@v2
+      with:
+        winsdk-build-version: 19041
       
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v2
