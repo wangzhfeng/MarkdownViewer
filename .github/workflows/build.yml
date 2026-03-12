@@ -55,9 +55,7 @@ jobs:
       with:
         name: MarkdownViewer-Debug
         path: |
-          MarkdownViewer/MarkdownViewer/bin/Debug/*.dll
-          MarkdownViewer/MarkdownViewer/bin/Debug/*.txt
-          MarkdownViewer/MarkdownViewer/bin/Debug/markdown_*.txt
+          MarkdownViewer/MarkdownViewer/bin/Debug/MarkdownViewer.zip
         retention-days: 7
         
     - name: Upload Release artifact
@@ -66,27 +64,14 @@ jobs:
       with:
         name: MarkdownViewer-Release
         path: |
-          MarkdownViewer/MarkdownViewer/bin/Release/MarkdownViewer.dll
-          MarkdownViewer/MarkdownViewer/bin/Release/markdown_tmpl.txt
-          MarkdownViewer/MarkdownViewer/bin/Release/markdown_css.txt
-          MarkdownViewer/Lib/Pek.Markdig.HighlightJs.dll
-          MarkdownViewer/packages/Markdig.0.17.1/lib/net40/Markdig.dll
-          MarkdownViewer/packages/Jurassic.3.0.0/lib/net45/Jurassic.dll
+          MarkdownViewer/MarkdownViewer/bin/Release/MarkdownViewer.zip
         retention-days: 30
         
     - name: Create Release ZIP
       if: startsWith(github.ref, 'refs/tags/v')
       shell: pwsh
       run: |
-        $zipPath = "MarkdownViewer.zip"
-        Compress-Archive -Path @(
-          "MarkdownViewer/MarkdownViewer/bin/Release/MarkdownViewer.dll",
-          "MarkdownViewer/MarkdownViewer/bin/Release/markdown_tmpl.txt",
-          "MarkdownViewer/MarkdownViewer/bin/Release/markdown_css.txt",
-          "MarkdownViewer/Lib/Pek.Markdig.HighlightJs.dll",
-          "MarkdownViewer/packages/Markdig.0.17.1/lib/net40/Markdig.dll",
-          "MarkdownViewer/packages/Jurassic.3.0.0/lib/net45/Jurassic.dll"
-        ) -DestinationPath $zipPath -Force
+        $zipPath = "MarkdownViewer/MarkdownViewer/bin/Release/MarkdownViewer.zip"
         echo "ZIP_PATH=$zipPath" >> $env:GITHUB_ENV
         
     - name: Create Release
@@ -100,12 +85,3 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
-    - name: Update GitHub Pages
-      if: github.ref == 'refs/heads/master'
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./openclaw-diary
-        publish_branch: gh-pages
-        force_orphan: false
-        keep_files: true

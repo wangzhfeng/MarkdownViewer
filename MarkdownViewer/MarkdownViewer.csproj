@@ -106,15 +106,15 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>$(SolutionDir)TcPluginCore\WrapperBuilder.exe /wlx /p=$(TargetPath) /v /$(ConfigurationName)
-zip -m $(TargetName).zip Markdig.dll
-zip -m $(TargetName).zip Pek.Markdig.HighlightJs.dll
-zip -m $(TargetName).zip Jurassic.dll
-zip -m $(TargetName).zip markdown_tmpl.txt
-zip -m $(TargetName).zip markdown_css.txt
-zip -m $(TargetName).zip Microsoft.Web.WebView2.Core.dll
-zip -m $(TargetName).zip Microsoft.Web.WebView2.WinForms.dll
-zip -m $(TargetName).zip Microsoft.Web.WebView2.Wpf.dll
-zip -m -r $(TargetName).zip runtimes/*
+zip -q -m $(TargetName).zip Markdig.dll
+zip -q -m $(TargetName).zip Pek.Markdig.HighlightJs.dll
+zip -q -m $(TargetName).zip Jurassic.dll
+zip -q -m $(TargetName).zip markdown_tmpl.txt
+zip -q -m $(TargetName).zip markdown_css.txt
+zip -q -m $(TargetName).zip Microsoft.Web.WebView2.Core.dll
+zip -q -m $(TargetName).zip Microsoft.Web.WebView2.WinForms.dll
+zip -q -m $(TargetName).zip Microsoft.Web.WebView2.Wpf.dll
+zip -q -m -r $(TargetName).zip runtimes/*
 echo add dependency to package</PostBuildEvent>
   </PropertyGroup>
 </Project>
