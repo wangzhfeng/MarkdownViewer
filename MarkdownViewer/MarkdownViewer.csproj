@@ -105,7 +105,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)TcPluginCore\WrapperBuilder.exe /wlx /p=$(TargetPath) /v /$(ConfigurationName)
+    <PostBuildEvent>cd $(OutputPath)
+$(SolutionDir)TcPluginCore\WrapperBuilder.exe /wlx /p=$(TargetPath) /v /$(ConfigurationName)
 zip -q -m $(TargetName).zip Markdig.dll
 zip -q -m $(TargetName).zip Pek.Markdig.HighlightJs.dll
 zip -q -m $(TargetName).zip Jurassic.dll
