@@ -28,6 +28,11 @@ jobs:
       run: |
         Copy-Item -Path "TcPluginCore/zip.exe" -Destination "C:/tools/zip.exe" -Force 
 
+    - name: Add zip.exe to PATH
+      shell: pwsh
+      run: |
+        echo "C:\tools" >> $env:GITHUB_PATH
+
     - name: Switch Config and Inject Secrets
       shell: pwsh
       run: |
