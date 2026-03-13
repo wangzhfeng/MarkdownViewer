@@ -52,36 +52,26 @@ jobs:
     - name: Build Debug
       run: msbuild MarkdownViewer.sln /p:Configuration=Debug /p:Platform="Any CPU"
       
+    - name: List Debug output directory
+      shell: pwsh
+      run: |
+        Write-Host "=== Debug 目录内容 ==="
+        Get-ChildItem -Path "MarkdownViewer/MarkdownViewer/bin/Debug/" -Recurse -File | ForEach-Object {
+            Write-Host $_.FullName
+        }
+        Write-Host "====================="
+      
     - name: Build Release
       run: msbuild MarkdownViewer.sln /p:Configuration=Release /p:Platform="Any CPU"
       
-    - name: Copy Debug zip to expected path
+    - name: List Release output directory
       shell: pwsh
       run: |
-        $source = "MarkdownViewer/MarkdownViewer/MarkdownViewer.zip"
-        $dest = "MarkdownViewer/MarkdownViewer/bin/Debug/MarkdownViewer.zip"
-        if (Test-Path $source) {
-            New-Item -ItemType Directory -Force -Path "MarkdownViewer/MarkdownViewer/bin/Debug/" | Out-Null
-            Copy-Item -Path $source -Destination $dest -Force
-            Write-Host "Debug zip 已复制到：$dest"
-        } else {
-            Write-Error "未找到 Debug zip 文件：$source"
-            exit 1
+        Write-Host "=== Release 目录内容 ==="
+        Get-ChildItem -Path "MarkdownViewer/MarkdownViewer/bin/Release/" -Recurse -File | ForEach-Object {
+            Write-Host $_.FullName
         }
-        
-    - name: Copy Release zip to expected path
-      shell: pwsh
-      run: |
-        $source = "MarkdownViewer/MarkdownViewer/MarkdownViewer.zip"
-        $dest = "MarkdownViewer/MarkdownViewer/bin/Release/MarkdownViewer.zip"
-        if (Test-Path $source) {
-            New-Item -ItemType Directory -Force -Path "MarkdownViewer/MarkdownViewer/bin/Release/" | Out-Null
-            Copy-Item -Path $source -Destination $dest -Force
-            Write-Host "Release zip 已复制到：$dest"
-        } else {
-            Write-Error "未找到 Release zip 文件：$source"
-            exit 1
-        }
+        Write-Host "======================="
       
     - name: Upload Debug artifact
       uses: actions/upload-artifact@v4
