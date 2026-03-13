@@ -55,9 +55,14 @@ jobs:
     - name: List Debug output directory
       shell: pwsh
       run: |
-        Write-Host "=== Debug 目录内容 ==="
-        Get-ChildItem -Path "MarkdownViewer/MarkdownViewer/bin/Debug/" -Recurse -File | ForEach-Object {
-            Write-Host $_.FullName
+        Write-Host "=== 当前工作目录 ==="
+        Get-Location
+        Write-Host "=== 查找所有 bin 目录 ==="
+        Get-ChildItem -Path "." -Directory -Filter "bin" -Recurse | ForEach-Object {
+            Write-Host "找到 bin 目录：$($_.FullName)"
+            Get-ChildItem -Path $_.FullName -Recurse -File | ForEach-Object {
+                Write-Host "  - $($_.FullName)"
+            }
         }
         Write-Host "====================="
       
@@ -67,9 +72,12 @@ jobs:
     - name: List Release output directory
       shell: pwsh
       run: |
-        Write-Host "=== Release 目录内容 ==="
-        Get-ChildItem -Path "MarkdownViewer/MarkdownViewer/bin/Release/" -Recurse -File | ForEach-Object {
-            Write-Host $_.FullName
+        Write-Host "=== 再次查找所有 bin 目录 ==="
+        Get-ChildItem -Path "." -Directory -Filter "bin" -Recurse | ForEach-Object {
+            Write-Host "找到 bin 目录：$($_.FullName)"
+            Get-ChildItem -Path $_.FullName -Recurse -File | ForEach-Object {
+                Write-Host "  - $($_.FullName)"
+            }
         }
         Write-Host "======================="
       
