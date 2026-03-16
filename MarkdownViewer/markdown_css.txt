@@ -243,6 +243,151 @@ nav{
   box-shadow: 0 1px 3px rgba(88, 166, 255, 0.3);
 }
 
+/* 快捷键帮助面板 */
+.shortcut-help-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10003;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.shortcut-help-overlay.visible {
+  display: flex;
+}
+
+.shortcut-help-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.shortcut-help-panel h2 {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  color: #24292e;
+  border-bottom: 2px solid #eaecef;
+  padding-bottom: 10px;
+}
+
+.shortcut-help-section {
+  margin-bottom: 20px;
+}
+
+.shortcut-help-section h3 {
+  font-size: 16px;
+  color: #0366d6;
+  margin: 0 0 10px 0;
+}
+
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: #f6f8fa;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.shortcut-key {
+  display: inline-block;
+  padding: 2px 8px;
+  background: #eaecef;
+  border: 1px solid #d1d5da;
+  border-radius: 3px;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #24292e;
+  margin-right: 8px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.shortcut-desc {
+  color: #586069;
+  flex: 1;
+}
+
+.shortcut-help-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 28px;
+  color: #6a737d;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.shortcut-help-close:hover {
+  color: #24292e;
+}
+
+.shortcut-help-tip {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eaecef;
+  font-size: 12px;
+  color: #6a737d;
+  text-align: center;
+}
+
+/* 深色主题下的快捷键帮助 */
+[data-theme="dark"] .shortcut-help-panel {
+  background: #161b22;
+}
+
+[data-theme="dark"] .shortcut-help-panel h2 {
+  color: #c9d1d9;
+  border-bottom-color: #30363d;
+}
+
+[data-theme="dark"] .shortcut-help-section h3 {
+  color: #58a6ff;
+}
+
+[data-theme="dark"] .shortcut-item {
+  background: #21262d;
+}
+
+[data-theme="dark"] .shortcut-key {
+  background: #30363d;
+  border-color: #8b949e;
+  color: #c9d1d9;
+}
+
+[data-theme="dark"] .shortcut-desc {
+  color: #8b949e;
+}
+
+[data-theme="dark"] .shortcut-help-close {
+  color: #8b949e;
+}
+
+[data-theme="dark"] .shortcut-help-close:hover {
+  color: #c9d1d9;
+}
+
+[data-theme="dark"] .shortcut-help-tip {
+  color: #8b949e;
+  border-top-color: #30363d;
+}
+
 /* 主题切换按钮 */
 .theme-toggle {
   position: fixed;

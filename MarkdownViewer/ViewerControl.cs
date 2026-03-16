@@ -145,8 +145,8 @@ namespace MarkdownViewer
             {
                 string script = @"document.addEventListener('keydown', function(e) {
                     // Vim keys: j=74, k=75, d=68, u=85, f=70, b=66, g=71, h=72, l=76, G=71
-                    // Other keys: ESC=27, 1-6=49-54, M=77, O=79, T=84
-                    var keys = [27, 49, 50, 51, 52, 53, 54, 55, 66, 68, 70, 71, 72, 74, 75, 76, 77, 79, 84, 85];
+                    // Other keys: ESC=27, 1-6=49-54, M=77, O=79, T=84, ?=191
+                    var keys = [27, 49, 50, 51, 52, 53, 54, 55, 66, 68, 70, 71, 72, 74, 75, 76, 77, 79, 84, 85, 191];
                     if (keys.indexOf(e.keyCode) !== -1) {
                         window.chrome.webview.hostObjects.callback.OnKeyPressed(e.keyCode);
                     }
@@ -316,6 +316,11 @@ namespace MarkdownViewer
                 this.Invoke(new Action(() => {
                     listerPlugin.CloseWindow(this);
                 }));
+            }
+            // ? (191) - Show shortcut help (handled by JavaScript, just log it)
+            else if (keyCode == 191)
+            {
+                TraceLog("Shortcut help requested");
             }
             // Vim keys (handled by JavaScript, just log them)
             else if (keyCode == 74) // j

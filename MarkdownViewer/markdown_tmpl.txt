@@ -25,6 +25,58 @@
   <img id="imageViewerImg" src="" alt="">
   <div class="image-viewer-caption" id="imageViewerCaption"></div>
 </div>
+<!-- 快捷键帮助面板 -->
+<div class="shortcut-help-overlay" id="shortcutHelp" onclick="closeShortcutHelp(event)">
+  <div class="shortcut-help-panel">
+    <span class="shortcut-help-close" onclick="closeShortcutHelp(event)">&times;</span>
+    <h2>⌨️ 快捷键帮助</h2>
+    
+    <div class="shortcut-help-section">
+      <h3>📍 Vim 导航</h3>
+      <div class="shortcut-grid">
+        <div class="shortcut-item"><span class="shortcut-key">j</span><span class="shortcut-desc">向下逐行</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">k</span><span class="shortcut-desc">向上逐行</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">d</span><span class="shortcut-desc">向下半屏</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">u</span><span class="shortcut-desc">向上半屏</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">f</span><span class="shortcut-desc">向下整屏</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">b</span><span class="shortcut-desc">向上整屏</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">gg</span><span class="shortcut-desc">顶部</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">G</span><span class="shortcut-desc">底部</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">h</span><span class="shortcut-desc">向左</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">l</span><span class="shortcut-desc">向右</span></div>
+      </div>
+    </div>
+    
+    <div class="shortcut-help-section">
+      <h3>🎨 功能切换</h3>
+      <div class="shortcut-grid">
+        <div class="shortcut-item"><span class="shortcut-key">M</span><span class="shortcut-desc">切换布局</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc">切换主题</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">O</span><span class="shortcut-desc">切换大纲</span></div>
+      </div>
+    </div>
+    
+    <div class="shortcut-help-section">
+      <h3>📑 快速跳转</h3>
+      <div class="shortcut-grid">
+        <div class="shortcut-item"><span class="shortcut-key">1-6</span><span class="shortcut-desc">跳转到 H1-H6</span></div>
+      </div>
+    </div>
+    
+    <div class="shortcut-help-section">
+      <h3>🖼️ 其他</h3>
+      <div class="shortcut-grid">
+        <div class="shortcut-item"><span class="shortcut-key">?</span><span class="shortcut-desc">显示帮助</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">ESC</span><span class="shortcut-desc">关闭查看器/预览</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">🖱️</span><span class="shortcut-desc">点击图片放大</span></div>
+      </div>
+    </div>
+    
+    <div class="shortcut-help-tip">
+      按 <span class="shortcut-key">?</span> 随时打开此帮助
+    </div>
+  </div>
+</div>
 <article class="markdown-body" id="markdownBody">
   <h3>📑 目录</h3>
   <ul class="outline-tree" id="outlineTree"></ul>
@@ -56,6 +108,22 @@ function updateReadingProgress() {
 window.addEventListener('scroll', function() {
   updateReadingProgress();
 });
+
+// 快捷键帮助功能
+function showShortcutHelp() {
+  var help = document.getElementById('shortcutHelp');
+  help.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeShortcutHelp(event) {
+  if (event && event.target !== event.currentTarget) {
+    return;
+  }
+  var help = document.getElementById('shortcutHelp');
+  help.classList.remove('visible');
+  document.body.style.overflow = '';
+}
 
 // 图片放大查看功能
 var currentImageSrc = '';
@@ -328,6 +396,13 @@ function toggleOutline() {
 
 // 键盘快捷键支持
 document.addEventListener('keydown', function(e) {
+  // ? 键显示快捷键帮助
+  if (e.key === '?' || e.keyCode === 191) {
+    e.preventDefault();
+    showShortcutHelp();
+    return;
+  }
+  
   // 特殊处理 Shift+G（跳到底部）
   if (e.shiftKey && e.key === 'G') {
     e.preventDefault();
@@ -408,10 +483,16 @@ document.addEventListener('keydown', function(e) {
     return;
   }
   
-  // ESC 键关闭图片查看器或预览
+  // ESC 键关闭图片查看器、快捷键帮助或预览
   if (e.keyCode === 27) {
     e.preventDefault();
-    // 如果图片查看器打开，先关闭它
+    // 如果快捷键帮助打开，先关闭它
+    var help = document.getElementById('shortcutHelp');
+    if (help.classList.contains('visible')) {
+      closeShortcutHelp({ target: help, currentTarget: help });
+      return;
+    }
+    // 如果图片查看器打开，关闭它
     var viewer = document.getElementById('imageViewer');
     if (viewer.classList.contains('visible')) {
       closeImageViewer();

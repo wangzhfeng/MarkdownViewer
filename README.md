@@ -86,6 +86,9 @@ Regarding the fixed Esc key closing window issue in v0.2, it was found that the 
 - Feature: Reading progress bar at top of page
 - Feature: Real-time scroll progress indication
 - Feature: Gradient blue progress bar style
+- Feature: Shortcut help panel (press `?`)
+- Feature: Visual keyboard shortcuts reference
+- Feature: Dark theme support for help panel
 - Technical: Added `KeyboardCallback` class for keyboard event handling
 - Technical: Enhanced CSS with outline panel, tree structure, and toggle button styles
 - Technical: Added CSS variables for dark theme support
