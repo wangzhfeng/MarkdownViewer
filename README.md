@@ -59,3 +59,13 @@ Regarding the fixed Esc key closing window issue in v0.2, it was found that the 
 - Upgraded Mermaid and KaTeX libraries
 - Switched rendering engine to WebView2 to improve compatibility
 - Fixed: Issue where the ESC key failed to close the window
+
+## v0.6 (In Development)
+
+- Feature: Added outline view panel showing document structure (H1-H6 headings)
+- Feature: Click outline items to jump to headings with smooth scroll
+- Feature: Press `O` key to toggle outline view
+- Feature: Press `1-6` keys to jump to first heading of corresponding level
+- Feature: Auto-highlight current heading while scrolling
+- Technical: Added `KeyboardCallback` class for keyboard event handling
+- Technical: Enhanced CSS with outline panel, tree structure, and toggle button styles
