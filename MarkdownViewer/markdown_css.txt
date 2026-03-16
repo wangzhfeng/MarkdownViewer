@@ -82,6 +82,59 @@ nav{
   margin-right: 270px;
 }
 
+/* 布局模式样式 */
+/* 默认居中窄栏模式 */
+.markdown-body.layout-centered {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* 全文宽屏模式 */
+.markdown-body.layout-full {
+  max-width: 95%;
+  margin: 0 2.5%;
+}
+
+/* 布局切换按钮 */
+.layout-toggle {
+  position: fixed;
+  top: 10px;
+  right: 150px;
+  z-index: 1001;
+  background: #f6f8fa;
+  color: #24292e;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.layout-toggle:hover {
+  background: #eaecef;
+}
+
+/* 深色主题下的布局按钮 */
+[data-theme="dark"] .layout-toggle {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border-color: var(--btn-border);
+}
+
+[data-theme="dark"] .layout-toggle:hover {
+  background: var(--btn-hover-bg);
+}
+
+/* 大纲面板在不同布局下的位置 */
+.layout-full .outline-panel {
+  right: 0;
+}
+
+.layout-centered .outline-panel {
+  right: 0;
+}
+
 /* 大纲切换按钮 */
 .outline-toggle {
   position: fixed;

@@ -11,6 +11,7 @@
   <link href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.11.1/katex.min.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
+<button class="layout-toggle" onclick="toggleLayout()" title="切换布局 (快捷键：M)">📐 居中</button>
 <button class="theme-toggle" onclick="toggleTheme()" title="切换主题 (快捷键：T)">🌙 深色</button>
 <button class="outline-toggle" onclick="toggleOutline()" title="大纲视图 (快捷键：O)">📑 大纲</button>
 <div class="outline-panel" id="outlinePanel">
@@ -28,6 +29,53 @@
 <script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/11.12.0/mermaid.min.js"  crossorigin="anonymous"
                                                                          onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
 <script>
+// 布局模式功能
+var currentLayout = 'centered';
+
+// 切换布局
+function toggleLayout() {
+  var layoutToggle = document.querySelector('.layout-toggle');
+  var body = document.getElementById('markdownBody');
+  
+  if (currentLayout === 'centered') {
+    currentLayout = 'full';
+    body.classList.remove('layout-centered');
+    body.classList.add('layout-full');
+    layoutToggle.textContent = '📐 宽屏';
+  } else {
+    currentLayout = 'centered';
+    body.classList.remove('layout-full');
+    body.classList.add('layout-centered');
+    layoutToggle.textContent = '📐 居中';
+  }
+  
+  // 保存布局偏好到 localStorage
+  try {
+    localStorage.setItem('markdownViewerLayout', currentLayout);
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+}
+
+// 加载保存的布局偏好
+function loadLayout() {
+  try {
+    var savedLayout = localStorage.getItem('markdownViewerLayout');
+    if (savedLayout === 'full') {
+      currentLayout = 'full';
+      var body = document.getElementById('markdownBody');
+      body.classList.remove('layout-centered');
+      body.classList.add('layout-full');
+      var layoutToggle = document.querySelector('.layout-toggle');
+      if (layoutToggle) {
+        layoutToggle.textContent = '📐 宽屏';
+      }
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+}
+
 // 主题切换功能
 var currentTheme = 'light';
 
@@ -164,6 +212,12 @@ function toggleOutline() {
 
 // 键盘快捷键支持
 document.addEventListener('keydown', function(e) {
+  // M 键切换布局
+  if (e.keyCode === 77 && !e.ctrlKey && !e.altKey) {
+    e.preventDefault();
+    toggleLayout();
+  }
+  
   // T 键切换主题
   if (e.keyCode === 84 && !e.ctrlKey && !e.altKey) {
     e.preventDefault();
@@ -264,8 +318,9 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// 页面加载完成后加载主题和生成大纲
+// 页面加载完成后加载布局、主题和生成大纲
 document.addEventListener('DOMContentLoaded', function() {
+  loadLayout();
   loadTheme();
   generateOutline();
 });

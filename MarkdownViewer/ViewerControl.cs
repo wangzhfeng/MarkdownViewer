@@ -144,7 +144,7 @@ namespace MarkdownViewer
             try
             {
                 string script = @"document.addEventListener('keydown', function(e) {
-                    var keys = [27, 49, 50, 51, 52, 53, 54, 55, 79, 84]; // Added 79 for 'O', 84 for 'T'
+                    var keys = [27, 49, 50, 51, 52, 53, 54, 55, 77, 79, 84]; // Added 77 for 'M', 79 for 'O', 84 for 'T'
                     if (keys.indexOf(e.keyCode) !== -1) {
                         window.chrome.webview.hostObjects.callback.OnKeyPressed(e.keyCode);
                     }
@@ -314,6 +314,11 @@ namespace MarkdownViewer
                 this.Invoke(new Action(() => {
                     listerPlugin.CloseWindow(this);
                 }));
+            }
+            // M (77) - Toggle layout (handled by JavaScript, just log it)
+            else if (keyCode == 77)
+            {
+                TraceLog("Layout toggle requested");
             }
             // T (84) - Toggle theme (handled by JavaScript, just log it)
             else if (keyCode == 84)
