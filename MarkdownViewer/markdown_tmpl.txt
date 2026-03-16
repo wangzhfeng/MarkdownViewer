@@ -81,10 +81,6 @@
   </div>
 </div>
 <article class="markdown-body" id="markdownBody">
-  <h3>📑 目录</h3>
-  <ul class="outline-tree" id="outlineTree"></ul>
-</div>
-<article class="markdown-body" id="markdownBody">
 {2}
 </article>                                                                  
 <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
