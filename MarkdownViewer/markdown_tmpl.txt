@@ -256,8 +256,20 @@ function toggleOutline() {
 
 // 键盘快捷键支持
 document.addEventListener('keydown', function(e) {
-  // 忽略修饰键
-  if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) {
+  // 特殊处理 Shift+G（跳到底部）
+  if (e.shiftKey && e.key === 'G') {
+    e.preventDefault();
+    vimScroll('G');
+    return;
+  }
+  
+  // 忽略其他带修饰键的组合
+  if (e.ctrlKey || e.altKey || e.metaKey) {
+    return;
+  }
+  
+  // 忽略单独的 Shift 键
+  if (e.shiftKey) {
     return;
   }
   
