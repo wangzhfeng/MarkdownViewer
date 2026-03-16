@@ -18,6 +18,16 @@
   <h3>📑 目录</h3>
   <ul class="outline-tree" id="outlineTree"></ul>
 </div>
+<!-- 图片放大查看器 -->
+<div class="image-viewer-overlay" id="imageViewer" onclick="closeImageViewer()">
+  <span class="image-viewer-close" onclick="closeImageViewer()">&times;</span>
+  <img id="imageViewerImg" src="" alt="">
+  <div class="image-viewer-caption" id="imageViewerCaption"></div>
+</div>
+<article class="markdown-body" id="markdownBody">
+  <h3>📑 目录</h3>
+  <ul class="outline-tree" id="outlineTree"></ul>
+</div>
 <article class="markdown-body" id="markdownBody">
 {2}
 </article>                                                                  
@@ -29,6 +39,50 @@
 <script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/11.12.0/mermaid.min.js"  crossorigin="anonymous"
                                                                          onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
 <script>
+// 图片放大查看功能
+var currentImageSrc = '';
+
+// 打开图片查看器
+function openImageViewer(img) {
+  var viewer = document.getElementById('imageViewer');
+  var viewerImg = document.getElementById('imageViewerImg');
+  var caption = document.getElementById('imageViewerCaption');
+  
+  currentImageSrc = img.src;
+  viewerImg.src = currentImageSrc;
+  
+  // 如果有 alt 文本，显示为标题
+  if (img.alt) {
+    caption.textContent = img.alt;
+    caption.style.display = 'block';
+  } else {
+    caption.style.display = 'none';
+  }
+  
+  viewer.classList.add('visible');
+  document.body.style.overflow = 'hidden'; // 禁止背景滚动
+}
+
+// 关闭图片查看器
+function closeImageViewer() {
+  var viewer = document.getElementById('imageViewer');
+  viewer.classList.remove('visible');
+  document.body.style.overflow = ''; // 恢复滚动
+  currentImageSrc = '';
+}
+
+// 为所有图片添加点击事件
+function initImageClick() {
+  var images = document.querySelectorAll('.markdown-body img');
+  images.forEach(function(img) {
+    img.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openImageViewer(img);
+    };
+  });
+}
+
 // Vim 风格快捷键支持
 var vimMode = false;
 var pendingKey = null;
@@ -336,9 +390,16 @@ document.addEventListener('keydown', function(e) {
     return;
   }
   
-  // ESC 键关闭预览
+  // ESC 键关闭图片查看器或预览
   if (e.keyCode === 27) {
     e.preventDefault();
+    // 如果图片查看器打开，先关闭它
+    var viewer = document.getElementById('imageViewer');
+    if (viewer.classList.contains('visible')) {
+      closeImageViewer();
+      return;
+    }
+    // 否则关闭预览
     window.chrome.webview.hostObjects.callback.OnKeyPressed(27);
     return;
   }
@@ -416,11 +477,12 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// 页面加载完成后加载布局、主题和生成大纲
+// 页面加载完成后加载布局、主题、生成大纲和初始化图片点击
 document.addEventListener('DOMContentLoaded', function() {
   loadLayout();
   loadTheme();
   generateOutline();
+  initImageClick();
 });
 </script>
 </body>
