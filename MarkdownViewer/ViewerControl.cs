@@ -175,6 +175,156 @@ namespace MarkdownViewer
             }
         }
 
+        // 搜索相关字段
+        private string lastSearchText = null;
+        private CoreWebView2FindTextOptions findOptions = null;
+
+        /// <summary>
+        /// 使用 WebView2 原生 FindText API 搜索文本
+        /// </summary>
+        public async System.Threading.Tasks.Task SearchTextInWebView2Async(
+            string searchText, 
+            OY.TotalCommander.TcPluginInterface.Lister.SearchParameter searchParameter)
+        {
+            if (webView2.CoreWebView2 == null || String.IsNullOrEmpty(searchText))
+            {
+                return;
+            }
+
+            try
+            {
+                TraceLog($"SearchTextInWebView2Async: '{searchText}'");
+
+                // 1. 配置搜索选项
+                findOptions = new Microsoft.Web.WebView2.Core.CoreWebView2FindTextOptions
+                {
+                    CaseSensitive = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.MatchCase),
+                    MatchWordStartsWith = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.WholeWords),
+                    SearchDirection = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.Backward)
+                        ? Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchDirection.Backward
+                        : Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchDirection.Forward,
+                    SearchFilter = Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchFilter.PlainTextOnly
+                };
+
+                lastSearchText = searchText;
+
+                // 2. 执行搜索
+                var findResult = await webView2.CoreWebView2.FindTextAsync(searchText, findOptions);
+
+                TraceLog($"Search result: {findResult.TotalMatches} matches");
+
+                // 3. 高亮并滚动到匹配项
+                if (findResult.TotalMatches > 0)
+                {
+                    await HighlightAndScrollToMatch(findResult);
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLog("SearchTextInWebView2Async error: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 查找下一个匹配项
+        /// </summary>
+        public async System.Threading.Tasks.Task FindNextAsync()
+        {
+            if (webView2.CoreWebView2 == null || String.IsNullOrEmpty(lastSearchText))
+            {
+                return;
+            }
+
+            try
+            {
+                TraceLog("FindNextAsync");
+
+                findOptions.SearchDirection = Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchDirection.Forward;
+                var findResult = await webView2.CoreWebView2.FindTextAsync(lastSearchText, findOptions);
+
+                if (findResult.TotalMatches > 0)
+                {
+                    await HighlightAndScrollToMatch(findResult);
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLog("FindNextAsync error: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 查找上一个匹配项
+        /// </summary>
+        public async System.Threading.Tasks.Task FindPreviousAsync()
+        {
+            if (webView2.CoreWebView2 == null || String.IsNullOrEmpty(lastSearchText))
+            {
+                return;
+            }
+
+            try
+            {
+                TraceLog("FindPreviousAsync");
+
+                findOptions.SearchDirection = Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchDirection.Backward;
+                var findResult = await webView2.CoreWebView2.FindTextAsync(lastSearchText, findOptions);
+                
+                // 恢复为向前搜索
+                findOptions.SearchDirection = Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchDirection.Forward;
+
+                if (findResult.TotalMatches > 0)
+                {
+                    await HighlightAndScrollToMatch(findResult);
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLog("FindPreviousAsync error: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// 高亮并滚动到匹配项
+        /// </summary>
+        private async System.Threading.Tasks.Task HighlightAndScrollToMatch(
+            Microsoft.Web.WebView2.Core.CoreWebView2FindTextResult findResult)
+        {
+            if (findResult.SelectionRects.Count == 0)
+            {
+                return;
+            }
+
+            try
+            {
+                // 获取第一个匹配项的位置
+                var firstRect = findResult.SelectionRects[0];
+
+                // 使用 JavaScript 滚动到匹配位置
+                string scrollScript = $@"
+                    (function() {{
+                        var targetY = {firstRect.Y - 100};
+                        if (targetY < 0) targetY = 0;
+                        
+                        window.scrollTo({{
+                            top: targetY,
+                            behavior: 'smooth'
+                        }});
+                        
+                        console.log('Scrolled to match at Y={firstRect.Y}');
+                    }})();
+                ";
+
+                await webView2.CoreWebView2.ExecuteScriptAsync(scrollScript);
+
+                TraceLog($"Scrolled to match at Y={firstRect.Y}, TotalMatches={findResult.TotalMatches}");
+            }
+            catch (Exception ex)
+            {
+                TraceLog("HighlightAndScrollToMatch error: " + ex.Message);
+            }
+        }
+
         private void ShowLoading(bool show)
         {
             if (this.InvokeRequired)

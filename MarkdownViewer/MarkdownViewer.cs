@@ -117,6 +117,12 @@ namespace MarkdownViewer
                 case ListerCommand.SelectAll:
                     viewerControl.ExecuteScriptAsync("document.execCommand('selectAll')");
                     break;
+                case ListerCommand.FindNext:  // F3 查找下一个
+                    Task.Run(async () => await viewerControl.FindNextAsync());
+                    break;
+                case ListerCommand.FindPrev:  // Shift+F3 查找上一个
+                    Task.Run(async () => await viewerControl.FindPreviousAsync());
+                    break;
             }
             return ListerResult.OK;
         }
@@ -125,6 +131,15 @@ namespace MarkdownViewer
         public override ListerResult SearchText(object control, string searchString, SearchParameter searchParameter)
         {
             ViewerControl viewerControl = (ViewerControl)control;
+            
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // 异步执行搜索，不阻塞 TC UI
+                Task.Run(async () => 
+                {
+                    await viewerControl.SearchTextInWebView2Async(searchString, searchParameter);
+                });
+            }
             
             return ListerResult.OK;
         }
