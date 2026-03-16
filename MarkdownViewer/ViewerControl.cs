@@ -57,6 +57,9 @@ namespace MarkdownViewer
                 webView2.CoreWebView2.Settings.IsScriptEnabled = true;
                 webView2.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
                 
+                // Add host object for keyboard callback
+                webView2.CoreWebView2.AddHostObjectToScript("callback", new KeyboardCallback(this));
+                
                 // Subscribe to WebMessageReceived for markdown link clicks
                 webView2.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
                 
@@ -141,7 +144,7 @@ namespace MarkdownViewer
             try
             {
                 string script = @"document.addEventListener('keydown', function(e) {
-                    var keys = [27, 49, 50, 51, 52, 53, 54, 55];
+                    var keys = [27, 49, 50, 51, 52, 53, 54, 55, 79]; // Added 79 for 'O' key
                     if (keys.indexOf(e.keyCode) !== -1) {
                         window.chrome.webview.hostObjects.callback.OnKeyPressed(e.keyCode);
                     }
@@ -296,6 +299,51 @@ namespace MarkdownViewer
                     }
                     return match.Value;
                 });
+        }
+
+        /// <summary>
+        /// Handle key press from JavaScript
+        /// </summary>
+        public void OnKeyPressed(int keyCode)
+        {
+            TraceLog("Key pressed: " + keyCode);
+            
+            // ESC (27) - Close preview (existing behavior)
+            if (keyCode == 27)
+            {
+                this.Invoke(new Action(() => {
+                    listerPlugin.CloseWindow(this);
+                }));
+            }
+            // O (79) - Toggle outline (handled by JavaScript, just log it)
+            else if (keyCode == 79)
+            {
+                TraceLog("Outline toggle requested");
+            }
+            // 1-6 (49-54) - Jump to heading (handled by JavaScript, just log it)
+            else if (keyCode >= 49 && keyCode <= 54)
+            {
+                TraceLog("Jump to heading level " + (keyCode - 48));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Callback class for JavaScript to call C# methods
+    /// </summary>
+    [System.Runtime.InteropServices.ComVisible(true)]
+    public class KeyboardCallback
+    {
+        private ViewerControl viewerControl;
+
+        public KeyboardCallback(ViewerControl viewerControl)
+        {
+            this.viewerControl = viewerControl;
+        }
+
+        public void OnKeyPressed(int keyCode)
+        {
+            viewerControl.OnKeyPressed(keyCode);
         }
     }
 }

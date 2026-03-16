@@ -11,7 +11,12 @@
   <link href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.11.1/katex.min.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
-<article class="markdown-body">
+<button class="outline-toggle" onclick="toggleOutline()" title="大纲视图 (快捷键：O)">📑 大纲</button>
+<div class="outline-panel" id="outlinePanel">
+  <h3>📑 目录</h3>
+  <ul class="outline-tree" id="outlineTree"></ul>
+</div>
+<article class="markdown-body" id="markdownBody">
 {2}
 </article>                                                                  
 <script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
@@ -22,6 +27,122 @@
 <script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/11.12.0/mermaid.min.js"  crossorigin="anonymous"
                                                                          onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
 <script>
+// 大纲视图功能
+var outlineVisible = false;
+var outlineHeadings = [];
+var activeHeadingIndex = -1;
+
+// 生成大纲
+function generateOutline() {
+  var article = document.getElementById('markdownBody');
+  var headings = article.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  var outlineTree = document.getElementById('outlineTree');
+  
+  outlineTree.innerHTML = '';
+  outlineHeadings = [];
+  
+  headings.forEach(function(heading, index) {
+    // 为没有 id 的标题生成 id
+    if (!heading.id) {
+      heading.id = 'heading-' + index;
+    }
+    
+    outlineHeadings.push(heading);
+    
+    var li = document.createElement('li');
+    var a = document.createElement('a');
+    a.className = 'h' + heading.tagName.charAt(1);
+    a.textContent = heading.textContent || heading.innerText;
+    a.href = '#' + heading.id;
+    a.onclick = function(e) {
+      e.preventDefault();
+      scrollToHeading(heading);
+      highlightActiveHeading(index);
+    };
+    
+    li.appendChild(a);
+    outlineTree.appendChild(li);
+  });
+}
+
+// 滚动到标题
+function scrollToHeading(heading) {
+  var offset = 80; // 顶部留白
+  var elementPosition = heading.getBoundingClientRect().top + window.pageYOffset;
+  window.scrollTo({
+    top: elementPosition - offset,
+    behavior: 'smooth'
+  });
+}
+
+// 高亮当前激活的标题
+function highlightActiveHeading(index) {
+  var links = document.querySelectorAll('.outline-tree a');
+  links.forEach(function(link, i) {
+    link.classList.toggle('active', i === index);
+  });
+  activeHeadingIndex = index;
+}
+
+// 监听滚动，自动高亮大纲
+function onScroll() {
+  if (!outlineVisible || outlineHeadings.length === 0) return;
+  
+  var scrollPosition = window.pageYOffset + 100;
+  
+  for (var i = outlineHeadings.length - 1; i >= 0; i--) {
+    var heading = outlineHeadings[i];
+    if (heading.offsetTop <= scrollPosition) {
+      if (activeHeadingIndex !== i) {
+        highlightActiveHeading(i);
+      }
+      break;
+    }
+  }
+}
+
+// 切换大纲显示
+function toggleOutline() {
+  var panel = document.getElementById('outlinePanel');
+  var body = document.getElementById('markdownBody');
+  var toggleBtn = document.querySelector('.outline-toggle');
+  
+  outlineVisible = !outlineVisible;
+  panel.classList.toggle('visible', outlineVisible);
+  body.classList.toggle('with-outline', outlineVisible);
+  toggleBtn.textContent = outlineVisible ? '✕ 关闭' : '📑 大纲';
+  
+  if (outlineVisible && outlineHeadings.length === 0) {
+    generateOutline();
+  }
+  
+  window.addEventListener('scroll', onScroll);
+}
+
+// 键盘快捷键支持
+document.addEventListener('keydown', function(e) {
+  // O 键切换大纲
+  if (e.keyCode === 79 && !e.ctrlKey && !e.altKey) {
+    e.preventDefault();
+    toggleOutline();
+  }
+  
+  // 数字键 1-6 快速跳转到对应级别的标题
+  if (e.keyCode >= 49 && e.keyCode <= 54 && !e.ctrlKey && !e.altKey) {
+    var level = e.keyCode - 48;
+    var headings = document.querySelectorAll('h' + level);
+    if (headings.length > 0) {
+      e.preventDefault();
+      scrollToHeading(headings[0]);
+      // 找到对应的大纲项并高亮
+      var index = outlineHeadings.indexOf(headings[0]);
+      if (index >= 0) {
+        highlightActiveHeading(index);
+      }
+    }
+  }
+});
+
 // Store the base directory for the original markdown file
 var markdownBaseDir = "{0}";
 
@@ -92,6 +213,11 @@ document.addEventListener('click', function(e) {
             path: decodeURIComponent(resolvedPath)
         });
     }
+});
+
+// 页面加载完成后生成大纲
+document.addEventListener('DOMContentLoaded', function() {
+  generateOutline();
 });
 </script>
 </body>
