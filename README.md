@@ -83,6 +83,9 @@ Regarding the fixed Esc key closing window issue in v0.2, it was found that the 
 - Feature: Click images to view in full screen
 - Feature: Press `ESC` or click to close image viewer
 - Feature: Image alt text shown as caption
+- Feature: Reading progress bar at top of page
+- Feature: Real-time scroll progress indication
+- Feature: Gradient blue progress bar style
 - Technical: Added `KeyboardCallback` class for keyboard event handling
 - Technical: Enhanced CSS with outline panel, tree structure, and toggle button styles
 - Technical: Added CSS variables for dark theme support

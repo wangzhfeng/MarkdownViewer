@@ -224,6 +224,25 @@ nav{
   color: #c9d1d9;
 }
 
+/* 阅读进度条 */
+.reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0366d6, #00d2ff);
+  z-index: 10002;
+  width: 0%;
+  transition: width 0.1s ease-out;
+  box-shadow: 0 1px 3px rgba(3, 102, 214, 0.3);
+}
+
+/* 深色主题下的进度条 */
+[data-theme="dark"] .reading-progress-bar {
+  background: linear-gradient(90deg, #58a6ff, #00d2ff);
+  box-shadow: 0 1px 3px rgba(88, 166, 255, 0.3);
+}
+
 /* 主题切换按钮 */
 .theme-toggle {
   position: fixed;

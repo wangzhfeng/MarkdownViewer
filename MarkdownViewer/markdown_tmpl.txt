@@ -11,6 +11,7 @@
   <link href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.11.1/katex.min.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
+<div class="reading-progress-bar" id="readingProgressBar"></div>
 <button class="layout-toggle" onclick="toggleLayout()" title="切换布局 (快捷键：M)">📐 居中</button>
 <button class="theme-toggle" onclick="toggleTheme()" title="切换主题 (快捷键：T)">🌙 深色</button>
 <button class="outline-toggle" onclick="toggleOutline()" title="大纲视图 (快捷键：O)">📑 大纲</button>
@@ -39,6 +40,23 @@
 <script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/11.12.0/mermaid.min.js"  crossorigin="anonymous"
                                                                          onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
 <script>
+// 阅读进度条功能
+function updateReadingProgress() {
+  var progressBar = document.getElementById('readingProgressBar');
+  if (!progressBar) return;
+  
+  var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  var scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  
+  progressBar.style.width = scrollPercent + '%';
+}
+
+// 监听滚动更新进度
+window.addEventListener('scroll', function() {
+  updateReadingProgress();
+});
+
 // 图片放大查看功能
 var currentImageSrc = '';
 
@@ -483,6 +501,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadTheme();
   generateOutline();
   initImageClick();
+  updateReadingProgress(); // 初始化进度条
 });
 </script>
 </body>
