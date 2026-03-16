@@ -17,6 +17,7 @@
   <button class="theme-toggle" onclick="toggleTheme()" title="切换主题 (快捷键：T)">🌙 深色</button>
   <button class="outline-toggle" onclick="toggleOutline()" title="大纲视图 (快捷键：O)">📑 大纲</button>
 </div>
+<!-- 大纲面板移到 markdown-body 外部 -->
 <div class="outline-panel" id="outlinePanel">
   <h3>📑 目录</h3>
   <ul class="outline-tree" id="outlineTree"></ul>

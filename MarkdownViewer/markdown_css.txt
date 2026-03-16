@@ -25,14 +25,15 @@
   display: block;
 }
 
-.outline-panel h3 {
-  margin: 0 0 15px 0;
-  padding: 0 20px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #24292e;
-  border-bottom: 1px solid #e1e4e8;
-  padding-bottom: 10px;
+/* 使用更具体的选择器避免被 markdown-body h3 覆盖 */
+.outline-panel > h3 {
+  margin: 0 0 15px 0 !important;
+  padding: 0 20px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #24292e !important;
+  border-bottom: 1px solid #e1e4e8 !important;
+  padding-bottom: 10px !important;
 }
 
 .outline-tree {
