@@ -11,6 +11,7 @@
   <link href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.11.1/katex.min.css" type="text/css" rel="stylesheet" />
 </head>
 <body>
+<button class="theme-toggle" onclick="toggleTheme()" title="切换主题 (快捷键：T)">🌙 深色</button>
 <button class="outline-toggle" onclick="toggleOutline()" title="大纲视图 (快捷键：O)">📑 大纲</button>
 <div class="outline-panel" id="outlinePanel">
   <h3>📑 目录</h3>
@@ -27,6 +28,48 @@
 <script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/11.12.0/mermaid.min.js"  crossorigin="anonymous"
                                                                          onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
 <script>
+// 主题切换功能
+var currentTheme = 'light';
+
+// 切换主题
+function toggleTheme() {
+  var themeToggle = document.querySelector('.theme-toggle');
+  
+  if (currentTheme === 'light') {
+    currentTheme = 'dark';
+    document.documentElement.setAttribute('data-theme', 'dark');
+    themeToggle.textContent = '☀️ 浅色';
+  } else {
+    currentTheme = 'light';
+    document.documentElement.removeAttribute('data-theme');
+    themeToggle.textContent = '🌙 深色';
+  }
+  
+  // 保存主题偏好到 localStorage
+  try {
+    localStorage.setItem('markdownViewerTheme', currentTheme);
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+}
+
+// 加载保存的主题偏好
+function loadTheme() {
+  try {
+    var savedTheme = localStorage.getItem('markdownViewerTheme');
+    if (savedTheme === 'dark') {
+      currentTheme = 'dark';
+      document.documentElement.setAttribute('data-theme', 'dark');
+      var themeToggle = document.querySelector('.theme-toggle');
+      if (themeToggle) {
+        themeToggle.textContent = '☀️ 浅色';
+      }
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+}
+
 // 大纲视图功能
 var outlineVisible = false;
 var outlineHeadings = [];
@@ -121,6 +164,12 @@ function toggleOutline() {
 
 // 键盘快捷键支持
 document.addEventListener('keydown', function(e) {
+  // T 键切换主题
+  if (e.keyCode === 84 && !e.ctrlKey && !e.altKey) {
+    e.preventDefault();
+    toggleTheme();
+  }
+  
   // O 键切换大纲
   if (e.keyCode === 79 && !e.ctrlKey && !e.altKey) {
     e.preventDefault();
@@ -215,8 +264,9 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// 页面加载完成后生成大纲
+// 页面加载完成后加载主题和生成大纲
 document.addEventListener('DOMContentLoaded', function() {
+  loadTheme();
   generateOutline();
 });
 </script>

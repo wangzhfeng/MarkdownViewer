@@ -67,5 +67,9 @@ Regarding the fixed Esc key closing window issue in v0.2, it was found that the 
 - Feature: Press `O` key to toggle outline view
 - Feature: Press `1-6` keys to jump to first heading of corresponding level
 - Feature: Auto-highlight current heading while scrolling
+- Feature: Added theme switching (light/dark mode)
+- Feature: Press `T` key to toggle theme
+- Feature: Theme preference saved to localStorage
 - Technical: Added `KeyboardCallback` class for keyboard event handling
 - Technical: Enhanced CSS with outline panel, tree structure, and toggle button styles
+- Technical: Added CSS variables for dark theme support

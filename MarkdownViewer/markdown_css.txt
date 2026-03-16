@@ -102,6 +102,145 @@ nav{
   background: #0255b3;
 }
 
+/* 主题切换按钮 */
+.theme-toggle {
+  position: fixed;
+  top: 10px;
+  right: 80px;
+  z-index: 1001;
+  background: #f6f8fa;
+  color: #24292e;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.theme-toggle:hover {
+  background: #eaecef;
+}
+
+/* 深色主题变量 */
+[data-theme="dark"] {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #21262d;
+  --text-primary: #c9d1d9;
+  --text-secondary: #8b949e;
+  --border-color: #30363d;
+  --link-color: #58a6ff;
+  --code-bg: #1f2428;
+  --blockquote-border: #3b434a;
+  --blockquote-text: #8b949e;
+  --table-border: #30363d;
+  --table-bg-alt: #161b22;
+  --hr-color: #30363d;
+  --outline-panel-bg: #161b22;
+  --outline-panel-border: #30363d;
+  --outline-text: #c9d1d9;
+  --outline-hover-bg: #21262d;
+  --outline-active-bg: #21262d;
+  --outline-active-border: #58a6ff;
+  --btn-bg: #21262d;
+  --btn-text: #c9d1d9;
+  --btn-border: #30363d;
+  --btn-hover-bg: #30363d;
+}
+
+/* 深色主题样式 */
+[data-theme="dark"] body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .markdown-body {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .markdown-body h1,
+[data-theme="dark"] .markdown-body h2,
+[data-theme="dark"] .markdown-body h3,
+[data-theme="dark"] .markdown-body h4,
+[data-theme="dark"] .markdown-body h5,
+[data-theme="dark"] .markdown-body h6 {
+  color: var(--text-primary);
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .markdown-body a {
+  color: var(--link-color);
+}
+
+[data-theme="dark"] .markdown-body code {
+  background-color: var(--code-bg);
+}
+
+[data-theme="dark"] .markdown-body pre {
+  background-color: var(--code-bg);
+}
+
+[data-theme="dark"] .markdown-body blockquote {
+  border-left-color: var(--blockquote-border);
+  color: var(--blockquote-text);
+}
+
+[data-theme="dark"] .markdown-body hr {
+  background-color: var(--hr-color);
+}
+
+[data-theme="dark"] .markdown-body table th,
+[data-theme="dark"] .markdown-body table td {
+  border-color: var(--table-border);
+}
+
+[data-theme="dark"] .markdown-body table tr:nth-child(2n) {
+  background-color: var(--table-bg-alt);
+}
+
+[data-theme="dark"] .outline-panel {
+  background-color: var(--outline-panel-bg);
+  border-left-color: var(--outline-panel-border);
+}
+
+[data-theme="dark"] .outline-panel h3 {
+  color: var(--outline-text);
+  border-bottom-color: var(--outline-panel-border);
+}
+
+[data-theme="dark"] .outline-tree a {
+  color: var(--outline-text);
+}
+
+[data-theme="dark"] .outline-tree a:hover {
+  background-color: var(--outline-hover-bg);
+  border-left-color: var(--outline-active-border);
+}
+
+[data-theme="dark"] .outline-tree a.active {
+  background-color: var(--outline-active-bg);
+  border-left-color: var(--outline-active-border);
+}
+
+[data-theme="dark"] .theme-toggle {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border-color: var(--btn-border);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+  background: var(--btn-hover-bg);
+}
+
+[data-theme="dark"] .outline-toggle {
+  background: #238636;
+}
+
+[data-theme="dark"] .outline-toggle:hover {
+  background: #2ea043;
+}
+
 .markdown-body {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
