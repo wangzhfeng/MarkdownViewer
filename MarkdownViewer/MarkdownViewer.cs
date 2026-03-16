@@ -126,6 +126,15 @@ namespace MarkdownViewer
         {
             ViewerControl viewerControl = (ViewerControl)control;
             
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // 异步执行搜索，不阻塞 TC UI
+                Task.Run(async () => 
+                {
+                    await viewerControl.SearchTextAsync(searchString, searchParameter);
+                });
+            }
+            
             return ListerResult.OK;
         }
 

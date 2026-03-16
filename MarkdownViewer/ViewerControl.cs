@@ -175,6 +175,151 @@ namespace MarkdownViewer
             }
         }
 
+        /// <summary>
+        /// 使用 JavaScript 实现搜索功能
+        /// </summary>
+        public async System.Threading.Tasks.Task SearchTextAsync(
+            string searchText, 
+            OY.TotalCommander.TcPluginInterface.Lister.SearchParameter searchParameter)
+        {
+            if (webView2.CoreWebView2 == null || String.IsNullOrEmpty(searchText))
+            {
+                return;
+            }
+
+            try
+            {
+                TraceLog($"SearchTextAsync: '{searchText}'");
+
+                // 转义搜索文本中的特殊字符
+                string escapedSearchText = searchText.Replace("\\", "\\\\").Replace("'", "\\'").Replace("\"", "\\\"");
+
+                // 构建搜索选项
+                bool matchCase = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.MatchCase);
+                bool wholeWords = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.WholeWords);
+
+                string script = $@"
+                    (function() {{
+                        try {{
+                            var searchText = '{escapedSearchText}';
+                            var matchCase = {matchCase.ToString().ToLower()};
+                            var wholeWords = {wholeWords.ToString().ToLower()};
+                            
+                            // 清除之前的高亮
+                            document.querySelectorAll('.search-highlight').forEach(function(el) {{
+                                var parent = el.parentNode;
+                                var textNode = document.createTextNode(el.textContent);
+                                parent.replaceChild(textNode, el);
+                                parent.normalize();
+                            }});
+                            
+                            if (!searchText) {{
+                                console.log('Search: empty text');
+                                return 0;
+                            }}
+                            
+                            // 构建正则表达式
+                            var regexText = searchText.replace(/[.*+?^${{}}()|[\\]\\\\]/g, '\\\\$&');
+                            if (wholeWords) {{
+                                regexText = '\\\\b' + regexText + '\\\\b';
+                            }}
+                            var flags = matchCase ? 'g' : 'gi';
+                            var regex = new RegExp(regexText, flags);
+                            
+                            // 使用 TreeWalker 遍历文本节点
+                            var markdownBody = document.getElementById('markdownBody');
+                            if (!markdownBody) {{
+                                console.log('Search: no markdownBody');
+                                return 0;
+                            }}
+                            
+                            var walker = document.createTreeWalker(
+                                markdownBody,
+                                NodeFilter.SHOW_TEXT,
+                                {{
+                                    acceptNode: function(node) {{
+                                        var parent = node.parentNode;
+                                        while (parent) {{
+                                            if (parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE') {{
+                                                return NodeFilter.FILTER_REJECT;
+                                            }}
+                                            parent = parent.parentNode;
+                                        }}
+                                        if (node.nodeValue && node.nodeValue.trim()) {{
+                                            return NodeFilter.FILTER_ACCEPT;
+                                        }}
+                                        return NodeFilter.FILTER_REJECT;
+                                    }}
+                                }}
+                            );
+                            
+                            var matchCount = 0;
+                            var firstMatchElement = null;
+                            
+                            // 遍历并高亮匹配项
+                            while (walker.nextNode()) {{
+                                var node = walker.currentNode;
+                                var text = node.nodeValue;
+                                var matches = [];
+                                var match;
+                                
+                                regex.lastIndex = 0;
+                                while ((match = regex.exec(text)) !== null) {{
+                                    matches.push({{
+                                        index: match.index,
+                                        length: match[0].length,
+                                        text: match[0]
+                                    }});
+                                }}
+                                
+                                if (matches.length === 0) continue;
+                                
+                                // 从后向前处理，避免索引偏移
+                                for (var i = matches.length - 1; i >= 0; i--) {{
+                                    var m = matches[i];
+                                    var before = node.nodeValue.substring(0, m.index);
+                                    var after = node.nodeValue.substring(m.index + m.length);
+                                    
+                                    var highlight = document.createElement('span');
+                                    highlight.className = 'search-highlight';
+                                    highlight.textContent = m.text;
+                                    
+                                    var parent = node.parentNode;
+                                    if (after) {{
+                                        var afterNode = document.createTextNode(after);
+                                        parent.insertBefore(afterNode, node.nextSibling);
+                                    }}
+                                    parent.insertBefore(highlight, node.nextSibling);
+                                    if (!firstMatchElement) firstMatchElement = highlight;
+                                    node.nodeValue = before;
+                                    matchCount++;
+                                }}
+                            }}
+                            
+                            // 滚动到第一个匹配项
+                            if (firstMatchElement && matchCount > 0) {{
+                                setTimeout(function() {{
+                                    firstMatchElement.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+                                }}, 100);
+                            }}
+                            
+                            console.log('Search: found ' + matchCount + ' matches');
+                            return matchCount;
+                        }} catch (e) {{
+                            console.log('Search error:', e);
+                            return 0;
+                        }}
+                    }})();
+                ";
+
+                await webView2.CoreWebView2.ExecuteScriptAsync(script);
+            }
+            catch (Exception ex)
+            {
+                TraceLog("SearchTextAsync error: " + ex.Message);
+            }
+        }
+
         private void ShowLoading(bool show)
         {
             if (this.InvokeRequired)
