@@ -73,7 +73,15 @@ Regarding the fixed Esc key closing window issue in v0.2, it was found that the 
 - Feature: Added layout modes (centered narrow / full-width)
 - Feature: Press `M` key to toggle layout
 - Feature: Layout preference saved to localStorage
+- Feature: Added Vim-style keyboard navigation
+- Feature: `j/k` - scroll line by line
+- Feature: `d/u` - scroll half page down/up
+- Feature: `f/b` - scroll full page down/up
+- Feature: `gg` - scroll to top
+- Feature: `G` - scroll to bottom
+- Feature: `h/l` - scroll left/right
 - Technical: Added `KeyboardCallback` class for keyboard event handling
 - Technical: Enhanced CSS with outline panel, tree structure, and toggle button styles
 - Technical: Added CSS variables for dark theme support
 - Technical: Added layout CSS classes for responsive width control
+- Technical: Enhanced keyboard handler for Vim-style navigation

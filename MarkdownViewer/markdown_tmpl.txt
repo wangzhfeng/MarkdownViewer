@@ -29,6 +29,50 @@
 <script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/11.12.0/mermaid.min.js"  crossorigin="anonymous"
                                                                          onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
 <script>
+// Vim 风格快捷键支持
+var vimMode = false;
+var pendingKey = null;
+
+// Vim 滚动功能
+function vimScroll(key) {
+  var scrollAmount = 0;
+  
+  switch(key) {
+    case 'j': // 向下逐行
+      window.scrollBy(0, 40);
+      break;
+    case 'k': // 向上逐行
+      window.scrollBy(0, -40);
+      break;
+    case 'd': // 向下半屏
+      window.scrollBy(0, window.innerHeight / 2);
+      break;
+    case 'u': // 向上半屏
+      window.scrollBy(0, -window.innerHeight / 2);
+      break;
+    case 'f': // 向下整屏
+      window.scrollBy(0, window.innerHeight);
+      break;
+    case 'b': // 向上整屏
+      window.scrollBy(0, -window.innerHeight);
+      break;
+    case 'g': // 顶部（需要 gg）
+      pendingKey = 'g';
+      return;
+    case 'G': // 底部
+      window.scrollTo(0, document.body.scrollHeight);
+      break;
+    case 'h': // 向左
+      window.scrollBy(-50, 0);
+      break;
+    case 'l': // 向右
+      window.scrollBy(50, 0);
+      break;
+  }
+  
+  pendingKey = null;
+}
+
 // 布局模式功能
 var currentLayout = 'centered';
 
@@ -212,26 +256,60 @@ function toggleOutline() {
 
 // 键盘快捷键支持
 document.addEventListener('keydown', function(e) {
+  // 忽略修饰键
+  if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) {
+    return;
+  }
+  
+  // Vim 风格快捷键（小写字母）
+  var vimKeys = ['j', 'k', 'd', 'u', 'f', 'b', 'g', 'h', 'l'];
+  if (vimKeys.indexOf(e.key) !== -1) {
+    e.preventDefault();
+    
+    // 处理 gg 组合（先按 g 再按 g）
+    if (e.key === 'g') {
+      if (pendingKey === 'g') {
+        window.scrollTo(0, 0);
+        pendingKey = null;
+      } else {
+        vimScroll('g');
+      }
+    } else {
+      vimScroll(e.key);
+    }
+    return;
+  }
+  
+  // Vim 风格快捷键（大写字母 G）
+  if (e.key === 'G') {
+    e.preventDefault();
+    vimScroll('G');
+    return;
+  }
+  
   // M 键切换布局
-  if (e.keyCode === 77 && !e.ctrlKey && !e.altKey) {
+  if (e.keyCode === 77) {
     e.preventDefault();
     toggleLayout();
+    return;
   }
   
   // T 键切换主题
-  if (e.keyCode === 84 && !e.ctrlKey && !e.altKey) {
+  if (e.keyCode === 84) {
     e.preventDefault();
     toggleTheme();
+    return;
   }
   
   // O 键切换大纲
-  if (e.keyCode === 79 && !e.ctrlKey && !e.altKey) {
+  if (e.keyCode === 79) {
     e.preventDefault();
     toggleOutline();
+    return;
   }
   
   // 数字键 1-6 快速跳转到对应级别的标题
-  if (e.keyCode >= 49 && e.keyCode <= 54 && !e.ctrlKey && !e.altKey) {
+  if (e.keyCode >= 49 && e.keyCode <= 54) {
     var level = e.keyCode - 48;
     var headings = document.querySelectorAll('h' + level);
     if (headings.length > 0) {
@@ -243,6 +321,14 @@ document.addEventListener('keydown', function(e) {
         highlightActiveHeading(index);
       }
     }
+    return;
+  }
+  
+  // ESC 键关闭预览
+  if (e.keyCode === 27) {
+    e.preventDefault();
+    window.chrome.webview.hostObjects.callback.OnKeyPressed(27);
+    return;
   }
 });
 
