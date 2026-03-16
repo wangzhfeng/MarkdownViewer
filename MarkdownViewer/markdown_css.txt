@@ -193,10 +193,19 @@ nav{
 [data-theme="dark"] .markdown-body table th,
 [data-theme="dark"] .markdown-body table td {
   border-color: var(--table-border);
+  background-color: var(--bg-primary);
+}
+
+[data-theme="dark"] .markdown-body table tr {
+  background-color: var(--bg-primary);
 }
 
 [data-theme="dark"] .markdown-body table tr:nth-child(2n) {
   background-color: var(--table-bg-alt);
+}
+
+[data-theme="dark"] .markdown-body table th {
+  background-color: var(--bg-tertiary);
 }
 
 [data-theme="dark"] .outline-panel {
