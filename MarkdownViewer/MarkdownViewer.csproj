@@ -38,7 +38,7 @@
   <ItemGroup>
     <PackageReference Include="Jurassic" Version="3.0.0" />
     <PackageReference Include="Markdig" Version="0.17.1" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2210.55" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3856.49" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Pek.Markdig.HighlightJs">
       <HintPath>..\Lib\Pek.Markdig.HighlightJs.dll</HintPath>
