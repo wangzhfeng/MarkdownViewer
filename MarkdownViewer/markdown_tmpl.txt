@@ -17,6 +17,7 @@
   <button class="theme-toggle" onclick="toggleTheme()" title="切换主题 (快捷键：T)">🌙 深色</button>
   <button class="outline-toggle" onclick="toggleOutline()" title="大纲视图 (快捷键：O)">📑 大纲</button>
   <button class="export-pdf" onclick="exportPdf()" title="导出 PDF (快捷键：P)">📄 PDF</button>
+  <button class="export-mermaid" onclick="exportMermaid()" title="导出流程图">🔄 流程图</button>
 </div>
 <!-- 大纲面板移到 markdown-body 外部 -->
 <div class="outline-panel" id="outlinePanel">
@@ -92,6 +93,7 @@
     onload="renderMathInElement(document.body);"></script>
 <script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/11.12.0/mermaid.min.js"  crossorigin="anonymous"
                                                                          onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 // 阅读进度条功能
 function updateReadingProgress() {
@@ -629,6 +631,66 @@ function exportPdf() {
   
   // 显示"正在导出"提示，持续时间较长，等待完成消息
   showToast('正在导出 PDF...', 5000);
+}
+
+// Mermaid 流程图导出功能
+function exportMermaid() {
+  var mermaidDivs = document.querySelectorAll('.mermaid');
+  
+  if (mermaidDivs.length === 0) {
+    showToast('未找到流程图', 3000);
+    return;
+  }
+  
+  // 如果有多个流程图，导出第一个
+  var mermaidDiv = mermaidDivs[0];
+  
+  // 创建临时容器
+  var container = document.createElement('div');
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  container.style.top = '-9999px';
+  container.style.background = getComputedStyle(document.body).backgroundColor || '#ffffff';
+  document.body.appendChild(container);
+  
+  // 获取 SVG
+  var svg = mermaidDiv.querySelector('svg');
+  
+  if (!svg) {
+    showToast('流程图正在渲染中，请稍后', 3000);
+    document.body.removeChild(container);
+    return;
+  }
+  
+  // 克隆 SVG 并添加到临时容器
+  var svgClone = svg.cloneNode(true);
+  svgClone.style.maxWidth = 'none';
+  container.appendChild(svgClone);
+  
+  // 使用 html2canvas 导出为图片
+  showToast('正在导出流程图...', 5000);
+  
+  html2canvas(container, {
+    backgroundColor: getComputedStyle(document.body).backgroundColor || '#ffffff',
+    scale: 2,
+    useCORS: true,
+    allowTaint: true
+  }).then(function(canvas) {
+    // 转换为 PNG 数据 URL
+    var pngDataUrl = canvas.toDataURL('image/png');
+    
+    // 创建下载链接
+    var link = document.createElement('a');
+    link.download = 'flowchart.png';
+    link.href = pngDataUrl;
+    link.click();
+    
+    document.body.removeChild(container);
+    showToast('流程图导出成功', 3000);
+  }).catch(function(error) {
+    document.body.removeChild(container);
+    showToast('导出失败: ' + error.message, 3000);
+  });
 }
 
 // 代码复制功能

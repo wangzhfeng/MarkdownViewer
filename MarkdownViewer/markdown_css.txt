@@ -205,6 +205,28 @@
   background: var(--btn-hover-bg);
 }
 
+/* Mermaid 流程图导出按钮 */
+.export-mermaid {
+  position: static;
+  right: auto;
+  z-index: auto;
+}
+
+.export-mermaid:hover {
+  background: #eaecef;
+}
+
+/* 深色主题下的 Mermaid 导出按钮 */
+[data-theme="dark"] .export-mermaid {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border-color: var(--btn-border);
+}
+
+[data-theme="dark"] .export-mermaid:hover {
+  background: var(--btn-hover-bg);
+}
+
 /* 图片放大查看功能 */
 .image-viewer-overlay {
   position: fixed;
