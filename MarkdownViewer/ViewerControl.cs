@@ -253,14 +253,14 @@ namespace MarkdownViewer
                     
                     // 通知 JavaScript 显示成功提示
                     var successMessage = $"{{\"type\":\"pdfExportSuccess\",\"path\":\"{outputPath.Replace("\\", "\\\\")}\"}}";
-                    await webView2.CoreWebView2.PostWebMessageAsJson(successMessage);
+                    webView2.CoreWebView2.PostWebMessageAsJson(successMessage);
                 }
                 else
                 {
                     TraceLog($"PDF export failed");
                     
                     // 通知 JavaScript 显示失败提示
-                    await webView2.CoreWebView2.PostWebMessageAsJson("{\"type\":\"pdfExportFailed\"}");
+                    webView2.CoreWebView2.PostWebMessageAsJson("{\"type\":\"pdfExportFailed\"}");
                 }
             }
             catch (Exception ex)
