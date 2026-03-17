@@ -171,6 +171,40 @@
   background: #0255b3;
 }
 
+/* 深色主题下的大纲切换按钮 */
+[data-theme="dark"] .outline-toggle {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: 1px solid var(--btn-border);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .outline-toggle:hover {
+  background: var(--btn-hover-bg);
+}
+
+/* PDF 导出按钮 */
+.export-pdf {
+  position: static;
+  right: auto;
+  z-index: auto;
+}
+
+.export-pdf:hover {
+  background: #eaecef;
+}
+
+/* 深色主题下的 PDF 导出按钮 */
+[data-theme="dark"] .export-pdf {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border-color: var(--btn-border);
+}
+
+[data-theme="dark"] .export-pdf:hover {
+  background: var(--btn-hover-bg);
+}
+
 /* 图片放大查看功能 */
 .image-viewer-overlay {
   position: fixed;
