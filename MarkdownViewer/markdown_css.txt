@@ -227,6 +227,35 @@
   background: var(--btn-hover-bg);
 }
 
+/* Mermaid 流程图导出按钮 */
+.mermaid-export-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background-color: rgba(0, 123, 255, 0.8);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.mermaid-export-btn:hover {
+  background-color: rgba(0, 123, 255, 1);
+}
+
+.mermaid {
+  position: relative;
+}
+
+.mermaid:hover .mermaid-export-btn {
+  opacity: 1;
+}
+
 /* 图片放大查看功能 */
 .image-viewer-overlay {
   position: fixed;
@@ -1397,6 +1426,11 @@
   
   /* 隐藏代码复制按钮 */
   .code-copy-btn {
+    display: none !important;
+  }
+  
+  /* 隐藏流程图导出按钮 */
+  .mermaid-export-btn {
     display: none !important;
   }
   

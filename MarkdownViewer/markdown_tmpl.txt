@@ -17,7 +17,6 @@
   <button class="theme-toggle" onclick="toggleTheme()" title="切换主题 (快捷键：T)">🌙 深色</button>
   <button class="outline-toggle" onclick="toggleOutline()" title="大纲视图 (快捷键：O)">📑 大纲</button>
   <button class="export-pdf" onclick="exportPdf()" title="导出 PDF (快捷键：P)">📄 PDF</button>
-  <button class="export-mermaid" onclick="exportMermaid()" title="导出流程图">🔄 流程图</button>
 </div>
 <!-- 大纲面板移到 markdown-body 外部 -->
 <div class="outline-panel" id="outlinePanel">
@@ -634,17 +633,29 @@ function exportPdf() {
 }
 
 // Mermaid 流程图导出功能
-function exportMermaid() {
+function initMermaidExport() {
   var mermaidDivs = document.querySelectorAll('.mermaid');
   
-  if (mermaidDivs.length === 0) {
-    showToast('未找到流程图', 3000);
-    return;
-  }
-  
-  // 如果有多个流程图，导出第一个
-  var mermaidDiv = mermaidDivs[0];
-  
+  mermaidDivs.forEach(function(div, index) {
+    // 避免重复添加
+    if (div.querySelector('.mermaid-export-btn')) return;
+    
+    var btn = document.createElement('button');
+    btn.className = 'mermaid-export-btn';
+    btn.textContent = '📥 导出 PNG';
+    btn.title = '导出流程图为图片';
+    btn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      exportSingleMermaid(div);
+    };
+    
+    div.appendChild(btn);
+  });
+}
+
+// 导出单个流程图
+function exportSingleMermaid(mermaidDiv) {
   // 创建临时容器
   var container = document.createElement('div');
   container.style.position = 'absolute';
@@ -756,6 +767,10 @@ document.addEventListener('DOMContentLoaded', function() {
   generateOutline();
   initImageClick();
   initCodeCopy();
+  // Mermaid 异步渲染，延迟初始化导出按钮
+  setTimeout(function() {
+    initMermaidExport();
+  }, 1000);
   updateReadingProgress(); // 初始化进度条
 });
 </script>
