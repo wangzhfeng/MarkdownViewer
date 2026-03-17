@@ -130,6 +130,36 @@ namespace MarkdownViewer
                     // Execute PDF export on UI thread (WebView2 must be accessed from UI thread)
                     this.Invoke(new Action(async () => await ExportPdfAsync(outputPath)));
                 }
+                // Parse message to check if it's an external link request
+                else if (message.Contains("\"externalLink\""))
+                {
+                    TraceLog("External link requested");
+                    
+                    // Extract URL from JSON
+                    int urlStart = message.IndexOf("\"url\":\"") + 7;
+                    int urlEnd = message.IndexOf("\"", urlStart);
+                    if (urlStart > 6 && urlEnd > urlStart)
+                    {
+                        string url = message.Substring(urlStart, urlEnd - urlStart);
+                        url = System.Uri.UnescapeDataString(url);
+                        
+                        TraceLog($"Opening external link: {url}");
+                        
+                        // Open in default browser
+                        try
+                        {
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = url,
+                                UseShellExecute = true
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            TraceLog($"Failed to open external link: {ex.Message}");
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {

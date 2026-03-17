@@ -515,7 +515,7 @@ document.addEventListener('keydown', function(e) {
 // Store the base directory for the original markdown file
 var markdownBaseDir = "{0}";
 
-// Support clicking on markdown file links to navigate
+// Support clicking on links to navigate
 document.addEventListener('click', function(e) {
     var link = e.target.closest('a');
     if (!link) return;
@@ -523,14 +523,26 @@ document.addEventListener('click', function(e) {
     var href = link.getAttribute('href');
     if (!href) return;
     
+    // Check if it's an external http/https link
+    if (href.startsWith('http://') || href.startsWith('https://')) {
+        e.preventDefault();
+        
+        // Notify host application to open in external browser
+        window.chrome.webview.postMessage({
+            type: 'externalLink',
+            url: href
+        });
+        return;
+    }
+    
     // Check if it's a markdown file link
     if (href.match(/\.(md|markdown|mk)(\?.*)?$/i)) {
         e.preventDefault();
         
         // Resolve relative path using the original file's directory
         var resolvedPath;
-        if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('file://')) {
-            // Absolute URL, use as-is
+        if (href.startsWith('file://')) {
+            // Absolute file URL, use as-is
             resolvedPath = href;
         } else if (href.startsWith('/')) {
             // Absolute path
