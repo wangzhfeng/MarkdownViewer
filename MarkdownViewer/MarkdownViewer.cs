@@ -82,8 +82,17 @@ namespace MarkdownViewer
             ViewerControl viewerControl = control as ViewerControl;
             if (viewerControl != null)
             {
-                // Dispose the web browser to release focus properly
-                viewerControl.webView2?.Dispose();
+                try
+                {
+                    // Dispose the web browser to release focus properly
+                    // Wrap in try-catch to handle race condition where control may already be disposed
+                    viewerControl.webView2?.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    // Ignore disposal errors - control may already be disposed
+                    TraceProc(System.Diagnostics.TraceLevel.Warning, "CloseWindow disposal error: " + ex.Message);
+                }
             }
             
             controls.Remove(control);
