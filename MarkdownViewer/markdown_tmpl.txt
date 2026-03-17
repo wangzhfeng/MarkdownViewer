@@ -634,17 +634,14 @@ function exportPdf() {
 // 监听来自 C# 的消息
 window.chrome.webview.addEventListener('message', function(arg) {
   console.log('Received message:', arg.data);
-  try {
-    var data = JSON.parse(arg.data);
-    console.log('Parsed data:', data);
-    
-    if (data.type === 'pdfExportSuccess') {
-      showToast('PDF 导出成功', 4000);
-    } else if (data.type === 'pdfExportFailed') {
-      showToast('PDF 导出失败', 4000);
-    }
-  } catch (err) {
-    console.log('Message parse error:', err, 'Raw data:', arg.data);
+  
+  // arg.data 已经是对象，不需要 JSON.parse
+  var data = arg.data;
+  
+  if (data && data.type === 'pdfExportSuccess') {
+    showToast('PDF 导出成功', 4000);
+  } else if (data && data.type === 'pdfExportFailed') {
+    showToast('PDF 导出失败', 4000);
   }
 });
 
