@@ -200,17 +200,19 @@ namespace MarkdownViewer
                 // 1. 获取 Find 对象
                 finder = webView2.CoreWebView2.Find;
 
-                // 2. 配置搜索选项 (WinRT API 属性)
+                // 2. 配置搜索选项 (WinRT API 属性 - 正确的属性名)
                 findOptions = new CoreWebView2FindOptions
                 {
-                    SearchText = searchText,
-                    MatchCase = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.MatchCase),
-                    FindInIframes = false
+                    FindTerm = searchText,
+                    IsCaseSensitive = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.MatchCase),
+                    ShouldMatchWord = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.WholeWords),
+                    ShouldHighlightAllMatches = true,
+                    SuppressDefaultFindDialog = true  // 隐藏默认查找 UI
                 };
 
                 lastSearchText = searchText;
 
-                // 3. 启动查找会话 (显示查找栏)
+                // 3. 启动查找会话 (不显示默认查找栏)
                 await finder.StartAsync(findOptions);
 
                 // 4. 等待 MatchCountChanged 事件获取结果
@@ -249,9 +251,11 @@ namespace MarkdownViewer
                     finder = webView2.CoreWebView2.Find;
                     findOptions = new CoreWebView2FindOptions
                     {
-                        SearchText = lastSearchText,
-                        MatchCase = false,
-                        FindInIframes = false
+                        FindTerm = lastSearchText,
+                        IsCaseSensitive = false,
+                        ShouldMatchWord = false,
+                        ShouldHighlightAllMatches = true,
+                        SuppressDefaultFindDialog = true
                     };
                     await finder.StartAsync(findOptions);
                 }
@@ -268,7 +272,7 @@ namespace MarkdownViewer
         }
 
         /// <summary>
-        /// 查找上一个匹配项 (Shift+F3)
+        /// 查找上一个匹配项 (F4)
         /// </summary>
         public async System.Threading.Tasks.Task FindPreviousAsync()
         {
@@ -287,9 +291,11 @@ namespace MarkdownViewer
                     finder = webView2.CoreWebView2.Find;
                     findOptions = new CoreWebView2FindOptions
                     {
-                        SearchText = lastSearchText,
-                        MatchCase = false,
-                        FindInIframes = false
+                        FindTerm = lastSearchText,
+                        IsCaseSensitive = false,
+                        ShouldMatchWord = false,
+                        ShouldHighlightAllMatches = true,
+                        SuppressDefaultFindDialog = true
                     };
                     await finder.StartAsync(findOptions);
                 }
