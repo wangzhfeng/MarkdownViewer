@@ -631,6 +631,48 @@ function exportPdf() {
   showToast('正在导出 PDF...', 5000);
 }
 
+// 代码复制功能
+function initCodeCopy() {
+  var codeBlocks = document.querySelectorAll('.markdown-body pre');
+  
+  codeBlocks.forEach(function(pre) {
+    // 避免重复添加
+    if (pre.querySelector('.code-copy-btn')) return;
+    
+    var btn = document.createElement('button');
+    btn.className = 'code-copy-btn';
+    btn.textContent = '复制';
+    btn.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      var code = pre.querySelector('code');
+      if (!code) {
+        code = pre;
+      }
+      
+      var text = code.textContent || code.innerText;
+      
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = '已复制!';
+        btn.classList.add('copied');
+        
+        setTimeout(function() {
+          btn.textContent = '复制';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(function(err) {
+        btn.textContent = '复制失败';
+        setTimeout(function() {
+          btn.textContent = '复制';
+        }, 2000);
+      });
+    };
+    
+    pre.appendChild(btn);
+  });
+}
+
 // 监听来自 C# 的消息
 window.chrome.webview.addEventListener('message', function(arg) {
   console.log('Received message:', arg.data);
@@ -651,6 +693,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadTheme();
   generateOutline();
   initImageClick();
+  initCodeCopy();
   updateReadingProgress(); // 初始化进度条
 });
 </script>

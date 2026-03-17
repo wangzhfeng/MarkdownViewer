@@ -1310,6 +1310,42 @@
   border: 1px solid var(--border-color);
 }
 
+/* 代码复制按钮 */
+.code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.code-copy-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.code-copy-btn.copied {
+  background-color: #238636;
+  color: white;
+  border-color: #238636;
+}
+
+.markdown-body pre {
+  position: relative;
+}
+
+.markdown-body pre:hover .code-copy-btn {
+  opacity: 1;
+}
+
 /* ========== 打印/PDF 导出优化 ========== */
 @media print {
   /* 隐藏工具条 */
@@ -1334,6 +1370,11 @@
   
   /* 隐藏阅读进度条 */
   .reading-progress-bar {
+    display: none !important;
+  }
+  
+  /* 隐藏代码复制按钮 */
+  .code-copy-btn {
     display: none !important;
   }
   
