@@ -250,6 +250,15 @@
 
 .mermaid {
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
 }
 
 .mermaid:hover .mermaid-export-btn {
