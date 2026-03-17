@@ -215,15 +215,15 @@ namespace MarkdownViewer
                 printSettings.ShouldPrintSelectionOnly = false;  // 打印全部内容
 
                 // 2. 导出 PDF
-                var result = await webView2.CoreWebView2.PrintToPdfAsync(outputPath, printSettings);
+                var success = await webView2.CoreWebView2.PrintToPdfAsync(outputPath, printSettings);
 
-                if (result == CoreWebView2PrintStatus.Succeeded)
+                if (success)
                 {
                     TraceLog($"PDF export success: {outputPath}");
                 }
                 else
                 {
-                    TraceLog($"PDF export failed: {result}");
+                    TraceLog($"PDF export failed");
                 }
             }
             catch (Exception ex)
