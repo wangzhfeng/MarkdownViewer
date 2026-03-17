@@ -127,8 +127,8 @@ namespace MarkdownViewer
                     // Generate default output path (same directory as markdown file, .pdf extension)
                     string outputPath = GenerateDefaultPdfPath();
                     
-                    // Execute PDF export asynchronously
-                    Task.Run(async () => await ExportPdfAsync(outputPath));
+                    // Execute PDF export on UI thread (WebView2 must be accessed from UI thread)
+                    this.Invoke(new Action(async () => await ExportPdfAsync(outputPath)));
                 }
             }
             catch (Exception ex)
@@ -423,6 +423,7 @@ namespace MarkdownViewer
         {
             if (String.IsNullOrEmpty(currentTempFile))
             {
+                TraceLog("GenerateDefaultPdfPath failed: currentTempFile is null or empty");
                 return null;
             }
 
@@ -434,17 +435,24 @@ namespace MarkdownViewer
                 // Remove "markdownviewer_" prefix
                 var originalName = tempFileName.Replace("markdownviewer_", "");
                 
+                TraceLog($"GenerateDefaultPdfPath: tempFile={currentTempFile}, originalName={originalName}, currentFileDir={currentFileDir}");
+                
                 // Get the directory of the current markdown file
                 if (!String.IsNullOrEmpty(currentFileDir))
                 {
-                    return Path.Combine(currentFileDir, originalName + ".pdf");
+                    var outputPath = Path.Combine(currentFileDir, originalName + ".pdf");
+                    TraceLog($"GenerateDefaultPdfPath success: {outputPath}");
+                    return outputPath;
                 }
                 
                 // Fallback to temp directory
-                return Path.Combine(Path.GetTempPath(), originalName + ".pdf");
+                var fallbackPath = Path.Combine(Path.GetTempPath(), originalName + ".pdf");
+                TraceLog($"GenerateDefaultPdfPath fallback: {fallbackPath}");
+                return fallbackPath;
             }
-            catch
+            catch (Exception ex)
             {
+                TraceLog($"GenerateDefaultPdfPath error: {ex.Message}");
                 return null;
             }
         }
@@ -644,7 +652,15 @@ namespace MarkdownViewer
             {
                 TraceLog("Export PDF requested");
                 string outputPath = GenerateDefaultPdfPath();
-                Task.Run(async () => await ExportPdfAsync(outputPath));
+                if (!String.IsNullOrEmpty(outputPath))
+                {
+                    // Execute on UI thread (WebView2 must be accessed from UI thread)
+                    this.Invoke(new Action(async () => await ExportPdfAsync(outputPath)));
+                }
+                else
+                {
+                    TraceLog("Export PDF failed: could not generate output path");
+                }
             }
             // 1-6 (49-54) - Jump to heading (handled by JavaScript, just log it)
             else if (keyCode >= 49 && keyCode <= 54)
