@@ -157,30 +157,30 @@
   position: static;
   right: auto;
   z-index: auto;
-  background: #0366d6;
-  color: white;
-  border: none;
+  background: #f6f8fa;
+  color: #24292e;
+  border: 1px solid #e1e4e8;
   border-radius: 4px;
   padding: 8px 12px;
   cursor: pointer;
   font-size: 13px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .outline-toggle:hover {
-  background: #0255b3;
+  background: #eaecef;
 }
 
 /* 深色主题下的大纲切换按钮 */
 [data-theme="dark"] .outline-toggle {
-  background: var(--btn-bg);
-  color: var(--btn-text);
-  border: 1px solid var(--btn-border);
-  box-shadow: none;
+  background: var(--btn-bg) !important;
+  color: var(--btn-text) !important;
+  border: 1px solid var(--btn-border) !important;
+  box-shadow: none !important;
 }
 
 [data-theme="dark"] .outline-toggle:hover {
-  background: var(--btn-hover-bg);
+  background: var(--btn-hover-bg) !important;
 }
 
 /* PDF 导出按钮 */
@@ -1278,6 +1278,36 @@
 
 .markdown-body hr {
   border-bottom-color: #eee;
+}
+
+/* Toast 通知提示 */
+.toast-notification {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  z-index: 100000;
+  opacity: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: 80%;
+  text-align: center;
+}
+
+.toast-notification.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 深色主题下的 Toast */
+[data-theme="dark"] .toast-notification {
+  background-color: rgba(48, 54, 61, 0.95);
+  border: 1px solid var(--border-color);
 }
 
 /* ========== 打印/PDF 导出优化 ========== */
