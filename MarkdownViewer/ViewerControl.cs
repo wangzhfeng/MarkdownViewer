@@ -217,7 +217,7 @@ namespace MarkdownViewer
                 // 2. 导出 PDF
                 var result = await webView2.CoreWebView2.PrintToPdfAsync(outputPath, printSettings);
 
-                if (result == CoreWebView2PrintStatus.Success)
+                if (result == CoreWebView2PrintStatus.Succeeded)
                 {
                     TraceLog($"PDF export success: {outputPath}");
                 }
