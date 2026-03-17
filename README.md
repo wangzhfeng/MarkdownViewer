@@ -9,9 +9,56 @@ MarkdownViewer is a Total Commander plugin, using preview markdown file which su
 
 # Features
 
-- Support for previewing Markdown files
-- Support for file navigation/jumping
-- Support for LaTeX and Mermaid flowcharts
+## Core Features
+
+- Preview Markdown files with syntax highlighting
+- File navigation: click Markdown links to jump between files
+- LaTeX math formulas support (KaTeX)
+- Mermaid flowcharts and diagrams
+- Code syntax highlighting (Highlight.js)
+
+## Enhanced Features (v0.6)
+
+### Document Outline
+
+- Outline panel showing H1-H6 heading structure
+- Click outline items to jump to headings with smooth scroll
+- Auto-highlight current heading while scrolling
+- Press `O` key to toggle outline view
+- Press `1-6` keys to jump to first heading of corresponding level
+
+### Themes & Layout
+
+- Theme switching: light / dark mode
+- Press `T` key to toggle theme
+- Theme preference saved to localStorage
+- Layout modes: centered narrow / full-width
+- Press `M` key to toggle layout
+- Layout preference saved to localStorage
+
+### Keyboard Navigation
+
+- Vim-style navigation: `j/k` (line), `d/u` (half page), `f/b` (full page)
+- Quick jump: `gg` (top), `G` (bottom), `h/l` (horizontal scroll)
+- Press `?` to show shortcut help panel
+
+### Image & Media
+
+- Click images to view in full screen
+- Press `ESC` or click to close image viewer
+- Image alt text shown as caption
+
+### Reading Experience
+
+- Reading progress bar at top of page
+- Real-time scroll progress indication
+- Gradient blue progress bar style
+
+### Export & External Links
+
+- Export to PDF: press `P` key or click PDF button
+- External links open in default browser
+- Print-optimized CSS (hide UI elements, code word-wrap)
 
 # About Installation 
 
@@ -28,30 +75,38 @@ Currently, the preview window cannot be closed using the ESC key. Please click t
 
 # Version
 
-## v0.1
+## v0.6 (2026-03-17)
 
-- support preview markdown file
+### Document Outline
 
-## v0.2
+- Outline panel showing H1-H6 heading structure
+- Click outline items to jump to headings with smooth scroll
+- Auto-highlight current heading while scrolling
+- Press `O` key to toggle outline view
+- Press `1-6` keys to jump to first heading of corresponding level
 
-- fixed: cannot close window with Esc [\#4](https://github.com/wangzhfeng/MarkdownViewer/issues/4)
-- using Nuget to manage dependency
+### Themes & Layout
 
-Thanks to [thorn0](https://github.com/thorn0) for your commit.
+- Theme switching: light / dark mode
+- Press `T` key to toggle theme
+- Theme preference saved to localStorage
+- Layout modes: centered narrow / full-width
+- Press `M` key to toggle layout
 
-## v0.3
+### Keyboard Navigation
 
-- feature: support print, can print to pdf through local printer
-- fixed: cannot preview local image
-- fixed: cannot select and copy [\#7](https://github.com/wangzhfeng/MarkdownViewer/issues/7)
-- fixed: dependented dll not package in output zip
+- Vim-style navigation: `j/k/d/u/f/b/g/G/h/l`
+- Press `?` to show shortcut help panel
 
-## v0.4
+### Export & External Links
 
-- Fixed Issue #15: Image preview issue with Chinese file paths
-- Fixed Issue #6 & #13: Total Commander losing focus issue
+- Export to PDF: press `P` key or click PDF button
+- External links open in default browser
+- Print-optimized CSS
 
-Regarding the fixed Esc key closing window issue in v0.2, it was found that the function frequently malfunctions. Several other solutions have been attempted, but the issue has not been resolved yet.
+### Bug Fixes
+
+- Fixed: ESC key not working reliably to close preview
 
 ## v0.5
 
@@ -60,37 +115,25 @@ Regarding the fixed Esc key closing window issue in v0.2, it was found that the 
 - Switched rendering engine to WebView2 to improve compatibility
 - Fixed: Issue where the ESC key failed to close the window
 
-## v0.6 (In Development)
+## v0.4
 
-- Feature: Added outline view panel showing document structure (H1-H6 headings)
-- Feature: Click outline items to jump to headings with smooth scroll
-- Feature: Press `O` key to toggle outline view
-- Feature: Press `1-6` keys to jump to first heading of corresponding level
-- Feature: Auto-highlight current heading while scrolling
-- Feature: Added theme switching (light/dark mode)
-- Feature: Press `T` key to toggle theme
-- Feature: Theme preference saved to localStorage
-- Feature: Added layout modes (centered narrow / full-width)
-- Feature: Press `M` key to toggle layout
-- Feature: Layout preference saved to localStorage
-- Feature: Added Vim-style keyboard navigation
-- Feature: `j/k` - scroll line by line
-- Feature: `d/u` - scroll half page down/up
-- Feature: `f/b` - scroll full page down/up
-- Feature: `gg` - scroll to top
-- Feature: `G` - scroll to bottom
-- Feature: `h/l` - scroll left/right
-- Feature: Click images to view in full screen
-- Feature: Press `ESC` or click to close image viewer
-- Feature: Image alt text shown as caption
-- Feature: Reading progress bar at top of page
-- Feature: Real-time scroll progress indication
-- Feature: Gradient blue progress bar style
-- Feature: Shortcut help panel (press `?`)
-- Feature: Visual keyboard shortcuts reference
-- Feature: Dark theme support for help panel
-- Technical: Added `KeyboardCallback` class for keyboard event handling
-- Technical: Enhanced CSS with outline panel, tree structure, and toggle button styles
-- Technical: Added CSS variables for dark theme support
-- Technical: Added layout CSS classes for responsive width control
-- Technical: Enhanced keyboard handler for Vim-style navigation
+- Fixed Issue #15: Image preview issue with Chinese file paths
+- Fixed Issue #6 & #13: Total Commander losing focus issue
+
+## v0.3
+
+- Feature: Support print, can print to PDF through local printer
+- Fixed: Cannot preview local images
+- Fixed: Cannot select and copy content [\#7](https://github.com/wangzhfeng/MarkdownViewer/issues/7)
+- Fixed: Dependent DLLs not packaged in output zip
+
+## v0.2
+
+- Fixed: Cannot close window with Esc [\#4](https://github.com/wangzhfeng/MarkdownViewer/issues/4)
+- Using NuGet to manage dependencies
+
+Thanks to [thorn0](https://github.com/thorn0) for your commit.
+
+## v0.1
+
+- Support previewing Markdown files
