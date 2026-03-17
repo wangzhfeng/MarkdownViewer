@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System.Drawing;
-using System.Runtime.InteropServices;
 
 namespace MarkdownViewer
 {
@@ -29,20 +28,12 @@ namespace MarkdownViewer
         private string pendingFileToLoad = null;
         private CoreWebView2Environment webView2Environment = null;
 
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetParent(IntPtr hWnd);
-
-        private const uint SWP_NOZORDER = 0x0004;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-
         public ViewerControl(ListerPlugin listerPlugin)
         {
             InitializeComponent();
             this.listerPlugin = listerPlugin;
             
+            InitializeSizeAndPosition();
             InitializeWebView2();
         }
 
@@ -61,18 +52,6 @@ namespace MarkdownViewer
             int x = workingArea.Left + (workingArea.Width - width) / 2;
             int y = workingArea.Top + (workingArea.Height - height) / 2;
             this.Location = new Point(x, y);
-
-            IntPtr hWnd = this.Handle;
-            if (hWnd != IntPtr.Zero)
-            {
-                SetWindowPos(hWnd, IntPtr.Zero, x, y, width, height, SWP_NOZORDER | SWP_SHOWWINDOW);
-            }
-        }
-
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
-            BeginInvoke(new Action(InitializeSizeAndPosition));
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
