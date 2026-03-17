@@ -627,22 +627,24 @@ function exportPdf() {
     outputPath: ''  // 空路径表示使用默认保存对话框
   });
   
-  // 显示"正在导出"提示
-  showToast('正在导出 PDF...', 2000);
+  // 显示"正在导出"提示，持续时间较长，等待完成消息
+  showToast('正在导出 PDF...', 5000);
 }
 
 // 监听来自 C# 的消息
-window.chrome.webview.addEventListener('message', function(e) {
+window.chrome.webview.addEventListener('message', function(arg) {
+  console.log('Received message:', arg.data);
   try {
-    var data = JSON.parse(e.data);
+    var data = JSON.parse(arg.data);
+    console.log('Parsed data:', data);
     
     if (data.type === 'pdfExportSuccess') {
-      showToast('PDF 导出成功：' + data.path, 4000);
+      showToast('PDF 导出成功', 4000);
     } else if (data.type === 'pdfExportFailed') {
       showToast('PDF 导出失败', 4000);
     }
   } catch (err) {
-    // Ignore parse errors
+    console.log('Message parse error:', err, 'Raw data:', arg.data);
   }
 });
 

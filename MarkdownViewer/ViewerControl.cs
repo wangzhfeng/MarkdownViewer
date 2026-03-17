@@ -252,8 +252,8 @@ namespace MarkdownViewer
                     TraceLog($"PDF export success: {outputPath}");
                     
                     // 通知 JavaScript 显示成功提示
-                    var successMessage = $"{{\"type\":\"pdfExportSuccess\",\"path\":\"{outputPath.Replace("\\", "\\\\")}\"}}";
-                    webView2.CoreWebView2.PostWebMessageAsJson(successMessage);
+                    // 使用简单的消息，避免路径中的特殊字符导致 JSON 解析问题
+                    webView2.CoreWebView2.PostWebMessageAsJson("{\"type\":\"pdfExportSuccess\"}");
                 }
                 else
                 {
