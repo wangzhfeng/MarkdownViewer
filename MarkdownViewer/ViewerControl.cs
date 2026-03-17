@@ -12,7 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
-using System.Drawing;
 
 namespace MarkdownViewer
 {
@@ -33,25 +32,7 @@ namespace MarkdownViewer
             InitializeComponent();
             this.listerPlugin = listerPlugin;
             
-            InitializeSizeAndPosition();
             InitializeWebView2();
-        }
-
-        private void InitializeSizeAndPosition()
-        {
-            Screen screen = Screen.PrimaryScreen;
-            if (screen == null) return;
-
-            Rectangle workingArea = screen.WorkingArea;
-
-            int width = (int)(workingArea.Width * 0.85);
-            int height = (int)(workingArea.Height * 0.85);
-
-            this.Size = new Size(width, height);
-
-            int x = workingArea.Left + (workingArea.Width - width) / 2;
-            int y = workingArea.Top + (workingArea.Height - height) / 2;
-            this.Location = new Point(x, y);
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
