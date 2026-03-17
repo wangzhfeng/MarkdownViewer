@@ -117,12 +117,8 @@ namespace MarkdownViewer
                 case ListerCommand.SelectAll:
                     viewerControl.ExecuteScriptAsync("document.execCommand('selectAll')");
                     break;
-                case ListerCommand.FindNext:  // F3 查找下一个
-                    Task.Run(async () => await viewerControl.FindNextAsync());
-                    break;
-                case ListerCommand.FindPrev:  // Shift+F3 查找上一个
-                    Task.Run(async () => await viewerControl.FindPreviousAsync());
-                    break;
+                // Note: ListerCommand.FindNext/FindPrev are not supported by TC Lister SDK
+                // F3/Shift+F3 handling is done via JavaScript keyboard listener in ViewerControl
             }
             return ListerResult.OK;
         }

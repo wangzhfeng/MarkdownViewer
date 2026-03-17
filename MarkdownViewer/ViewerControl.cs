@@ -144,9 +144,10 @@ namespace MarkdownViewer
             try
             {
                 string script = @"document.addEventListener('keydown', function(e) {
-                    // Vim keys: j=74, k=75, d=68, u=85, f=70, b=66, g=71, h=72, l=76, G=71
+                    // Vim keys: j=74, k=75, d=68, u=85, f=70, b=66, g=71, h=72, l=76
+                    // Function keys: F3=114 (find next), F4=115 (find prev)
                     // Other keys: ESC=27, 1-6=49-54, M=77, O=79, T=84, ?=191
-                    var keys = [27, 49, 50, 51, 52, 53, 54, 55, 66, 68, 70, 71, 72, 74, 75, 76, 77, 79, 84, 85, 191];
+                    var keys = [27, 49, 50, 51, 52, 53, 54, 55, 66, 68, 70, 71, 72, 74, 75, 76, 77, 79, 84, 85, 114, 115, 191];
                     if (keys.indexOf(e.keyCode) !== -1) {
                         window.chrome.webview.hostObjects.callback.OnKeyPressed(e.keyCode);
                     }
@@ -177,10 +178,11 @@ namespace MarkdownViewer
 
         // 搜索相关字段
         private string lastSearchText = null;
-        private CoreWebView2FindTextOptions findOptions = null;
+        private CoreWebView2FindOptions findOptions = null;
+        private CoreWebView2Find finder = null;
 
         /// <summary>
-        /// 使用 WebView2 原生 FindText API 搜索文本
+        /// 使用 WebView2 原生 Find API 搜索文本 (WinRT 1.0.3856.49)
         /// </summary>
         public async System.Threading.Tasks.Task SearchTextInWebView2Async(
             string searchText, 
@@ -195,28 +197,30 @@ namespace MarkdownViewer
             {
                 TraceLog($"SearchTextInWebView2Async: '{searchText}'");
 
-                // 1. 配置搜索选项
-                findOptions = new Microsoft.Web.WebView2.Core.CoreWebView2FindTextOptions
+                // 1. 获取 Find 对象
+                finder = webView2.CoreWebView2.Find;
+
+                // 2. 配置搜索选项 (WinRT API 属性)
+                findOptions = new CoreWebView2FindOptions
                 {
-                    CaseSensitive = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.MatchCase),
-                    MatchWordStartsWith = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.WholeWords),
-                    SearchDirection = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.Backward)
-                        ? Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchDirection.Backward
-                        : Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchDirection.Forward,
-                    SearchFilter = Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchFilter.PlainTextOnly
+                    SearchText = searchText,
+                    MatchCase = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.MatchCase),
+                    FindInIframes = false
                 };
 
                 lastSearchText = searchText;
 
-                // 2. 执行搜索
-                var findResult = await webView2.CoreWebView2.FindTextAsync(searchText, findOptions);
+                // 3. 启动查找会话 (显示查找栏)
+                await finder.StartAsync(findOptions);
 
-                TraceLog($"Search result: {findResult.TotalMatches} matches");
+                // 4. 等待 MatchCountChanged 事件获取结果
+                int matchCount = finder.MatchCount;
+                TraceLog($"Search result: {matchCount} matches");
 
-                // 3. 高亮并滚动到匹配项
-                if (findResult.TotalMatches > 0)
+                // 5. 滚动到第一个匹配项
+                if (matchCount > 0)
                 {
-                    await HighlightAndScrollToMatch(findResult);
+                    await ScrollToFirstMatch();
                 }
             }
             catch (Exception ex)
@@ -226,7 +230,7 @@ namespace MarkdownViewer
         }
 
         /// <summary>
-        /// 查找下一个匹配项
+        /// 查找下一个匹配项 (F3)
         /// </summary>
         public async System.Threading.Tasks.Task FindNextAsync()
         {
@@ -239,13 +243,23 @@ namespace MarkdownViewer
             {
                 TraceLog("FindNextAsync");
 
-                findOptions.SearchDirection = Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchDirection.Forward;
-                var findResult = await webView2.CoreWebView2.FindTextAsync(lastSearchText, findOptions);
-
-                if (findResult.TotalMatches > 0)
+                // 确保查找会话已启动
+                if (finder == null)
                 {
-                    await HighlightAndScrollToMatch(findResult);
+                    finder = webView2.CoreWebView2.Find;
+                    findOptions = new CoreWebView2FindOptions
+                    {
+                        SearchText = lastSearchText,
+                        MatchCase = false,
+                        FindInIframes = false
+                    };
+                    await finder.StartAsync(findOptions);
                 }
+
+                // 导航到下一个匹配
+                finder.FindNext();
+
+                TraceLog($"FindNext: ActiveMatchIndex={finder.ActiveMatchIndex}, MatchCount={finder.MatchCount}");
             }
             catch (Exception ex)
             {
@@ -254,7 +268,7 @@ namespace MarkdownViewer
         }
 
         /// <summary>
-        /// 查找上一个匹配项
+        /// 查找上一个匹配项 (Shift+F3)
         /// </summary>
         public async System.Threading.Tasks.Task FindPreviousAsync()
         {
@@ -267,16 +281,23 @@ namespace MarkdownViewer
             {
                 TraceLog("FindPreviousAsync");
 
-                findOptions.SearchDirection = Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchDirection.Backward;
-                var findResult = await webView2.CoreWebView2.FindTextAsync(lastSearchText, findOptions);
-                
-                // 恢复为向前搜索
-                findOptions.SearchDirection = Microsoft.Web.WebView2.Core.CoreWebView2FindTextSearchDirection.Forward;
-
-                if (findResult.TotalMatches > 0)
+                // 确保查找会话已启动
+                if (finder == null)
                 {
-                    await HighlightAndScrollToMatch(findResult);
+                    finder = webView2.CoreWebView2.Find;
+                    findOptions = new CoreWebView2FindOptions
+                    {
+                        SearchText = lastSearchText,
+                        MatchCase = false,
+                        FindInIframes = false
+                    };
+                    await finder.StartAsync(findOptions);
                 }
+
+                // 导航到上一个匹配
+                finder.FindPrevious();
+
+                TraceLog($"FindPrevious: ActiveMatchIndex={finder.ActiveMatchIndex}, MatchCount={finder.MatchCount}");
             }
             catch (Exception ex)
             {
@@ -285,43 +306,36 @@ namespace MarkdownViewer
         }
 
         /// <summary>
-        /// 高亮并滚动到匹配项
+        /// 滚动到第一个匹配项
         /// </summary>
-        private async System.Threading.Tasks.Task HighlightAndScrollToMatch(
-            Microsoft.Web.WebView2.Core.CoreWebView2FindTextResult findResult)
+        private async System.Threading.Tasks.Task ScrollToFirstMatch()
         {
-            if (findResult.SelectionRects.Count == 0)
-            {
-                return;
-            }
-
             try
             {
-                // 获取第一个匹配项的位置
-                var firstRect = findResult.SelectionRects[0];
-
-                // 使用 JavaScript 滚动到匹配位置
-                string scrollScript = $@"
-                    (function() {{
-                        var targetY = {firstRect.Y - 100};
-                        if (targetY < 0) targetY = 0;
+                // 使用 JavaScript 查找并滚动到第一个高亮匹配项
+                string scrollScript = @"
+                    (function() {
+                        // 查找 WebView2 原生查找高亮的元素 (mark 标签或带背景的 span)
+                        var marked = document.querySelector('mark') || 
+                                     document.querySelector('span[style*=""background-color""]') ||
+                                     document.querySelector('.webview2-find-highlight');
                         
-                        window.scrollTo({{
-                            top: targetY,
-                            behavior: 'smooth'
-                        }});
-                        
-                        console.log('Scrolled to match at Y={firstRect.Y}');
-                    }})();
+                        if (marked) {
+                            marked.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            console.log('Scrolled to first match');
+                        } else {
+                            // 如果没有找到高亮，滚动到顶部
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    })();
                 ";
 
                 await webView2.CoreWebView2.ExecuteScriptAsync(scrollScript);
-
-                TraceLog($"Scrolled to match at Y={firstRect.Y}, TotalMatches={findResult.TotalMatches}");
+                TraceLog("Scrolled to first match");
             }
             catch (Exception ex)
             {
-                TraceLog("HighlightAndScrollToMatch error: " + ex.Message);
+                TraceLog("ScrollToFirstMatch error: " + ex.Message);
             }
         }
 
@@ -466,6 +480,18 @@ namespace MarkdownViewer
                 this.Invoke(new Action(() => {
                     listerPlugin.CloseWindow(this);
                 }));
+            }
+            // F3 (114) - Find next
+            else if (keyCode == 114)
+            {
+                TraceLog("Find next (F3)");
+                Task.Run(async () => await FindNextAsync());
+            }
+            // Shift+F3 - Find previous (we use F4=115 as alternative since Shift+F3 is hard to detect)
+            else if (keyCode == 115)
+            {
+                TraceLog("Find previous (F4)");
+                Task.Run(async () => await FindPreviousAsync());
             }
             // ? (191) - Show shortcut help (handled by JavaScript, just log it)
             else if (keyCode == 191)
