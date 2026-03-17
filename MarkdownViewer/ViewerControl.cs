@@ -25,6 +25,7 @@ namespace MarkdownViewer
         private string currentTempFile = null;
         private bool isWebViewInitialized = false;
         private string pendingFileToLoad = null;
+        private CoreWebView2Environment webView2Environment = null;
 
         public ViewerControl(ListerPlugin listerPlugin)
         {
@@ -51,8 +52,8 @@ namespace MarkdownViewer
             try
             {
                 var options = new CoreWebView2EnvironmentOptions("--allow-file-access-from-files");
-                var env = await CoreWebView2Environment.CreateAsync(null, null, options);
-                await webView2.EnsureCoreWebView2Async(env);
+                webView2Environment = await CoreWebView2Environment.CreateAsync(null, null, options);
+                await webView2.EnsureCoreWebView2Async(webView2Environment);
                 
                 webView2.CoreWebView2.Settings.IsScriptEnabled = true;
                 webView2.CoreWebView2.Settings.AreDefaultScriptDialogsEnabled = true;
@@ -200,15 +201,13 @@ namespace MarkdownViewer
                 // 1. 获取 Find 对象
                 finder = webView2.CoreWebView2.Find;
 
-                // 2. 配置搜索选项 (WinRT API 属性 - 正确的属性名)
-                findOptions = new CoreWebView2FindOptions
-                {
-                    FindTerm = searchText,
-                    IsCaseSensitive = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.MatchCase),
-                    ShouldMatchWord = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.WholeWords),
-                    ShouldHighlightAllMatches = true,
-                    SuppressDefaultFindDialog = true  // 隐藏默认查找 UI
-                };
+                // 2. 使用 Environment.CreateFindOptions() 创建选项对象 (不能用 new)
+                findOptions = webView2Environment.CreateFindOptions();
+                findOptions.FindTerm = searchText;
+                findOptions.IsCaseSensitive = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.MatchCase);
+                findOptions.ShouldMatchWord = searchParameter.HasFlag(OY.TotalCommander.TcPluginInterface.Lister.SearchParameter.WholeWords);
+                findOptions.ShouldHighlightAllMatches = true;
+                findOptions.SuppressDefaultFindDialog = true;  // 隐藏默认查找 UI
 
                 lastSearchText = searchText;
 
@@ -249,14 +248,12 @@ namespace MarkdownViewer
                 if (finder == null)
                 {
                     finder = webView2.CoreWebView2.Find;
-                    findOptions = new CoreWebView2FindOptions
-                    {
-                        FindTerm = lastSearchText,
-                        IsCaseSensitive = false,
-                        ShouldMatchWord = false,
-                        ShouldHighlightAllMatches = true,
-                        SuppressDefaultFindDialog = true
-                    };
+                    findOptions = webView2Environment.CreateFindOptions();
+                    findOptions.FindTerm = lastSearchText;
+                    findOptions.IsCaseSensitive = false;
+                    findOptions.ShouldMatchWord = false;
+                    findOptions.ShouldHighlightAllMatches = true;
+                    findOptions.SuppressDefaultFindDialog = true;
                     await finder.StartAsync(findOptions);
                 }
 
@@ -289,14 +286,12 @@ namespace MarkdownViewer
                 if (finder == null)
                 {
                     finder = webView2.CoreWebView2.Find;
-                    findOptions = new CoreWebView2FindOptions
-                    {
-                        FindTerm = lastSearchText,
-                        IsCaseSensitive = false,
-                        ShouldMatchWord = false,
-                        ShouldHighlightAllMatches = true,
-                        SuppressDefaultFindDialog = true
-                    };
+                    findOptions = webView2Environment.CreateFindOptions();
+                    findOptions.FindTerm = lastSearchText;
+                    findOptions.IsCaseSensitive = false;
+                    findOptions.ShouldMatchWord = false;
+                    findOptions.ShouldHighlightAllMatches = true;
+                    findOptions.SuppressDefaultFindDialog = true;
                     await finder.StartAsync(findOptions);
                 }
 
