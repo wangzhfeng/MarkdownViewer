@@ -31,10 +31,8 @@ MarkdownViewer is a Total Commander plugin, using preview markdown file which su
 
 - Theme switching: light / dark mode
 - Press `T` key to toggle theme
-- Theme preference saved to localStorage
 - Layout modes: centered narrow / full-width
 - Press `M` key to toggle layout
-- Layout preference saved to localStorage
 
 ### Keyboard Navigation
 
@@ -58,7 +56,6 @@ MarkdownViewer is a Total Commander plugin, using preview markdown file which su
 
 - Export to PDF: press `P` key or click PDF button
 - External links open in default browser
-- Print-optimized CSS (hide UI elements, code word-wrap)
 
 # About Installation 
 
@@ -89,7 +86,6 @@ Currently, the preview window cannot be closed using the ESC key. Please click t
 
 - Theme switching: light / dark mode
 - Press `T` key to toggle theme
-- Theme preference saved to localStorage
 - Layout modes: centered narrow / full-width
 - Press `M` key to toggle layout
 
@@ -102,7 +98,6 @@ Currently, the preview window cannot be closed using the ESC key. Please click t
 
 - Export to PDF: press `P` key or click PDF button
 - External links open in default browser
-- Print-optimized CSS
 
 ### Bug Fixes
 
