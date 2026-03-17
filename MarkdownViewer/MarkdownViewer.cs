@@ -123,6 +123,22 @@ namespace MarkdownViewer
             return ListerResult.OK;
         }
 
+        public override ListerResult ExportPdf(object control, string outputFile)
+        {
+            ViewerControl viewerControl = (ViewerControl)control;
+            
+            if (!String.IsNullOrEmpty(outputFile))
+            {
+                // 异步执行 PDF 导出
+                Task.Run(async () => 
+                {
+                    await viewerControl.ExportPdfAsync(outputFile);
+                });
+            }
+            
+            return ListerResult.OK;
+        }
+
 
         public override ListerResult SearchText(object control, string searchString, SearchParameter searchParameter)
         {

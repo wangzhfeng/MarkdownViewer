@@ -16,6 +16,7 @@
   <button class="layout-toggle" onclick="toggleLayout()" title="切换布局 (快捷键：M)">📐 居中</button>
   <button class="theme-toggle" onclick="toggleTheme()" title="切换主题 (快捷键：T)">🌙 深色</button>
   <button class="outline-toggle" onclick="toggleOutline()" title="大纲视图 (快捷键：O)">📑 大纲</button>
+  <button class="export-pdf" onclick="exportPdf()" title="导出 PDF (快捷键：P)">📄 PDF</button>
 </div>
 <!-- 大纲面板移到 markdown-body 外部 -->
 <div class="outline-panel" id="outlinePanel">
@@ -56,6 +57,7 @@
         <div class="shortcut-item"><span class="shortcut-key">M</span><span class="shortcut-desc">切换布局</span></div>
         <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc">切换主题</span></div>
         <div class="shortcut-item"><span class="shortcut-key">O</span><span class="shortcut-desc">切换大纲</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">P</span><span class="shortcut-desc">导出 PDF</span></div>
       </div>
     </div>
     
@@ -466,6 +468,13 @@ document.addEventListener('keydown', function(e) {
     return;
   }
   
+  // P 键导出 PDF
+  if (e.keyCode === 80) {
+    e.preventDefault();
+    exportPdf();
+    return;
+  }
+  
   // 数字键 1-6 快速跳转到对应级别的标题
   if (e.keyCode >= 49 && e.keyCode <= 54) {
     var level = e.keyCode - 48;
@@ -574,6 +583,15 @@ document.addEventListener('click', function(e) {
         });
     }
 });
+
+// 导出 PDF 功能
+function exportPdf() {
+  // 通知 C# 宿主应用程序导出 PDF
+  window.chrome.webview.postMessage({
+    type: 'exportPdf',
+    outputPath: ''  // 空路径表示使用默认保存对话框
+  });
+}
 
 // 页面加载完成后加载布局、主题、生成大纲和初始化图片点击
 document.addEventListener('DOMContentLoaded', function() {

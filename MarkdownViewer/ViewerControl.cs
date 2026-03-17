@@ -119,6 +119,17 @@ namespace MarkdownViewer
                         }
                     }
                 }
+                // Parse message to check if it's an export PDF request
+                else if (message.Contains("\"exportPdf\""))
+                {
+                    TraceLog("Export PDF requested");
+                    
+                    // Generate default output path (same directory as markdown file, .pdf extension)
+                    string outputPath = GenerateDefaultPdfPath();
+                    
+                    // Execute PDF export asynchronously
+                    Task.Run(async () => await ExportPdfAsync(outputPath));
+                }
             }
             catch (Exception ex)
             {
@@ -174,6 +185,50 @@ namespace MarkdownViewer
             if (webView2.CoreWebView2 != null)
             {
                 await webView2.CoreWebView2.ExecuteScriptAsync("window.print()");
+            }
+        }
+
+        /// <summary>
+        /// 导出当前文档为 PDF 文件
+        /// </summary>
+        public async System.Threading.Tasks.Task ExportPdfAsync(string outputPath)
+        {
+            if (webView2.CoreWebView2 == null || String.IsNullOrEmpty(outputPath))
+            {
+                return;
+            }
+
+            try
+            {
+                TraceLog($"ExportPdfAsync: {outputPath}");
+
+                // 1. 创建打印设置
+                var printSettings = webView2Environment.CreatePrintSettings();
+                printSettings.Orientation = CoreWebView2PrintOrientation.Portrait;  // 纵向
+                printSettings.ScaleFactor = 1.0;  // 100% 缩放
+                printSettings.MarginTop = 0.4;  // 上边距 (英寸)
+                printSettings.MarginBottom = 0.4;  // 下边距
+                printSettings.MarginLeft = 0.4;  // 左边距
+                printSettings.MarginRight = 0.4;  // 右边距
+                printSettings.ShouldPrintBackgrounds = true;  // 打印背景色和图片
+                printSettings.ShouldPrintHeaderAndFooter = false;  // 不打印页眉页脚
+                printSettings.ShouldPrintSelectionOnly = false;  // 打印全部内容
+
+                // 2. 导出 PDF
+                var result = await webView2.CoreWebView2.PrintToPdfAsync(outputPath, printSettings);
+
+                if (result == CoreWebView2PrintStatus.Success)
+                {
+                    TraceLog($"PDF export success: {outputPath}");
+                }
+                else
+                {
+                    TraceLog($"PDF export failed: {result}");
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLog("ExportPdfAsync error: " + ex.Message);
             }
         }
 
@@ -358,6 +413,39 @@ namespace MarkdownViewer
             if (listerPlugin is MarkdownViewer)
             {
                 ((MarkdownViewer)listerPlugin).Log(message);
+            }
+        }
+
+        /// <summary>
+        /// 生成默认 PDF 输出路径 (与 Markdown 文件同目录，同名 .pdf 扩展名)
+        /// </summary>
+        private string GenerateDefaultPdfPath()
+        {
+            if (String.IsNullOrEmpty(currentTempFile))
+            {
+                return null;
+            }
+
+            try
+            {
+                // Temp file is like: C:\Users\xxx\AppData\Local\Temp\markdownviewer_xxx.html
+                // We want to save PDF to the same directory as the original markdown file
+                var tempFileName = Path.GetFileNameWithoutExtension(currentTempFile);
+                // Remove "markdownviewer_" prefix
+                var originalName = tempFileName.Replace("markdownviewer_", "");
+                
+                // Get the directory of the current markdown file
+                if (!String.IsNullOrEmpty(currentFileDir))
+                {
+                    return Path.Combine(currentFileDir, originalName + ".pdf");
+                }
+                
+                // Fallback to temp directory
+                return Path.Combine(Path.GetTempPath(), originalName + ".pdf");
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -550,6 +638,13 @@ namespace MarkdownViewer
             else if (keyCode == 79)
             {
                 TraceLog("Outline toggle requested");
+            }
+            // P (80) - Export PDF
+            else if (keyCode == 80)
+            {
+                TraceLog("Export PDF requested");
+                string outputPath = GenerateDefaultPdfPath();
+                Task.Run(async () => await ExportPdfAsync(outputPath));
             }
             // 1-6 (49-54) - Jump to heading (handled by JavaScript, just log it)
             else if (keyCode >= 49 && keyCode <= 54)
