@@ -1248,6 +1248,9 @@
   max-width: 100%;
   box-sizing: content-box;
   background-color: #fff;
+  display: block;
+  margin: 20px auto;
+  cursor: pointer;
 }
 
 .markdown-body code {
