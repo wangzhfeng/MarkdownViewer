@@ -38,10 +38,35 @@ namespace MarkdownViewer
         protected override void OnHandleDestroyed(EventArgs e)
         {
             base.OnHandleDestroyed(e);
-            // Cleanup temp file
+            // Cleanup current temp file
             if (!String.IsNullOrEmpty(currentTempFile) && File.Exists(currentTempFile))
             {
-                try { File.Delete(currentTempFile); } catch { }
+                try { 
+                    TraceLog($"Cleanup current temp: {currentTempFile}");
+                    File.Delete(currentTempFile); 
+                } catch { }
+            }
+            
+            // Also cleanup old markdownviewer temp files (older than 1 hour)
+            try
+            {
+                var tempDir = Path.GetTempPath();
+                var oldFiles = Directory.GetFiles(tempDir, "markdownviewer_*.html");
+                var oneHourAgo = DateTime.Now.AddHours(-1);
+                
+                foreach (var file in oldFiles)
+                {
+                    var lastWrite = File.GetLastWriteTime(file);
+                    if (lastWrite < oneHourAgo)
+                    {
+                        TraceLog($"Cleanup old temp: {file}");
+                        File.Delete(file);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                TraceLog($"Cleanup old temps error: {ex.Message}");
             }
         }
 
@@ -586,15 +611,12 @@ namespace MarkdownViewer
                     String escapedDirPath = dirPath.Replace("\\", "\\\\");
                     String html = markdownTmpl.Replace("{0}", escapedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
 
-                    // Save to temp file and navigate to it
-                    String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Path.GetFileName(fileName) + ".html");
+                    // Save to temp file with unique name (timestamp + random)
+                    String tempFile = Path.Combine(Path.GetTempPath(), $"markdownviewer_{DateTime.Now:yyyyMMddHHmmss}_{Path.GetFileName(fileName)}_{new Random().Next(1000, 9999)}.html");
                     File.WriteAllText(tempFile, html, Encoding.UTF8);
                     
-                    // Cleanup previous temp file
-                    if (!String.IsNullOrEmpty(currentTempFile) && File.Exists(currentTempFile))
-                    {
-                        try { File.Delete(currentTempFile); } catch { }
-                    }
+                    // Store old temp file for later cleanup
+                    String oldTempFile = currentTempFile;
                     currentTempFile = tempFile;
 
                     // Navigate to temp file
@@ -606,6 +628,19 @@ namespace MarkdownViewer
                             {
                                 var fileUri = new Uri("file:///" + tempFile.Replace("\\", "/"));
                                 webView2.CoreWebView2.Navigate(fileUri.AbsoluteUri);
+                                
+                                // Cleanup old temp file after a delay (ensure navigation completes)
+                                if (!String.IsNullOrEmpty(oldTempFile) && File.Exists(oldTempFile))
+                                {
+                                    Task.Delay(2000).ContinueWith(_ => {
+                                        try { 
+                                            TraceLog($"Cleanup old temp: {oldTempFile}");
+                                            File.Delete(oldTempFile); 
+                                        } catch (Exception ex) { 
+                                            TraceLog($"Cleanup failed: {ex.Message}");
+                                        }
+                                    });
+                                }
                             }
                         }
                         catch (Exception ex)
