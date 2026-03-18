@@ -10,38 +10,82 @@
   <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.3/styles/monokai.min.css" rel="stylesheet">
   <link href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.11.1/katex.min.css" type="text/css" rel="stylesheet" />
   <script>
-    // 立即加载主题和布局（必须在 DOMContentLoaded 之前执行）
-    (function() {
-      function applyTheme() {
-        try {
-          var savedTheme = localStorage.getItem('markdownViewerTheme');
-          if (savedTheme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            var btn = document.querySelector('.theme-toggle');
-            if (btn) btn.textContent = '☀️ 浅色';
-          }
-        } catch (e) {}
-      }
-      function applyLayout() {
-        try {
-          var savedLayout = localStorage.getItem('markdownViewerLayout');
-          if (savedLayout === 'full') {
-            var body = document.getElementById('markdownBody');
-            if (body) {
-              body.classList.remove('layout-centered');
-              body.classList.add('layout-full');
-            }
-            var btn = document.querySelector('.layout-toggle');
-            if (btn) btn.textContent = '📐 居中';
-          }
-        } catch (e) {}
-      }
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() { applyTheme(); applyLayout(); });
+    // 主题和布局状态
+    var currentTheme = 'light';
+    var currentLayout = 'centered';
+    
+    // 布局相关函数
+    function toggleLayout() {
+      var layoutToggle = document.querySelector('.layout-toggle');
+      var body = document.getElementById('markdownBody');
+      
+      if (currentLayout === 'centered') {
+        currentLayout = 'full';
+        body.classList.remove('layout-centered');
+        body.classList.add('layout-full');
+        layoutToggle.textContent = '📐 居中';
       } else {
-        applyTheme(); applyLayout();
+        currentLayout = 'centered';
+        body.classList.remove('layout-full');
+        body.classList.add('layout-centered');
+        layoutToggle.textContent = '📐 宽屏';
       }
-    })();
+      
+      try {
+        localStorage.setItem('markdownViewerLayout', currentLayout);
+      } catch (e) {}
+    }
+    
+    function loadLayout() {
+      try {
+        var savedLayout = localStorage.getItem('markdownViewerLayout');
+        if (savedLayout === 'full') {
+          currentLayout = 'full';
+          var body = document.getElementById('markdownBody');
+          if (body) {
+            body.classList.remove('layout-centered');
+            body.classList.add('layout-full');
+          }
+          var layoutToggle = document.querySelector('.layout-toggle');
+          if (layoutToggle) layoutToggle.textContent = '📐 居中';
+        }
+      } catch (e) {}
+    }
+    
+    // 主题相关函数
+    function toggleTheme() {
+      var themeToggle = document.querySelector('.theme-toggle');
+      
+      if (currentTheme === 'light') {
+        currentTheme = 'dark';
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '☀️ 浅色';
+      } else {
+        currentTheme = 'light';
+        document.documentElement.removeAttribute('data-theme');
+        themeToggle.textContent = '🌙 深色';
+      }
+      
+      try {
+        localStorage.setItem('markdownViewerTheme', currentTheme);
+      } catch (e) {}
+    }
+    
+    function loadTheme() {
+      try {
+        var savedTheme = localStorage.getItem('markdownViewerTheme');
+        if (savedTheme === 'dark') {
+          currentTheme = 'dark';
+          document.documentElement.setAttribute('data-theme', 'dark');
+          var themeToggle = document.querySelector('.theme-toggle');
+          if (themeToggle) themeToggle.textContent = '☀️ 浅色';
+        }
+      } catch (e) {}
+    }
+    
+    // 页面加载前应用保存的主题和布局
+    loadTheme();
+    loadLayout();
   </script>
 </head>
 <body>
@@ -247,95 +291,6 @@ function vimScroll(key) {
   }
   
   pendingKey = null;
-}
-
-// 布局模式功能
-var currentLayout = 'centered';
-
-// 切换布局
-function toggleLayout() {
-  var layoutToggle = document.querySelector('.layout-toggle');
-  var body = document.getElementById('markdownBody');
-  
-  if (currentLayout === 'centered') {
-    currentLayout = 'full';
-    body.classList.remove('layout-centered');
-    body.classList.add('layout-full');
-    layoutToggle.textContent = '📐 居中';
-  } else {
-    currentLayout = 'centered';
-    body.classList.remove('layout-full');
-    body.classList.add('layout-centered');
-    layoutToggle.textContent = '📐 宽屏';
-  }
-  
-  // 保存布局偏好到 localStorage
-  try {
-    localStorage.setItem('markdownViewerLayout', currentLayout);
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-}
-
-// 加载保存的布局偏好
-function loadLayout() {
-  try {
-    var savedLayout = localStorage.getItem('markdownViewerLayout');
-    if (savedLayout === 'full') {
-      currentLayout = 'full';
-      var body = document.getElementById('markdownBody');
-      body.classList.remove('layout-centered');
-      body.classList.add('layout-full');
-      var layoutToggle = document.querySelector('.layout-toggle');
-      if (layoutToggle) {
-        layoutToggle.textContent = '📐 居中';
-      }
-    }
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-}
-
-// 主题切换功能
-var currentTheme = 'light';
-
-// 切换主题
-function toggleTheme() {
-  var themeToggle = document.querySelector('.theme-toggle');
-  
-  if (currentTheme === 'light') {
-    currentTheme = 'dark';
-    document.documentElement.setAttribute('data-theme', 'dark');
-    themeToggle.textContent = '☀️ 浅色';
-  } else {
-    currentTheme = 'light';
-    document.documentElement.removeAttribute('data-theme');
-    themeToggle.textContent = '🌙 深色';
-  }
-  
-  // 保存主题偏好到 localStorage
-  try {
-    localStorage.setItem('markdownViewerTheme', currentTheme);
-  } catch (e) {
-    // Ignore localStorage errors
-  }
-}
-
-// 加载保存的主题偏好
-function loadTheme() {
-  try {
-    var savedTheme = localStorage.getItem('markdownViewerTheme');
-    if (savedTheme === 'dark') {
-      currentTheme = 'dark';
-      document.documentElement.setAttribute('data-theme', 'dark');
-      var themeToggle = document.querySelector('.theme-toggle');
-      if (themeToggle) {
-        themeToggle.textContent = '☀️ 浅色';
-      }
-    }
-  } catch (e) {
-    // Ignore localStorage errors
-  }
 }
 
 // 大纲视图功能
@@ -794,10 +749,8 @@ window.chrome.webview.addEventListener('message', function(arg) {
   }
 });
 
-// 页面加载完成后加载布局、主题、生成大纲和初始化图片点击
+// 页面加载完成后生成大纲和初始化功能
 document.addEventListener('DOMContentLoaded', function() {
-  loadLayout();
-  loadTheme();
   generateOutline();
   initImageClick();
   initCodeCopy();
