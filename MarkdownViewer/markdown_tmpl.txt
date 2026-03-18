@@ -13,7 +13,7 @@
 <body>
 <div class="reading-progress-bar" id="readingProgressBar"></div>
 <div class="toolbar">
-  <button class="layout-toggle" onclick="toggleLayout()" title="切换布局 (快捷键：M)">📐 居中</button>
+  <button class="layout-toggle" onclick="toggleLayout()" title="切换布局 (快捷键：M)">📐 宽屏</button>
   <button class="theme-toggle" onclick="toggleTheme()" title="切换主题 (快捷键：T)">🌙 深色</button>
   <button class="outline-toggle" onclick="toggleOutline()" title="大纲视图 (快捷键：O)">📑 大纲</button>
   <button class="export-pdf" onclick="exportPdf()" title="导出 PDF (快捷键：P)">📄 PDF</button>
@@ -227,12 +227,12 @@ function toggleLayout() {
     currentLayout = 'full';
     body.classList.remove('layout-centered');
     body.classList.add('layout-full');
-    layoutToggle.textContent = '📐 宽屏';
+    layoutToggle.textContent = '📐 居中';
   } else {
     currentLayout = 'centered';
     body.classList.remove('layout-full');
     body.classList.add('layout-centered');
-    layoutToggle.textContent = '📐 居中';
+    layoutToggle.textContent = '📐 宽屏';
   }
   
   // 保存布局偏好到 localStorage
@@ -254,7 +254,7 @@ function loadLayout() {
       body.classList.add('layout-full');
       var layoutToggle = document.querySelector('.layout-toggle');
       if (layoutToggle) {
-        layoutToggle.textContent = '📐 宽屏';
+        layoutToggle.textContent = '📐 居中';
       }
     }
   } catch (e) {
