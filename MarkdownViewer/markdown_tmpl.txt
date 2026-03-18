@@ -122,35 +122,20 @@
       return i18n[lang][key] || i18n['zh'][key] || key;
     }
     
-    // 应用语言到页面
+    // 应用语言到页面（除工具栏按钮外的所有 data-i18n 元素）
     function applyLang() {
-      // 应用 data-i18n 属性
+      // 应用 data-i18n 属性（工具栏按钮已由 initToolbarText() 处理）
       document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        // 跳过工具栏按钮，它们已在 initToolbarText() 中设置
+        if (el.classList.contains('layout-toggle') || 
+            el.classList.contains('theme-toggle') || 
+            el.classList.contains('outline-toggle') || 
+            el.classList.contains('export-pdf')) {
+          return;
+        }
         var key = el.getAttribute('data-i18n');
         el.textContent = t(key);
       });
-      
-      // 工具栏按钮文本和标题
-      var layoutBtn = document.querySelector('.layout-toggle');
-      if (layoutBtn) {
-        layoutBtn.textContent = currentLayout === 'full' ? t('layoutCentered') : t('layoutFull');
-        layoutBtn.title = t('switchLayout') + ' (M)';
-      }
-      var themeBtn = document.querySelector('.theme-toggle');
-      if (themeBtn) {
-        themeBtn.textContent = currentTheme === 'dark' ? t('themeLight') : t('themeDark');
-        themeBtn.title = t('switchTheme') + ' (T)';
-      }
-      var outlineBtn = document.querySelector('.outline-toggle');
-      if (outlineBtn) {
-        outlineBtn.textContent = t('outline');
-        outlineBtn.title = t('switchOutline') + ' (O)';
-      }
-      var pdfBtn = document.querySelector('.export-pdf');
-      if (pdfBtn) {
-        pdfBtn.textContent = t('pdf');
-        pdfBtn.title = t('exportPdfShortcut') + ' (P)';
-      }
     }
     
     // 主题和布局状态
@@ -246,17 +231,29 @@
   <button class="export-pdf" onclick="exportPdf()" data-i18n="pdf"></button>
 </div>
 <script>
-// 立即设置工具栏按钮文字，避免延迟显示
+// 立即设置工具栏按钮文字和 title，避免延迟显示
 (function initToolbarText() {
   var layoutBtn = document.querySelector('.layout-toggle');
   var themeBtn = document.querySelector('.theme-toggle');
   var outlineBtn = document.querySelector('.outline-toggle');
   var pdfBtn = document.querySelector('.export-pdf');
   
-  if (layoutBtn) layoutBtn.textContent = currentLayout === 'full' ? t('layoutCentered') : t('layoutFull');
-  if (themeBtn) themeBtn.textContent = currentTheme === 'dark' ? t('themeLight') : t('themeDark');
-  if (outlineBtn) outlineBtn.textContent = t('outline');
-  if (pdfBtn) pdfBtn.textContent = t('pdf');
+  if (layoutBtn) {
+    layoutBtn.textContent = currentLayout === 'full' ? t('layoutCentered') : t('layoutFull');
+    layoutBtn.title = t('switchLayout') + ' (M)';
+  }
+  if (themeBtn) {
+    themeBtn.textContent = currentTheme === 'dark' ? t('themeLight') : t('themeDark');
+    themeBtn.title = t('switchTheme') + ' (T)';
+  }
+  if (outlineBtn) {
+    outlineBtn.textContent = t('outline');
+    outlineBtn.title = t('switchOutline') + ' (O)';
+  }
+  if (pdfBtn) {
+    pdfBtn.textContent = t('pdf');
+    pdfBtn.title = t('exportPdfShortcut') + ' (P)';
+  }
 })();
 </script>
 <!-- 大纲面板移到 markdown-body 外部 -->
