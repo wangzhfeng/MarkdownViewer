@@ -235,25 +235,36 @@
     // 页面加载前应用保存的主题和布局
     loadTheme();
     loadLayout();
-    
-    // 立即初始化按钮文本（不等待 DOMContentLoaded）
-    function initToolbarButtons() {
-      var layoutBtn = document.querySelector('.layout-toggle');
-      if (layoutBtn) layoutBtn.textContent = currentLayout === 'full' ? t('layoutCentered') : t('layoutFull');
-      var themeBtn = document.querySelector('.theme-toggle');
-      if (themeBtn) themeBtn.textContent = currentTheme === 'dark' ? t('themeLight') : t('themeDark');
-      var outlineBtn = document.querySelector('.outline-toggle');
-      if (outlineBtn) outlineBtn.textContent = t('outline');
-      var pdfBtn = document.querySelector('.export-pdf');
-      if (pdfBtn) pdfBtn.textContent = t('pdf');
-    }
-    
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initToolbarButtons);
-    } else {
-      initToolbarButtons();
-    }
   </script>
+</head>
+<body>
+<div class="reading-progress-bar" id="readingProgressBar"></div>
+<div class="toolbar">
+  <button class="layout-toggle" onclick="toggleLayout()"></button>
+  <button class="theme-toggle" onclick="toggleTheme()"></button>
+  <button class="outline-toggle" onclick="toggleOutline()"></button>
+  <button class="export-pdf" onclick="exportPdf()"></button>
+</div>
+<script>
+  // 检测语言并设置按钮文字（立即执行，无闪屏）
+  (function() {
+    var sysLang = 'zh';
+    try { sysLang = (navigator.language || navigator.userLanguage || '').toLowerCase().startsWith('en') ? 'en' : 'zh'; } catch(e) {}
+    var isEn = sysLang === 'en';
+    var layoutText = isEn ? (currentLayout === 'full' ? '📐 Centered' : '📐 Full Width') : (currentLayout === 'full' ? '📐 居中' : '📐 宽屏');
+    var themeText = isEn ? (currentTheme === 'dark' ? '☀️ Light' : '🌙 Dark') : (currentTheme === 'dark' ? '☀️ 浅色' : '🌙 深色');
+    var outlineText = isEn ? '📑 Outline' : '📑 大纲';
+    var pdfText = isEn ? '📄 PDF' : '📄 PDF';
+    var layoutBtn = document.querySelector('.layout-toggle');
+    var themeBtn = document.querySelector('.theme-toggle');
+    var outlineBtn = document.querySelector('.outline-toggle');
+    var pdfBtn = document.querySelector('.export-pdf');
+    if (layoutBtn) layoutBtn.textContent = layoutText;
+    if (themeBtn) themeBtn.textContent = themeText;
+    if (outlineBtn) outlineBtn.textContent = outlineText;
+    if (pdfBtn) pdfBtn.textContent = pdfText;
+  })();
+</script>
 </head>
 <body>
 <div class="reading-progress-bar" id="readingProgressBar"></div>
@@ -263,6 +274,19 @@
   <button class="outline-toggle" onclick="toggleOutline()">📑 大纲</button>
   <button class="export-pdf" onclick="exportPdf()">📄 PDF</button>
 </div>
+<script>
+  // 页面加载时同步设置按钮文字
+  (function() {
+    var layoutBtn = document.querySelector('.layout-toggle');
+    var themeBtn = document.querySelector('.theme-toggle');
+    var outlineBtn = document.querySelector('.outline-toggle');
+    var pdfBtn = document.querySelector('.export-pdf');
+    if (layoutBtn) layoutBtn.textContent = '📐 宽屏';
+    if (themeBtn) themeBtn.textContent = '🌙 深色';
+    if (outlineBtn) outlineBtn.textContent = '📑 大纲';
+    if (pdfBtn) pdfBtn.textContent = '📄 PDF';
+  })();
+</script>
 <!-- 大纲面板移到 markdown-body 外部 -->
 <div class="outline-panel" id="outlinePanel">
   <h3 data-i18n="tableOfContents"></h3>
