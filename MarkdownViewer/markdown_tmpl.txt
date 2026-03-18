@@ -246,23 +246,27 @@
   <button class="export-pdf" onclick="exportPdf()"></button>
 </div>
 <script>
-  // 检测语言并设置按钮文字（立即执行，无闪屏）
+  // 检测语言并设置按钮文字
   (function() {
-    var sysLang = 'zh';
-    try { sysLang = (navigator.language || navigator.userLanguage || '').toLowerCase().startsWith('en') ? 'en' : 'zh'; } catch(e) {}
-    var isEn = sysLang === 'en';
-    var layoutText = isEn ? (currentLayout === 'full' ? '📐 Centered' : '📐 Full Width') : (currentLayout === 'full' ? '📐 居中' : '📐 宽屏');
-    var themeText = isEn ? (currentTheme === 'dark' ? '☀️ Light' : '🌙 Dark') : (currentTheme === 'dark' ? '☀️ 浅色' : '🌙 深色');
-    var outlineText = isEn ? '📑 Outline' : '📑 大纲';
-    var pdfText = isEn ? '📄 PDF' : '📄 PDF';
+    var isEn = false;
+    try { isEn = (navigator.language || navigator.userLanguage || '').toLowerCase().startsWith('en'); } catch(e) {}
+    var texts = isEn ? {
+      layoutCentered: '📐 Centered', layoutFull: '📐 Full Width',
+      themeDark: '🌙 Dark', themeLight: '☀️ Light',
+      outline: '📑 Outline', pdf: '📄 PDF'
+    } : {
+      layoutCentered: '📐 居中', layoutFull: '📐 宽屏',
+      themeDark: '🌙 深色', themeLight: '☀️ 浅色',
+      outline: '📑 大纲', pdf: '📄 PDF'
+    };
     var layoutBtn = document.querySelector('.layout-toggle');
     var themeBtn = document.querySelector('.theme-toggle');
     var outlineBtn = document.querySelector('.outline-toggle');
     var pdfBtn = document.querySelector('.export-pdf');
-    if (layoutBtn) layoutBtn.textContent = layoutText;
-    if (themeBtn) themeBtn.textContent = themeText;
-    if (outlineBtn) outlineBtn.textContent = outlineText;
-    if (pdfBtn) pdfBtn.textContent = pdfText;
+    if (layoutBtn) layoutBtn.textContent = currentLayout === 'full' ? texts.layoutCentered : texts.layoutFull;
+    if (themeBtn) themeBtn.textContent = currentTheme === 'dark' ? texts.themeLight : texts.themeDark;
+    if (outlineBtn) outlineBtn.textContent = texts.outline;
+    if (pdfBtn) pdfBtn.textContent = texts.pdf;
   })();
 </script>
 </head>
