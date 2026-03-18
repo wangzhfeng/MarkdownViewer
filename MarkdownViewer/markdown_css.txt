@@ -1443,6 +1443,11 @@
     display: none !important;
   }
   
+  /* 隐藏 Toast 通知 */
+  .toast-notification {
+    display: none !important;
+  }
+  
   /* 正文占满全页 */
   .markdown-body {
     margin: 0 !important;
