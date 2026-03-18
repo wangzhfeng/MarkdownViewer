@@ -663,6 +663,50 @@ document.addEventListener('keydown', function(e) {
 // Store the base directory for the original markdown file
 var markdownBaseDir = "{0}";
 
+// Path resolution helper functions
+var path = {
+  isAbsolute: function(p) {
+    return p.startsWith('\\\\') || /^[a-zA-Z]:\\/.test(p);
+  }
+};
+
+function resolvePath(baseDir, relativePath) {
+  // Normalize path separators
+  var normalized = relativePath.replace(/\//g, '\\');
+  
+  // Split into parts
+  var baseParts = baseDir.split('\\').filter(function(p) { return p !== ''; });
+  var relParts = normalized.split('\\');
+  
+  // Handle drive letter
+  var driveLetter = null;
+  if (baseParts.length > 0 && /^[a-zA-Z]:$/.test(baseParts[0])) {
+    driveLetter = baseParts[0];
+    baseParts.shift();
+  }
+  
+  // Process each part
+  for (var i = 0; i < relParts.length; i++) {
+    var part = relParts[i];
+    if (part === '.' || part === '') {
+      continue;
+    } else if (part === '..') {
+      if (baseParts.length > 0) {
+        baseParts.pop();
+      }
+    } else {
+      baseParts.push(part);
+    }
+  }
+  
+  // Reconstruct path
+  if (driveLetter) {
+    return driveLetter + '\\' + baseParts.join('\\');
+  } else {
+    return baseParts.join('\\');
+  }
+}
+
 // Support clicking on links to navigate
 document.addEventListener('click', function(e) {
     var link = e.target.closest('a');
@@ -691,55 +735,29 @@ document.addEventListener('click', function(e) {
         var resolvedPath;
         if (href.startsWith('file://')) {
             // Absolute file URL, use as-is
-            resolvedPath = href;
-        } else if (href.startsWith('/')) {
+            resolvedPath = href.replace('file:///', '').replace(/\//g, '\\');
+        } else if (href.startsWith('file:')) {
+            // file: protocol
+            resolvedPath = href.replace('file:///', '').replace(/\//g, '\\');
+        } else if (path.isAbsolute(href)) {
             // Absolute path
-            resolvedPath = href.substring(1).replace(/\//g, '\\');
+            resolvedPath = href.replace(/\//g, '\\');
         } else {
             // Relative path - resolve against markdownBaseDir
-            // Ensure baseDir ends with backslash
-            var baseDir = markdownBaseDir;
-            if (!baseDir.endsWith('\\')) {
-                baseDir = baseDir + '\\';
+            try {
+                resolvedPath = resolvePath(markdownBaseDir, href);
+            } catch (err) {
+                console.error('Path resolution failed:', err);
+                resolvedPath = markdownBaseDir + '\\' + href.replace(/\//g, '\\');
             }
-            
-            // Normalize href: replace / with \ and resolve . and ..
-            var normalizedHref = href.replace(/\//g, '\\');
-            
-            // Combine paths
-            var combined = baseDir + normalizedHref;
-            
-            // Resolve .. by splitting and processing
-            var parts = combined.split('\\');
-            var result = [];
-            
-            // Handle drive letter (e.g., "d:")
-            var driveLetter = null;
-            if (parts.length > 0 && parts[0].match(/^[a-zA-Z]:$/)) {
-                driveLetter = parts[0];
-                parts.shift();
-            }
-            
-            for (var i = 0; i < parts.length; i++) {
-                var part = parts[i];
-                if (part === '.' || part === '') {
-                    continue;
-                } else if (part === '..') {
-                    if (result.length > 0) {
-                        result.pop();
-                    }
-                } else {
-                    result.push(part);
-                }
-            }
-            
-            resolvedPath = driveLetter ? driveLetter + '\\' + result.join('\\') : result.join('\\');
         }
+        
+        TraceLog('Link clicked: ' + href + ' -> ' + resolvedPath);
         
         // Notify host application
         window.chrome.webview.postMessage({
             type: 'markdownLink',
-            path: decodeURIComponent(resolvedPath)
+            path: resolvedPath
         });
     }
 });

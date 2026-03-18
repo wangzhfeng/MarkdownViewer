@@ -105,7 +105,9 @@ namespace MarkdownViewer
                         // The path is already resolved by JavaScript, just unescape it
                         targetPath = System.Uri.UnescapeDataString(targetPath);
                         
-                        TraceLog("Markdown link clicked: " + targetPath);
+                        TraceLog($"Markdown link clicked: {targetPath}");
+                        TraceLog($"Current dir: {currentFileDir}");
+                        TraceLog($"File exists: {File.Exists(targetPath)}");
                         
                         // Load the file in the current viewer (preview mode)
                         if (File.Exists(targetPath))
@@ -116,6 +118,10 @@ namespace MarkdownViewer
                         else
                         {
                             TraceLog("File not found: " + targetPath);
+                            // Try to show error to user
+                            this.Invoke(new Action(() => {
+                                MessageBox.Show($"文件未找到：{targetPath}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }));
                         }
                     }
                 }
