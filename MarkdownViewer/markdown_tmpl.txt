@@ -10,22 +10,37 @@
   <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.3/styles/monokai.min.css" rel="stylesheet">
   <link href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.11.1/katex.min.css" type="text/css" rel="stylesheet" />
   <script>
-    // 立即加载主题和布局，避免闪屏
+    // 立即加载主题和布局（必须在 DOMContentLoaded 之前执行）
     (function() {
-      try {
-        var savedTheme = localStorage.getItem('markdownViewerTheme');
-        if (savedTheme === 'dark') {
-          document.documentElement.setAttribute('data-theme', 'dark');
-          document.querySelector('.theme-toggle').textContent = '☀️ 浅色';
-        }
-        
-        var savedLayout = localStorage.getItem('markdownViewerLayout');
-        if (savedLayout === 'full') {
-          document.getElementById('markdownBody').classList.remove('layout-centered');
-          document.getElementById('markdownBody').classList.add('layout-full');
-          document.querySelector('.layout-toggle').textContent = '📐 居中';
-        }
-      } catch (e) {}
+      function applyTheme() {
+        try {
+          var savedTheme = localStorage.getItem('markdownViewerTheme');
+          if (savedTheme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            var btn = document.querySelector('.theme-toggle');
+            if (btn) btn.textContent = '☀️ 浅色';
+          }
+        } catch (e) {}
+      }
+      function applyLayout() {
+        try {
+          var savedLayout = localStorage.getItem('markdownViewerLayout');
+          if (savedLayout === 'full') {
+            var body = document.getElementById('markdownBody');
+            if (body) {
+              body.classList.remove('layout-centered');
+              body.classList.add('layout-full');
+            }
+            var btn = document.querySelector('.layout-toggle');
+            if (btn) btn.textContent = '📐 居中';
+          }
+        } catch (e) {}
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() { applyTheme(); applyLayout(); });
+      } else {
+        applyTheme(); applyLayout();
+      }
     })();
   </script>
 </head>
