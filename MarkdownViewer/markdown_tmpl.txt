@@ -752,7 +752,7 @@ document.addEventListener('click', function(e) {
             }
         }
         
-        TraceLog('Link clicked: ' + href + ' -> ' + resolvedPath);
+        console.log('Link clicked: ' + href + ' -> ' + resolvedPath);
         
         // Notify host application
         window.chrome.webview.postMessage({
