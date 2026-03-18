@@ -235,6 +235,24 @@
     // 页面加载前应用保存的主题和布局
     loadTheme();
     loadLayout();
+    
+    // 立即初始化按钮文本（不等待 DOMContentLoaded）
+    function initToolbarButtons() {
+      var layoutBtn = document.querySelector('.layout-toggle');
+      if (layoutBtn) layoutBtn.textContent = currentLayout === 'full' ? t('layoutCentered') : t('layoutFull');
+      var themeBtn = document.querySelector('.theme-toggle');
+      if (themeBtn) themeBtn.textContent = currentTheme === 'dark' ? t('themeLight') : t('themeDark');
+      var outlineBtn = document.querySelector('.outline-toggle');
+      if (outlineBtn) outlineBtn.textContent = t('outline');
+      var pdfBtn = document.querySelector('.export-pdf');
+      if (pdfBtn) pdfBtn.textContent = t('pdf');
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initToolbarButtons);
+    } else {
+      initToolbarButtons();
+    }
   </script>
 </head>
 <body>
