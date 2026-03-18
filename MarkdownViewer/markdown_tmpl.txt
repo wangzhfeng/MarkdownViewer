@@ -9,6 +9,25 @@
   <style>{1}</style>
   <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.3/styles/monokai.min.css" rel="stylesheet">
   <link href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.11.1/katex.min.css" type="text/css" rel="stylesheet" />
+  <script>
+    // 立即加载主题和布局，避免闪屏
+    (function() {
+      try {
+        var savedTheme = localStorage.getItem('markdownViewerTheme');
+        if (savedTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          document.querySelector('.theme-toggle').textContent = '☀️ 浅色';
+        }
+        
+        var savedLayout = localStorage.getItem('markdownViewerLayout');
+        if (savedLayout === 'full') {
+          document.getElementById('markdownBody').classList.remove('layout-centered');
+          document.getElementById('markdownBody').classList.add('layout-full');
+          document.querySelector('.layout-toggle').textContent = '📐 居中';
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
 <div class="reading-progress-bar" id="readingProgressBar"></div>
