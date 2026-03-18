@@ -245,6 +245,20 @@
   <button class="outline-toggle" onclick="toggleOutline()" data-i18n="outline"></button>
   <button class="export-pdf" onclick="exportPdf()" data-i18n="pdf"></button>
 </div>
+<script>
+// 立即设置工具栏按钮文字，避免延迟显示
+(function initToolbarText() {
+  var layoutBtn = document.querySelector('.layout-toggle');
+  var themeBtn = document.querySelector('.theme-toggle');
+  var outlineBtn = document.querySelector('.outline-toggle');
+  var pdfBtn = document.querySelector('.export-pdf');
+  
+  if (layoutBtn) layoutBtn.textContent = currentLayout === 'full' ? t('layoutCentered') : t('layoutFull');
+  if (themeBtn) themeBtn.textContent = currentTheme === 'dark' ? t('themeLight') : t('themeDark');
+  if (outlineBtn) outlineBtn.textContent = t('outline');
+  if (pdfBtn) pdfBtn.textContent = t('pdf');
+})();
+</script>
 <!-- 大纲面板移到 markdown-body 外部 -->
 <div class="outline-panel" id="outlinePanel">
   <h3 data-i18n="tableOfContents"></h3>
