@@ -291,6 +291,39 @@
     if (pdfBtn) pdfBtn.textContent = '📄 PDF';
   })();
 </script>
+</head>
+<body>
+<div class="reading-progress-bar" id="readingProgressBar"></div>
+<div class="toolbar">
+  <button class="layout-toggle" onclick="toggleLayout()"></button>
+  <button class="theme-toggle" onclick="toggleTheme()"></button>
+  <button class="outline-toggle" onclick="toggleOutline()"></button>
+  <button class="export-pdf" onclick="exportPdf()"></button>
+</div>
+<script>
+  // 检测语言并设置按钮文字
+  (function() {
+    var isEn = false;
+    try { isEn = (navigator.language || navigator.userLanguage || '').toLowerCase().startsWith('en'); } catch(e) {}
+    var texts = isEn ? {
+      layoutCentered: '📐 Centered', layoutFull: '📐 Full Width',
+      themeDark: '🌙 Dark', themeLight: '☀️ Light',
+      outline: '📑 Outline', pdf: '📄 PDF'
+    } : {
+      layoutCentered: '📐 居中', layoutFull: '📐 宽屏',
+      themeDark: '🌙 深色', themeLight: '☀️ 浅色',
+      outline: '📑 大纲', pdf: '📄 PDF'
+    };
+    var layoutBtn = document.querySelector('.layout-toggle');
+    var themeBtn = document.querySelector('.theme-toggle');
+    var outlineBtn = document.querySelector('.outline-toggle');
+    var pdfBtn = document.querySelector('.export-pdf');
+    if (layoutBtn) layoutBtn.textContent = currentLayout === 'full' ? texts.layoutCentered : texts.layoutFull;
+    if (themeBtn) themeBtn.textContent = currentTheme === 'dark' ? texts.themeLight : texts.themeDark;
+    if (outlineBtn) outlineBtn.textContent = texts.outline;
+    if (pdfBtn) pdfBtn.textContent = texts.pdf;
+  })();
+</script>
 <!-- 大纲面板移到 markdown-body 外部 -->
 <div class="outline-panel" id="outlinePanel">
   <h3 data-i18n="tableOfContents"></h3>
