@@ -258,10 +258,10 @@
 <body>
 <div class="reading-progress-bar" id="readingProgressBar"></div>
 <div class="toolbar">
-  <button class="layout-toggle" onclick="toggleLayout()"></button>
-  <button class="theme-toggle" onclick="toggleTheme()"></button>
-  <button class="outline-toggle" onclick="toggleOutline()"></button>
-  <button class="export-pdf" onclick="exportPdf()"></button>
+  <button class="layout-toggle" onclick="toggleLayout()">📐 宽屏</button>
+  <button class="theme-toggle" onclick="toggleTheme()">🌙 深色</button>
+  <button class="outline-toggle" onclick="toggleOutline()">📑 大纲</button>
+  <button class="export-pdf" onclick="exportPdf()">📄 PDF</button>
 </div>
 <!-- 大纲面板移到 markdown-body 外部 -->
 <div class="outline-panel" id="outlinePanel">
