@@ -17,10 +17,13 @@ namespace MarkdownViewer
 
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.webView2 = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.loadingPanel = new System.Windows.Forms.Panel();
-            this.loadingLabel = new System.Windows.Forms.Label();
+            this.loadingPicture = new System.Windows.Forms.PictureBox();
+            this.loadingTimer = new System.Windows.Forms.Timer(this.components);
             this.loadingPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.loadingPicture)).BeginInit();
             this.SuspendLayout();
             // 
             // webView2
@@ -37,23 +40,26 @@ namespace MarkdownViewer
             // loadingPanel
             // 
             this.loadingPanel.BackColor = System.Drawing.Color.White;
-            this.loadingPanel.Controls.Add(this.loadingLabel);
+            this.loadingPanel.Controls.Add(this.loadingPicture);
             this.loadingPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.loadingPanel.Location = new System.Drawing.Point(0, 0);
             this.loadingPanel.Name = "loadingPanel";
             this.loadingPanel.Size = new System.Drawing.Size(406, 361);
             this.loadingPanel.TabIndex = 1;
             // 
-            // loadingLabel
+            // loadingPicture
             // 
-            this.loadingLabel.AutoSize = true;
-            this.loadingLabel.Font = new System.Drawing.Font("Microsoft YaHei", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.loadingLabel.Location = new System.Drawing.Point(153, 169);
-            this.loadingLabel.Name = "loadingLabel";
-            this.loadingLabel.Size = new System.Drawing.Size(100, 21);
-            this.loadingLabel.TabIndex = 0;
-            this.loadingLabel.Text = "加载中...";
-            this.loadingLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.loadingPicture.Location = new System.Drawing.Point(178, 145);
+            this.loadingPicture.Name = "loadingPicture";
+            this.loadingPicture.Size = new System.Drawing.Size(50, 50);
+            this.loadingPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.loadingPicture.TabIndex = 0;
+            this.loadingPicture.TabStop = false;
+            // 
+            // loadingTimer
+            // 
+            this.loadingTimer.Interval = 50;
+            this.loadingTimer.Tick += new System.EventHandler(this.loadingTimer_Tick);
             // 
             // ViewerControl
             // 
@@ -64,7 +70,7 @@ namespace MarkdownViewer
             this.Name = "ViewerControl";
             this.Size = new System.Drawing.Size(406, 361);
             this.loadingPanel.ResumeLayout(false);
-            this.loadingPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.loadingPicture)).EndInit();
             this.ResumeLayout(false);
         }
 
@@ -72,6 +78,7 @@ namespace MarkdownViewer
 
         internal Microsoft.Web.WebView2.WinForms.WebView2 webView2;
         private System.Windows.Forms.Panel loadingPanel;
-        private System.Windows.Forms.Label loadingLabel;
+        private System.Windows.Forms.PictureBox loadingPicture;
+        private System.Windows.Forms.Timer loadingTimer;
     }
 }

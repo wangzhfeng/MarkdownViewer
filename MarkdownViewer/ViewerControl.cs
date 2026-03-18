@@ -442,7 +442,47 @@ namespace MarkdownViewer
             if (loadingPanel != null)
             {
                 loadingPanel.Visible = show;
+                if (show)
+                {
+                    StartLoadingAnimation();
+                }
+                else
+                {
+                    StopLoadingAnimation();
+                }
             }
+        }
+
+        private int loadingAngle = 0;
+
+        private void StartLoadingAnimation()
+        {
+            loadingAngle = 0;
+            loadingTimer.Start();
+        }
+
+        private void StopLoadingAnimation()
+        {
+            loadingTimer.Stop();
+        }
+
+        private void loadingTimer_Tick(object sender, EventArgs e)
+        {
+            loadingAngle = (loadingAngle + 20) % 360;
+            
+            var bmp = new System.Drawing.Bitmap(50, 50);
+            using (var g = System.Drawing.Graphics.FromImage(bmp))
+            {
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                g.Clear(System.Drawing.Color.Transparent);
+                
+                using (var pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(66, 133, 244), 4))
+                {
+                    g.DrawArc(pen, 5, 5, 40, 40, loadingAngle, 270);
+                }
+            }
+            
+            loadingPicture.Image = bmp;
         }
 
         private void TraceLog(string message)
