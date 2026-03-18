@@ -130,15 +130,27 @@
         el.textContent = t(key);
       });
       
-      // 工具栏按钮标题
+      // 工具栏按钮文本和标题
       var layoutBtn = document.querySelector('.layout-toggle');
-      if (layoutBtn) layoutBtn.title = t('switchLayout') + ' (M)';
+      if (layoutBtn) {
+        layoutBtn.textContent = currentLayout === 'full' ? t('layoutCentered') : t('layoutFull');
+        layoutBtn.title = t('switchLayout') + ' (M)';
+      }
       var themeBtn = document.querySelector('.theme-toggle');
-      if (themeBtn) themeBtn.title = t('switchTheme') + ' (T)';
+      if (themeBtn) {
+        themeBtn.textContent = currentTheme === 'dark' ? t('themeLight') : t('themeDark');
+        themeBtn.title = t('switchTheme') + ' (T)';
+      }
       var outlineBtn = document.querySelector('.outline-toggle');
-      if (outlineBtn) outlineBtn.title = t('switchOutline') + ' (O)';
+      if (outlineBtn) {
+        outlineBtn.textContent = t('outline');
+        outlineBtn.title = t('switchOutline') + ' (O)';
+      }
       var pdfBtn = document.querySelector('.export-pdf');
-      if (pdfBtn) pdfBtn.title = t('exportPdfShortcut') + ' (P)';
+      if (pdfBtn) {
+        pdfBtn.textContent = t('pdf');
+        pdfBtn.title = t('exportPdfShortcut') + ' (P)';
+      }
     }
     
     // 主题和布局状态
@@ -223,17 +235,6 @@
     // 页面加载前应用保存的主题和布局
     loadTheme();
     loadLayout();
-    // 初始化按钮文本
-    (function() {
-      var layoutBtn = document.querySelector('.layout-toggle');
-      if (layoutBtn) layoutBtn.textContent = currentLayout === 'full' ? t('layoutCentered') : t('layoutFull');
-      var themeBtn = document.querySelector('.theme-toggle');
-      if (themeBtn) themeBtn.textContent = currentTheme === 'dark' ? t('themeLight') : t('themeDark');
-      var outlineBtn = document.querySelector('.outline-toggle');
-      if (outlineBtn) outlineBtn.textContent = t('outline');
-      var pdfBtn = document.querySelector('.export-pdf');
-      if (pdfBtn) pdfBtn.textContent = t('pdf');
-    })();
   </script>
 </head>
 <body>
