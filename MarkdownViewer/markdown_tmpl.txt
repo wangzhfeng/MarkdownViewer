@@ -10,6 +10,137 @@
   <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.3/styles/monokai.min.css" rel="stylesheet">
   <link href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.11.1/katex.min.css" type="text/css" rel="stylesheet" />
   <script>
+    // 语言包
+    var i18n = {
+      zh: {
+        layoutCentered: '📐 居中',
+        layoutFull: '📐 宽屏',
+        themeDark: '🌙 深色',
+        themeLight: '☀️ 浅色',
+        outline: '📑 大纲',
+        outlineClose: '✕ 关闭',
+        pdf: '📄 PDF',
+        tableOfContents: '📑 目录',
+        exportPdf: '导出 PDF',
+        exportingPdf: '正在导出 PDF...',
+        pdfExportSuccess: 'PDF 导出成功',
+        pdfExportFailed: 'PDF 导出失败',
+        exportPng: '📥 导出 PNG',
+        noMermaidFound: '未找到流程图',
+        mermaidRendering: '流程图正在渲染中，请稍后',
+        exportingMermaid: '正在导出流程图...',
+        mermaidExportSuccess: '流程图导出成功',
+        mermaidExportFailed: '导出失败',
+        copied: '已复制!',
+        copyFailed: '复制失败',
+        copy: '复制',
+        vimNavigation: '📍 Vim 导航',
+        featureToggle: '🎨 功能切换',
+        quickJump: '📑 快速跳转',
+        other: '🖼️ 其他',
+        shortcutsHelp: '⌨️ 快捷键帮助',
+        pressToShowHelp: '按 ? 随时打开此帮助',
+        switchLayout: '切换布局',
+        switchTheme: '切换主题',
+        switchOutline: '切换大纲',
+        exportPdfShortcut: '导出 PDF',
+        jumpToHeading: '跳转到 H1-H6',
+        showHelp: '显示帮助',
+        closeViewer: '关闭查看器/预览',
+        clickToZoom: '点击图片放大',
+        down: '向下逐行',
+        up: '向上逐行',
+        downHalf: '向下半屏',
+        upHalf: '向上半屏',
+        downFull: '向下整屏',
+        upFull: '向上整屏',
+        top: '顶部',
+        bottom: '底部',
+        left: '向左',
+        right: '向右'
+      },
+      en: {
+        layoutCentered: '📐 Centered',
+        layoutFull: '📐 Full Width',
+        themeDark: '🌙 Dark',
+        themeLight: '☀️ Light',
+        outline: '📑 Outline',
+        outlineClose: '✕ Close',
+        pdf: '📄 PDF',
+        tableOfContents: '📑 Contents',
+        exportPdf: 'Export PDF',
+        exportingPdf: 'Exporting PDF...',
+        pdfExportSuccess: 'PDF exported successfully',
+        pdfExportFailed: 'PDF export failed',
+        exportPng: '📥 Export PNG',
+        noMermaidFound: 'No diagram found',
+        mermaidRendering: 'Diagram is rendering, please wait',
+        exportingMermaid: 'Exporting diagram...',
+        mermaidExportSuccess: 'Diagram exported successfully',
+        mermaidExportFailed: 'Export failed',
+        copied: 'Copied!',
+        copyFailed: 'Copy failed',
+        copy: 'Copy',
+        vimNavigation: '📍 Vim Navigation',
+        featureToggle: '🎨 Feature Toggle',
+        quickJump: '📑 Quick Jump',
+        other: '🖼️ Other',
+        shortcutsHelp: '⌨️ Keyboard Shortcuts',
+        pressToShowHelp: 'Press ? to show this help',
+        switchLayout: 'Switch Layout',
+        switchTheme: 'Switch Theme',
+        switchOutline: 'Switch Outline',
+        exportPdfShortcut: 'Export PDF',
+        jumpToHeading: 'Jump to H1-H6',
+        showHelp: 'Show Help',
+        closeViewer: 'Close Viewer/Preview',
+        clickToZoom: 'Click to zoom image',
+        down: 'Scroll Down',
+        up: 'Scroll Up',
+        downHalf: 'Page Down',
+        upHalf: 'Page Up',
+        downFull: 'Screen Down',
+        upFull: 'Screen Up',
+        top: 'Top',
+        bottom: 'Bottom',
+        left: 'Left',
+        right: 'Right'
+      }
+    };
+    
+    // 检测系统语言
+    var lang = 'zh';
+    try {
+      var systemLang = navigator.language || navigator.userLanguage;
+      if (systemLang && systemLang.toLowerCase().startsWith('en')) {
+        lang = 'en';
+      }
+    } catch (e) {}
+    
+    // 获取翻译文本
+    function t(key) {
+      return i18n[lang][key] || i18n['zh'][key] || key;
+    }
+    
+    // 应用语言到页面
+    function applyLang() {
+      // 应用 data-i18n 属性
+      document.querySelectorAll('[data-i18n]').forEach(function(el) {
+        var key = el.getAttribute('data-i18n');
+        el.textContent = t(key);
+      });
+      
+      // 工具栏按钮标题
+      var layoutBtn = document.querySelector('.layout-toggle');
+      if (layoutBtn) layoutBtn.title = t('switchLayout') + ' (M)';
+      var themeBtn = document.querySelector('.theme-toggle');
+      if (themeBtn) themeBtn.title = t('switchTheme') + ' (T)';
+      var outlineBtn = document.querySelector('.outline-toggle');
+      if (outlineBtn) outlineBtn.title = t('switchOutline') + ' (O)';
+      var pdfBtn = document.querySelector('.export-pdf');
+      if (pdfBtn) pdfBtn.title = t('exportPdfShortcut') + ' (P)';
+    }
+    
     // 主题和布局状态
     var currentTheme = 'light';
     var currentLayout = 'centered';
@@ -23,12 +154,12 @@
         currentLayout = 'full';
         body.classList.remove('layout-centered');
         body.classList.add('layout-full');
-        layoutToggle.textContent = '📐 居中';
+        layoutToggle.textContent = t('layoutCentered');
       } else {
         currentLayout = 'centered';
         body.classList.remove('layout-full');
         body.classList.add('layout-centered');
-        layoutToggle.textContent = '📐 宽屏';
+        layoutToggle.textContent = t('layoutFull');
       }
       
       try {
@@ -47,7 +178,10 @@
             body.classList.add('layout-full');
           }
           var layoutToggle = document.querySelector('.layout-toggle');
-          if (layoutToggle) layoutToggle.textContent = '📐 居中';
+          if (layoutToggle) layoutToggle.textContent = t('layoutCentered');
+        } else {
+          var layoutToggle = document.querySelector('.layout-toggle');
+          if (layoutToggle) layoutToggle.textContent = t('layoutFull');
         }
       } catch (e) {}
     }
@@ -59,11 +193,11 @@
       if (currentTheme === 'light') {
         currentTheme = 'dark';
         document.documentElement.setAttribute('data-theme', 'dark');
-        themeToggle.textContent = '☀️ 浅色';
+        themeToggle.textContent = t('themeLight');
       } else {
         currentTheme = 'light';
         document.documentElement.removeAttribute('data-theme');
-        themeToggle.textContent = '🌙 深色';
+        themeToggle.textContent = t('themeDark');
       }
       
       try {
@@ -78,7 +212,10 @@
           currentTheme = 'dark';
           document.documentElement.setAttribute('data-theme', 'dark');
           var themeToggle = document.querySelector('.theme-toggle');
-          if (themeToggle) themeToggle.textContent = '☀️ 浅色';
+          if (themeToggle) themeToggle.textContent = t('themeLight');
+        } else {
+          var themeToggle = document.querySelector('.theme-toggle');
+          if (themeToggle) themeToggle.textContent = t('themeDark');
         }
       } catch (e) {}
     }
@@ -86,19 +223,30 @@
     // 页面加载前应用保存的主题和布局
     loadTheme();
     loadLayout();
+    // 初始化按钮文本
+    (function() {
+      var layoutBtn = document.querySelector('.layout-toggle');
+      if (layoutBtn) layoutBtn.textContent = currentLayout === 'full' ? t('layoutCentered') : t('layoutFull');
+      var themeBtn = document.querySelector('.theme-toggle');
+      if (themeBtn) themeBtn.textContent = currentTheme === 'dark' ? t('themeLight') : t('themeDark');
+      var outlineBtn = document.querySelector('.outline-toggle');
+      if (outlineBtn) outlineBtn.textContent = t('outline');
+      var pdfBtn = document.querySelector('.export-pdf');
+      if (pdfBtn) pdfBtn.textContent = t('pdf');
+    })();
   </script>
 </head>
 <body>
 <div class="reading-progress-bar" id="readingProgressBar"></div>
 <div class="toolbar">
-  <button class="layout-toggle" onclick="toggleLayout()" title="切换布局 (快捷键：M)">📐 宽屏</button>
-  <button class="theme-toggle" onclick="toggleTheme()" title="切换主题 (快捷键：T)">🌙 深色</button>
-  <button class="outline-toggle" onclick="toggleOutline()" title="大纲视图 (快捷键：O)">📑 大纲</button>
-  <button class="export-pdf" onclick="exportPdf()" title="导出 PDF (快捷键：P)">📄 PDF</button>
+  <button class="layout-toggle" onclick="toggleLayout()"></button>
+  <button class="theme-toggle" onclick="toggleTheme()"></button>
+  <button class="outline-toggle" onclick="toggleOutline()"></button>
+  <button class="export-pdf" onclick="exportPdf()"></button>
 </div>
 <!-- 大纲面板移到 markdown-body 外部 -->
 <div class="outline-panel" id="outlinePanel">
-  <h3>📑 目录</h3>
+  <h3 data-i18n="tableOfContents"></h3>
   <ul class="outline-tree" id="outlineTree"></ul>
 </div>
 <!-- 图片放大查看器 -->
@@ -111,53 +259,51 @@
 <div class="shortcut-help-overlay" id="shortcutHelp" onclick="closeShortcutHelp(event)">
   <div class="shortcut-help-panel">
     <span class="shortcut-help-close" onclick="closeShortcutHelp(event)">&times;</span>
-    <h2>⌨️ 快捷键帮助</h2>
+    <h2 data-i18n="shortcutsHelp"></h2>
     
     <div class="shortcut-help-section">
-      <h3>📍 Vim 导航</h3>
+      <h3 data-i18n="vimNavigation"></h3>
       <div class="shortcut-grid">
-        <div class="shortcut-item"><span class="shortcut-key">j</span><span class="shortcut-desc">向下逐行</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">k</span><span class="shortcut-desc">向上逐行</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">d</span><span class="shortcut-desc">向下半屏</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">u</span><span class="shortcut-desc">向上半屏</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">f</span><span class="shortcut-desc">向下整屏</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">b</span><span class="shortcut-desc">向上整屏</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">gg</span><span class="shortcut-desc">顶部</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">G</span><span class="shortcut-desc">底部</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">h</span><span class="shortcut-desc">向左</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">l</span><span class="shortcut-desc">向右</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">j</span><span class="shortcut-desc" data-i18n="down"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">k</span><span class="shortcut-desc" data-i18n="up"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">d</span><span class="shortcut-desc" data-i18n="downHalf"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">u</span><span class="shortcut-desc" data-i18n="upHalf"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">f</span><span class="shortcut-desc" data-i18n="downFull"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">b</span><span class="shortcut-desc" data-i18n="upFull"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">gg</span><span class="shortcut-desc" data-i18n="top"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">G</span><span class="shortcut-desc" data-i18n="bottom"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">h</span><span class="shortcut-desc" data-i18n="left"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">l</span><span class="shortcut-desc" data-i18n="right"></span></div>
       </div>
     </div>
     
     <div class="shortcut-help-section">
-      <h3>🎨 功能切换</h3>
+      <h3 data-i18n="featureToggle"></h3>
       <div class="shortcut-grid">
-        <div class="shortcut-item"><span class="shortcut-key">M</span><span class="shortcut-desc">切换布局</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc">切换主题</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">O</span><span class="shortcut-desc">切换大纲</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">P</span><span class="shortcut-desc">导出 PDF</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">M</span><span class="shortcut-desc" data-i18n="switchLayout"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">T</span><span class="shortcut-desc" data-i18n="switchTheme"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">O</span><span class="shortcut-desc" data-i18n="switchOutline"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">P</span><span class="shortcut-desc" data-i18n="exportPdfShortcut"></span></div>
       </div>
     </div>
     
     <div class="shortcut-help-section">
-      <h3>📑 快速跳转</h3>
+      <h3 data-i18n="quickJump"></h3>
       <div class="shortcut-grid">
-        <div class="shortcut-item"><span class="shortcut-key">1-6</span><span class="shortcut-desc">跳转到 H1-H6</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">1-6</span><span class="shortcut-desc" data-i18n="jumpToHeading"></span></div>
       </div>
     </div>
     
     <div class="shortcut-help-section">
-      <h3>🖼️ 其他</h3>
+      <h3 data-i18n="other"></h3>
       <div class="shortcut-grid">
-        <div class="shortcut-item"><span class="shortcut-key">?</span><span class="shortcut-desc">显示帮助</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">ESC</span><span class="shortcut-desc">关闭查看器/预览</span></div>
-        <div class="shortcut-item"><span class="shortcut-key">🖱️</span><span class="shortcut-desc">点击图片放大</span></div>
+        <div class="shortcut-item"><span class="shortcut-key">?</span><span class="shortcut-desc" data-i18n="showHelp"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">ESC</span><span class="shortcut-desc" data-i18n="closeViewer"></span></div>
+        <div class="shortcut-item"><span class="shortcut-key">🖱️</span><span class="shortcut-desc" data-i18n="clickToZoom"></span></div>
       </div>
     </div>
     
-    <div class="shortcut-help-tip">
-      按 <span class="shortcut-key">?</span> 随时打开此帮助
-    </div>
+    <div class="shortcut-help-tip" data-i18n="pressToShowHelp"></div>
   </div>
 </div>
 <article class="markdown-body" id="markdownBody">
@@ -376,7 +522,7 @@ function toggleOutline() {
   outlineVisible = !outlineVisible;
   panel.classList.toggle('visible', outlineVisible);
   body.classList.toggle('with-outline', outlineVisible);
-  toggleBtn.textContent = outlineVisible ? '✕ 关闭' : '📑 大纲';
+  toggleBtn.textContent = outlineVisible ? t('outlineClose') : t('outline');
   
   if (outlineVisible && outlineHeadings.length === 0) {
     generateOutline();
@@ -618,7 +764,7 @@ function exportPdf() {
   });
   
   // 显示"正在导出"提示，持续时间较长，等待完成消息
-  showToast('正在导出 PDF...', 5000);
+  showToast(t('exportingPdf'), 5000);
 }
 
 // Mermaid 流程图导出功能
@@ -631,8 +777,8 @@ function initMermaidExport() {
     
     var btn = document.createElement('button');
     btn.className = 'mermaid-export-btn';
-    btn.textContent = '📥 导出 PNG';
-    btn.title = '导出流程图为图片';
+    btn.textContent = t('exportPng');
+    btn.title = t('exportPng');
     btn.onclick = function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -657,7 +803,7 @@ function exportSingleMermaid(mermaidDiv) {
   var svg = mermaidDiv.querySelector('svg');
   
   if (!svg) {
-    showToast('流程图正在渲染中，请稍后', 3000);
+    showToast(t('mermaidRendering'), 3000);
     document.body.removeChild(container);
     return;
   }
@@ -668,7 +814,7 @@ function exportSingleMermaid(mermaidDiv) {
   container.appendChild(svgClone);
   
   // 使用 html2canvas 导出为图片
-  showToast('正在导出流程图...', 5000);
+  showToast(t('exportingMermaid'), 5000);
   
   html2canvas(container, {
     backgroundColor: getComputedStyle(document.body).backgroundColor || '#ffffff',
@@ -686,10 +832,10 @@ function exportSingleMermaid(mermaidDiv) {
     link.click();
     
     document.body.removeChild(container);
-    showToast('流程图导出成功', 3000);
+    showToast(t('mermaidExportSuccess'), 3000);
   }).catch(function(error) {
     document.body.removeChild(container);
-    showToast('导出失败: ' + error.message, 3000);
+    showToast(t('mermaidExportFailed') + ': ' + error.message, 3000);
   });
 }
 
@@ -703,7 +849,7 @@ function initCodeCopy() {
     
     var btn = document.createElement('button');
     btn.className = 'code-copy-btn';
-    btn.textContent = '复制';
+    btn.textContent = t('copy');
     btn.onclick = function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -716,17 +862,17 @@ function initCodeCopy() {
       var text = code.textContent || code.innerText;
       
       navigator.clipboard.writeText(text).then(function() {
-        btn.textContent = '已复制!';
+        btn.textContent = t('copied');
         btn.classList.add('copied');
         
         setTimeout(function() {
-          btn.textContent = '复制';
+          btn.textContent = t('copy');
           btn.classList.remove('copied');
         }, 2000);
       }).catch(function(err) {
-        btn.textContent = '复制失败';
+        btn.textContent = t('copyFailed');
         setTimeout(function() {
-          btn.textContent = '复制';
+          btn.textContent = t('copy');
         }, 2000);
       });
     };
@@ -743,14 +889,15 @@ window.chrome.webview.addEventListener('message', function(arg) {
   var data = arg.data;
   
   if (data && data.type === 'pdfExportSuccess') {
-    showToast('PDF 导出成功', 4000);
+    showToast(t('pdfExportSuccess'), 4000);
   } else if (data && data.type === 'pdfExportFailed') {
-    showToast('PDF 导出失败', 4000);
+    showToast(t('pdfExportFailed'), 4000);
   }
 });
 
 // 页面加载完成后生成大纲和初始化功能
 document.addEventListener('DOMContentLoaded', function() {
+  applyLang();
   generateOutline();
   initImageClick();
   initCodeCopy();
