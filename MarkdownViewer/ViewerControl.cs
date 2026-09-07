@@ -17,7 +17,6 @@ namespace MarkdownViewer
 {
     public partial class ViewerControl : UserControl
     {
-        private Encoding encoding = Encoding.UTF8;
         private const String TMPL_FILE_NAME = "markdown_tmpl.txt";
         private const String CSS_FILE_NAME = "markdown_css.txt";
 
@@ -554,7 +553,9 @@ namespace MarkdownViewer
         {
             try
             {
-                using (StreamReader sr = new StreamReader(fileName, encoding))
+                byte[] fileBytes = File.ReadAllBytes(fileName);
+                Encoding detectedEncoding = DetectEncoding(fileBytes);
+                using (var sr = new StreamReader(new MemoryStream(fileBytes), detectedEncoding, true))
                 {
                     String markdownContent = sr.ReadToEnd();
                     var pipeline = new MarkdownPipelineBuilder()
@@ -563,6 +564,7 @@ namespace MarkdownViewer
                         .UseYamlFrontMatter()
                         .UseFootnotes()
                         .UseHighlightJs()
+                        .DisableHtml()
                         .Build();
                     String markdownHTML = Markdown.ToHtml(markdownContent, pipeline);
                     markdownHTML = DecodeImagePath(markdownHTML);
@@ -574,11 +576,14 @@ namespace MarkdownViewer
                     var styleFilePath = buildDir + @"\" + CSS_FILE_NAME;
                     var style = File.ReadAllText(styleFilePath);
 
+                    // 前端资源目录的 file:// URL（本地化加载 KaTeX/Mermaid/highlight.js 等，替代 CDN）
+                    String assetsUrl = new Uri(Path.Combine(buildDir, "assets") + Path.DirectorySeparatorChar).AbsoluteUri;
+
                     String dirPath = Path.GetDirectoryName(fileName);
                     currentFileDir = dirPath; // Store for link resolution
                     // Escape backslashes for JavaScript string
                     String escapedDirPath = dirPath.Replace("\\", "\\\\");
-                    String html = markdownTmpl.Replace("{0}", escapedDirPath).Replace("{1}", style).Replace("{2}", markdownHTML);
+                    String html = markdownTmpl.Replace("{0}", escapedDirPath).Replace("{3}", assetsUrl).Replace("{1}", style).Replace("{2}", markdownHTML);
 
                     // Save to temp file and navigate to it
                     String tempFile = Path.Combine(Path.GetTempPath(), "markdownviewer_" + Path.GetFileName(fileName) + ".html");
@@ -639,6 +644,47 @@ namespace MarkdownViewer
                     }
                     return match.Value;
                 });
+        }
+
+        /// <summary>
+        /// 检测文本编码：优先 BOM，其次严格 UTF-8 验证，失败回退 GB18030
+        /// </summary>
+        private static Encoding DetectEncoding(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0)
+            {
+                return new UTF8Encoding(false);
+            }
+
+            // BOM 检测（StreamReader 会负责剥离，这里只决定无 BOM 时的默认）
+            if (bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
+            {
+                return new UTF8Encoding(false); // UTF-8 BOM
+            }
+            if (bytes.Length >= 2 &&
+                ((bytes[0] == 0xFF && bytes[1] == 0xFE) ||
+                 (bytes[0] == 0xFE && bytes[1] == 0xFF)))
+            {
+                return new UTF8Encoding(false); // UTF-16 LE/BE，交给 StreamReader 精确处理
+            }
+
+            // 无 BOM：尝试严格 UTF-8 解码，出现非法字节则回退 GBK/GB18030
+            try
+            {
+                new UTF8Encoding(false, true).GetCharCount(bytes);
+                return new UTF8Encoding(false);
+            }
+            catch (DecoderFallbackException)
+            {
+                try
+                {
+                    return Encoding.GetEncoding("GB18030");
+                }
+                catch
+                {
+                    return Encoding.Default;
+                }
+            }
         }
 
         /// <summary>

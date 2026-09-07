@@ -99,6 +99,9 @@
     <Content Include="markdown_tmpl.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="assets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -115,6 +118,7 @@ zip -q -m $(TargetName).zip Microsoft.Web.WebView2.Core.dll
 zip -q -m $(TargetName).zip Microsoft.Web.WebView2.WinForms.dll
 zip -q -m $(TargetName).zip Microsoft.Web.WebView2.Wpf.dll
 zip -q -m -r $(TargetName).zip runtimes/*
+zip -q -m -r $(TargetName).zip assets
 echo add dependency to package</PostBuildEvent>
   </PropertyGroup>
 </Project>

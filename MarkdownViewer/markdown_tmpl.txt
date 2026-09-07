@@ -7,8 +7,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <style>{1}</style>
-  <link href="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.3/styles/monokai.min.css" rel="stylesheet">
-  <link href="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.11.1/katex.min.css" type="text/css" rel="stylesheet" />
+  <link href="{3}monokai.min.css" rel="stylesheet">
+  <link href="{3}katex.min.css" type="text/css" rel="stylesheet" />
   <script>
     // 语言包
     var i18n = {
@@ -321,14 +321,14 @@
 <article class="markdown-body" id="markdownBody">
 {2}
 </article>                                                                  
-<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script src="{3}highlight.min.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
-<script defer src="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/katex.min.js"  crossorigin="anonymous"></script>
-<script defer src="https://cdn.bootcdn.net/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js" crossorigin="anonymous"
+<script defer src="{3}katex.min.js"></script>
+<script defer src="{3}auto-render.min.js"
     onload="renderMathInElement(document.body);"></script>
-<script defer src="https://cdn.bootcdn.net/ajax/libs/mermaid/11.12.0/mermaid.min.js"  crossorigin="anonymous"
+<script defer src="{3}mermaid.min.js"
                                                                          onload="mermaid.initialize({startOnLoad:true,flowchart:{useMaxWidth:false,htmlLabels:false},sequenceDiagram:{useMaxWidth:false,htmlLabels:false}});"></script>
-<script src="https://cdn.bootcdn.net/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="{3}html2canvas.min.js"></script>
 <script>
 // 阅读进度条功能
 function updateReadingProgress() {
