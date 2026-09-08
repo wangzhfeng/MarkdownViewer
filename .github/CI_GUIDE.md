@@ -95,7 +95,34 @@ git push origin v1.3.0
 
 ## 本地构建
 
-如果需要本地构建测试：
+项目根目录提供了 `Makefile`，可用 GNU make 一键构建（在 Git Bash 中运行）：
+
+```bash
+# 构建 Debug 版本
+make debug
+
+# 构建 Release 版本
+make release
+
+# 依次构建 Debug + Release
+make all
+
+# 仅还原 NuGet 包
+make restore
+
+# 清理构建产物
+make clean
+```
+
+Makefile 会自动探测 MSBuild 和 NuGet，也可用环境变量覆盖：
+
+```bash
+MSBUILD="/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" \
+NUGET=/c/tools/nuget.exe \
+make release
+```
+
+不使用 make 时，也可直接调用 MSBuild（需要 Visual Studio）：
 
 ```bash
 # Windows (需要 Visual Studio)

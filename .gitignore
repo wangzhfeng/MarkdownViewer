@@ -293,3 +293,6 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+
+# Makefile 本地构建工具目录
+.build-tools/
