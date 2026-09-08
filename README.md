@@ -65,12 +65,60 @@ Then, double-click to open `MarkdownViewer.zip` in Total Commander and follow th
 
 The latest version uses WebView2. If you are using an older operating system, you will need to install the WebView2 runtime.
 
-# About Usage
+# Building from Source
 
-Currently, the preview window cannot be closed using the ESC key. Please click the close button on the preview window to close it.
+## Prerequisites
+
+- Windows with Visual Studio 2017 or later (including the .NET Framework 4.8 development tools)
+- Git Bash (bundled with GNU Make)
+
+## Build
+
+A `Makefile` is provided at the repository root. Run in Git Bash:
+
+```bash
+make debug      # build the Debug version
+make release    # build the Release version
+make all        # build Debug + Release
+make restore    # restore NuGet packages only
+make clean      # clean build artifacts
+```
+
+The output ZIP (`MarkdownViewer.zip`) is generated at:
+
+- Debug: `MarkdownViewer/bin/Debug/`
+- Release: `MarkdownViewer/bin/Release/`
+
+MSBuild and NuGet are auto-detected, and can be overridden via environment variables:
+
+```bash
+MSBUILD=/path/to/MSBuild.exe NUGET=/path/to/nuget.exe make release
+```
+
+You can also build directly with MSBuild:
+
+```bash
+nuget restore MarkdownViewer.sln
+msbuild MarkdownViewer.sln -p:Configuration=Release -p:Platform="Any CPU"
+```
 
 
 # Version
+
+## v1.0.0 (2026-09-08)
+
+### Security
+
+- Disable inline HTML in Markdig to block script injection from untrusted Markdown files
+
+### Improvements
+
+- Auto-detect file encoding (UTF-8 / GBK) to fix garbled Chinese text
+- Bundle front-end libraries (KaTeX / Mermaid / Highlight.js) locally for offline use
+
+### Build
+
+- Add `Makefile` to build Debug / Release versions locally
 
 ## v0.6 (2026-03-17)
 

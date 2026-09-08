@@ -61,13 +61,59 @@ MarkdownViewer 是一款 Total Commander 的插件，用于浏览 markdown 文�
 
 最新版本使用了 WebView2，如果是老版本的操作系统，需要安装 WebView2 的运行时。
 
-# 使用说明
+# 从源码构建
 
-- 按 `ESC` 键关闭预览窗口
-- 按 `Ctrl+C` 复制选中内容
-- 按 `Ctrl+P` 打印或导出 PDF
+## 环境要求
+
+- Windows，安装 Visual Studio 2017 或更高版本（含 .NET Framework 4.8 开发工具）
+- Git Bash（自带 GNU Make）
+
+## 构建步骤
+
+项目根目录提供了 `Makefile`，在 Git Bash 中执行：
+
+```bash
+make debug      # 构建 Debug 版本
+make release    # 构建 Release 版本
+make all        # 依次构建 Debug + Release
+make restore    # 仅还原 NuGet 包
+make clean      # 清理构建产物
+```
+
+构建产物为 `MarkdownViewer.zip`，位于：
+
+- Debug：`MarkdownViewer/bin/Debug/`
+- Release：`MarkdownViewer/bin/Release/`
+
+MSBuild 与 NuGet 会自动探测，也可通过环境变量指定：
+
+```bash
+MSBUILD=/path/to/MSBuild.exe NUGET=/path/to/nuget.exe make release
+```
+
+也可直接使用 MSBuild：
+
+```bash
+nuget restore MarkdownViewer.sln
+msbuild MarkdownViewer.sln -p:Configuration=Release -p:Platform="Any CPU"
+```
 
 # 版本历史
+
+## v1.0.0 (2026-09-08)
+
+### 安全
+
+- Markdig 禁用内嵌 HTML，阻止不可信 Markdown 文件的脚本注入
+
+### 改进
+
+- 自动探测文件编码（UTF-8 / GBK），修复中文乱码
+- 前端库（KaTeX / Mermaid / Highlight.js）本地化打包，支持离线使用
+
+### 构建
+
+- 新增 `Makefile`，支持本地构建 Debug / Release 版本
 
 ## v0.6 (2026-03-17)
 
