@@ -296,3 +296,6 @@ __pycache__/
 
 # Makefile 本地构建工具目录
 .build-tools/
+
+.claude
+.workbuddy
