@@ -17,7 +17,7 @@ MarkdownViewer is a Total Commander plugin, using preview markdown file which su
 - Mermaid flowcharts and diagrams
 - Code syntax highlighting (Highlight.js)
 
-## Enhanced Features (v0.6)
+## Enhanced Features
 
 ### Document Outline
 

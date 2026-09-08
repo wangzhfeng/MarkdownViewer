@@ -14,7 +14,7 @@ MarkdownViewer 是一款 Total Commander 的插件，用于浏览 markdown 文�
 - Mermaid 流程图和图表
 - 代码语法高亮（Highlight.js）
 
-## 增强功能（v0.6）
+## 增强功能
 
 ### 文档大纲
 
