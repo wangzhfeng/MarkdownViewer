@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth" data-page-node-id="RaAjQKWGh34zHlGyYxp0h5">
+<head data-page-node-id="jQgRVTj9uCXUMn4l6HGwpR">
+  <meta charset="UTF-8" data-page-node-id="ha8gVgQIWXqBD7ekVvAG8G" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="xblnVDyyHTF2RSnLNCvHyT" />
+  <title>MarkdownViewer — Total Commander 的 Markdown 预览插件</title>
+  <meta name="description" content="MarkdownViewer 是一款 Total Commander 插件，在文件管理器中直接预览 Markdown 文件，支持语法高亮、KaTeX 数学公式、Mermaid 图表、代码高亮、文档大纲、Vim 导航与 PDF 导出。" data-page-node-id="aOGWjmJiyhHbszJQIqmkXO" />
+  <meta name="keywords" content="Total Commander, Markdown, 插件, 预览, KaTeX, Mermaid, Highlight.js, MarkdownViewer" data-page-node-id="HoOvR8PEfGAMVzxXOQy3gc" />
+  <link rel="canonical" href="https://wangzhfeng.github.io/MarkdownViewer/" data-page-node-id="XULZo761znkz3cQQudUaVq" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" data-page-node-id="GfCgKBk4oiZReBnmNKR37E" />
+  <meta property="og:title" content="MarkdownViewer — Total Commander 的 Markdown 预览插件" data-page-node-id="0BiKnzJJGmc1sWsAOfOHAe" />
+  <meta property="og:description" content="在 Total Commander 中直接预览 Markdown，支持数学公式、图表、代码高亮、文档大纲与 Vim 导航。" data-page-node-id="3BWKRGSocd0AavfByAyWhp" />
+  <meta property="og:url" content="https://wangzhfeng.github.io/MarkdownViewer/" data-page-node-id="s0T3sfMTeWREzo6v6E4Mrm" />
+  <meta property="og:image" content="https://wangzhfeng.github.io/MarkdownViewer/Doc/viewer.png" data-page-node-id="psJsY0HnhnQDlyd4FjO9HT" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" data-page-node-id="Xo1QWT4oN7FQmpJQNOFWOf" />
+  <meta name="twitter:title" content="MarkdownViewer — Total Commander 的 Markdown 预览插件" data-page-node-id="JurWfMPVl2KwOxOzrBKO2v" />
+  <meta name="twitter:description" content="在 Total Commander 中直接预览 Markdown，支持数学公式、图表、代码高亮、文档大纲与 Vim 导航。" data-page-node-id="dwJJ0eRnODqThBolyR2V0l" />
+  <meta name="twitter:image" content="https://wangzhfeng.github.io/MarkdownViewer/Doc/viewer.png" data-page-node-id="G0kXbWrr1ZddIzPF2hclGK" />
+
+  <link rel="icon" type="image/png" href="Doc/viewer.png" data-page-node-id="14zrtEBlxorj9KgxFp41Bu" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#2563EB',
+              light: '#3B82F6',
+              dark: '#1D4ED8',
+            },
+            accent: {
+              DEFAULT: '#06B6D4',
+              light: '#22D3EE',
+              dark: '#0891B2',
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', 'Arial', 'sans-serif'],
+            mono: ['SF Mono', 'JetBrains Mono', 'Fira Code', 'Consolas', 'Menlo', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 渐变背景 */
+    .bg-gradient-brand {
+      background: linear-gradient(135deg, #2563EB 0%, #06B6D4 100%);
+    }
+    .text-gradient-brand {
+      background: linear-gradient(135deg, #3B82F6 0%, #22D3EE 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    /* 焦点可见性 */
+    a:focus-visible, button:focus-visible, summary:focus-visible {
+      outline: 2px solid #3B82F6;
+      outline-offset: 2px;
+      border-radius: 0.375rem;
+    }
+    /* 平滑过渡 */
+    .transition-brand { transition: all 0.2s ease; }
+  </style>
+</head>
+
+<body class="bg-white text-slate-800 dark:bg-slate-950 dark:text-slate-200 antialiased" data-page-node-id="zYBjANV545GIl8aLYMST4C">
+  <!-- 跳过导航 -->
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:left-4 focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg" data-page-node-id="yPW3utMpFLA9KVrnrZycoX">跳到主内容</a>
+
+  <!-- 导航栏 -->
+  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur border-b border-slate-200 dark:border-slate-800" data-page-node-id="GwWw3e3h5f25RGYBhwZqoo">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16" aria-label="主导航" data-page-node-id="u0ypeL0uUD5dTUBMB2F851">
+      <a href="#" class="flex items-center gap-2 font-semibold text-lg" data-page-node-id="F3TY4CaNUmC7hqAiLuaH9s">
+        <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-brand text-white font-mono font-bold text-sm" data-page-node-id="5nnY0A70TIFZXD86W7T0CU">M</span>
+        <span data-page-node-id="FRKFWYzfq7nfLezyjNGh0k">Markdown<span class="text-gradient-brand" data-page-node-id="Av6HgtcLmLbzfbEZe4joTx">Viewer</span></span>
+      </a>
+      <div class="hidden md:flex items-center gap-6 text-sm font-medium" data-page-node-id="z6AYbgaDT7TwAFR0GGheAh">
+        <a href="#features" class="hover:text-primary-light transition-brand" data-page-node-id="IpQQawCTjKV93fiuO5ksj0">功能特性</a>
+        <a href="#demo" class="hover:text-primary-light transition-brand" data-page-node-id="dHEXRSnHq9BNRI0hS4LsDG">界面预览</a>
+        <a href="#install" class="hover:text-primary-light transition-brand" data-page-node-id="a5gcmCuNR9LipV5YurEuEm">安装</a>
+        <a href="#shortcuts" class="hover:text-primary-light transition-brand" data-page-node-id="8aBxON7Qr7zpYCx6siTsJo">快捷键</a>
+        <a href="#faq" class="hover:text-primary-light transition-brand" data-page-node-id="W7Z2t9BBJrGARknmFDkKG5">常见问题</a>
+      </div>
+      <div class="flex items-center gap-3" data-page-node-id="rhw7K0BZAnVBHVdvLMcOtq">
+        <button id="theme-toggle" type="button" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-brand" aria-label="切换主题" data-page-node-id="EFYjwqrLLaLCrEShugWwEy">
+          <svg id="icon-sun" class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="jYMTV6d9VFOzU87CwOruVi"><circle cx="12" cy="12" r="4" data-page-node-id="5IBdPqvi7g6G4KdxtFAwQM"/><path stroke-linecap="round" d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4" data-page-node-id="rZC2w3vPE0a1TAGXvhXJOG"/></svg>
+          <svg id="icon-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="RAOfBOgxD0o6ID8GmCZvW7"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" data-page-node-id="KrXIQsAyewROw6YiBHzJKh"/></svg>
+        </button>
+        <a href="#install" class="hidden sm:inline-flex items-center gap-1.5 bg-primary hover:bg-primary-dark text-white text-sm font-semibold px-4 py-2 rounded-lg transition-brand" data-page-node-id="QOX2QLRA7lge8GKrywFDmC">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="JdqzGpImP0dyRDsFf51OpV"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 10l5 5 5-5M12 15V3" data-page-node-id="MuD7u6hIUdKApwtfdsODGr"/></svg>
+          立即下载
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main" data-page-node-id="5TlaG9vMV6EyvXahpiKLOC">
+    <!-- Hero -->
+    <section class="relative overflow-hidden" data-page-node-id="RPBOO3WxrEURxJSBX9r8N9">
+      <div class="absolute inset-0 bg-gradient-brand opacity-5 dark:opacity-10" data-page-node-id="2NhjHSSCzVSxRiaVnVwAho"></div>
+      <div class="relative max-w-6xl mx-auto px-4 sm:px-6 py-20 lg:py-28 grid lg:grid-cols-2 gap-12 items-center" data-page-node-id="6Rrve5pnc6lGpxxQE6dQqt">
+        <div data-page-node-id="mHniAXD8pvENMvv3oWqCVI">
+          <p class="inline-flex items-center gap-2 text-sm font-medium text-primary dark:text-accent-light bg-primary/10 dark:bg-accent/10 px-3 py-1 rounded-full mb-6" data-page-node-id="nFnPqXaPpffbijoFbyPq5W">
+            <span class="w-2 h-2 rounded-full bg-primary dark:bg-accent-light" data-page-node-id="hwls3vhCVND9RBhGDtOLLv"></span>
+            Total Commander 插件 · 开源免费
+          </p>
+          <h1 class="text-4xl sm:text-5xl font-bold tracking-tight leading-tight" data-page-node-id="RgCyvwF3BtsFNT4Eg9cBEY">
+            在 Total Commander 里<br class="hidden sm:block" data-page-node-id="HUd3GYuuWcsxiobR0so3A7" />
+            <span class="text-gradient-brand" data-page-node-id="ZBhLrifV6natj2HQC34nEv">流畅预览 Markdown</span>
+          </h1>
+          <p class="mt-6 text-lg text-slate-600 dark:text-slate-400 leading-relaxed" data-page-node-id="OSCcfGuPjw2Nd8zw2MPjX2">
+            MarkdownViewer 让你无需离开文件管理器，即可查看 <code class="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded" data-page-node-id="9rDcBWf05unM8C3bz0jluL">.md</code> / <code class="font-mono text-sm bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded" data-page-node-id="5wXFs7ZErJ86DMgSPPNUGw">.markdown</code> 文件。数学公式、流程图、代码高亮、文档大纲、Vim 导航一应俱全。
+          </p>
+          <div class="mt-8 flex flex-wrap gap-4" data-page-node-id="pt8ijIU3NH7SHrndiAwGCr">
+            <a href="#install" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-3 rounded-xl shadow-lg shadow-primary/25 transition-brand" data-page-node-id="PhQF3nohJgaPcAUr16JF2E">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="4SJiaxgTjyUDFDdSiprACi"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 10l5 5 5-5M12 15V3" data-page-node-id="DxYqHhvWFlMuHX41sHqQfq"/></svg>
+              下载安装
+            </a>
+            <a href="https://github.com/wangzhfeng/MarkdownViewer" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold px-6 py-3 rounded-xl transition-brand" data-page-node-id="uHXHgh5BTq2SMd4ZEAty9g">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" data-page-node-id="KBLHsKqIM4deRsowG2mlEv"><path d="M12 2C6.48 2 2 6.58 2 12.24c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.88-.01-1.72-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.63.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.35 9.35 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.8-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.02 10.02 0 0 0 22 12.24C22 6.58 17.52 2 12 2z" data-page-node-id="Hw2PTUnc3sNgMaFE4hnWQY"/></svg>
+              查看源码
+            </a>
+          </div>
+          <dl class="mt-10 grid grid-cols-3 gap-6 text-center sm:text-left" data-page-node-id="0uoqBr0XHoWSNn0wnRAFJF">
+            <div data-page-node-id="oGsH9pGk6PBtzHFb53vBQw">
+              <dt class="text-2xl font-bold text-primary" data-page-node-id="mDgw6UWmDnHBV19UJu9zyi">10+</dt>
+              <dd class="text-sm text-slate-500 dark:text-slate-400" data-page-node-id="vOsnUkhSoP27MzwpHMIWIu">核心功能</dd>
+            </div>
+            <div data-page-node-id="8E6uc1vmPd9hyxi6WZE313">
+              <dt class="text-2xl font-bold text-primary" data-page-node-id="MdZCuczVBi6AVHAhMKObfw">3</dt>
+              <dd class="text-sm text-slate-500 dark:text-slate-400" data-page-node-id="zOAUZnEhVCiwIehIqQubv3">渲染引擎集成</dd>
+            </div>
+            <div data-page-node-id="qOyn5krdUEIPHJX1baYv8K">
+              <dt class="text-2xl font-bold text-primary" data-page-node-id="3FM3i4WC0vV8RrLa4tnMbY">100%</dt>
+              <dd class="text-sm text-slate-500 dark:text-slate-400" data-page-node-id="2WuouSfuu1I2Nlx7QU0vUf">离线可用</dd>
+            </div>
+          </dl>
+        </div>
+        <div class="relative" data-page-node-id="a9e3C8oIHON4l015FK6PlD">
+          <div class="rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden bg-slate-50 dark:bg-slate-900" data-page-node-id="GjQHyuZrvxdiBjr6Mmg7ro">
+            <div class="flex items-center gap-2 px-4 py-3 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700" data-page-node-id="qEA0YSuaUNfcmmCjFsMJKU">
+              <span class="w-3 h-3 rounded-full bg-red-400" data-page-node-id="wL4xKefkAHQLhRFpaYf4gc"></span>
+              <span class="w-3 h-3 rounded-full bg-yellow-400" data-page-node-id="BmjPEraNBr2qtESCR74yQ8"></span>
+              <span class="w-3 h-3 rounded-full bg-green-400" data-page-node-id="XL93IqmQPKfJzTKFXfa3Ag"></span>
+              <span class="ml-3 text-xs font-mono text-slate-500 dark:text-slate-400" data-page-node-id="HwPrYoBcyflNjjfudDZY0w">README.md — MarkdownViewer</span>
+            </div>
+            <div class="p-6 font-mono text-sm leading-relaxed" data-page-node-id="fiRqI1x821NodxJL40gkxx">
+              <p class="text-slate-500 dark:text-slate-400" data-page-node-id="OsJh0ptet1e8V3XtVweRUc"># 欢迎使用 MarkdownViewer</p>
+              <p class="mt-3" data-page-node-id="wmRDWCtbrnjdicDVi7VxHq"><span class="text-emerald-600 dark:text-emerald-400" data-page-node-id="eGcSGCLAIpLwY5VXVsppE8">## 数学公式</span></p>
+              <p class="text-slate-700 dark:text-slate-300" data-page-node-id="aeoLxIZQkQVWnk80JdLfNI">质能方程：$E = mc^2$</p>
+              <p class="mt-3" data-page-node-id="yNE2c4VR4iOpQ18fR1zg3s"><span class="text-emerald-600 dark:text-emerald-400" data-page-node-id="iDE0bughQUMDxPxULCoCI9">## 流程图</span></p>
+              <pre class="mt-2 text-indigo-500 dark:text-indigo-400" data-page-node-id="n7YDyazNSS3YEKVLrxgsL2">graph LR
+  A[开始] --> B{判断}
+  B -->|是| C[执行]
+  B -->|否| D[结束]</pre>
+              <p class="mt-3" data-page-node-id="DTCxrkc9za1s4qAePuCd1S"><span class="text-emerald-600 dark:text-emerald-400" data-page-node-id="NwiBd3dGvXQKSEAHPBxa6q">## 代码高亮</span></p>
+              <pre class="mt-2 text-amber-600 dark:text-amber-400" data-page-node-id="WAutQcjtqXZshUvA2rBtAP"><code data-page-node-id="Anhfxb56WaNUS663GK5OAC">func hello() {
+  fmt.Println("Hello, Markdown!")
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 功能特性 -->
+    <section id="features" class="max-w-6xl mx-auto px-4 sm:px-6 py-20" data-page-node-id="RhPaJO8DDWGMAuTP9KjMDU">
+      <div class="text-center max-w-2xl mx-auto" data-page-node-id="9VBnSrAfGmv1Rzp6jbMmNn">
+        <h2 class="text-3xl sm:text-4xl font-bold" data-page-node-id="bW2kpHJM51ffwyirnLFDmm">功能特性</h2>
+        <p class="mt-4 text-lg text-slate-600 dark:text-slate-400" data-page-node-id="JlcPKiNpyod3FhIsKu25sP">不只是渲染 Markdown，更是一套完整的阅读体验。</p>
+      </div>
+      <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6" data-page-node-id="w7krMMtH26ziCYJM89CDbI">
+        <!-- 卡片 -->
+        <div class="group p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:shadow-lg transition-brand" data-page-node-id="8qHnZp46XbSPkQP2xAGLud">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4" data-page-node-id="1XX1kKxXubetjXow1S06uJ">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="6lFx3rRqrYTIbid0nVP1Zd"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h10" data-page-node-id="2HJh0OdEz4gavGQ5AWjfR2"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="aIzxECnxvo777i0SLACuBI">语法高亮预览</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="Ue9pc3CgfyrArol4pz6nTm">基于 Markdig 渲染管线，支持脚注、Emoji、YAML Front Matter，禁用内联 HTML 阻止脚本注入。</p>
+        </div>
+        <div class="group p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:shadow-lg transition-brand" data-page-node-id="7uapo4Zk9Hss8U5MHV9BH3">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4" data-page-node-id="NnjOJkqMbywBZqYZrMsnP8">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="o5PPVgVWBRRuWdhEwmbynQ"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h10M7 12h10M7 17h6" data-page-node-id="ThnH3DTlr6q6wL6LUn0ZkU"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="iKYC300PCKytYpGnjrBlF6">KaTeX 数学公式</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="3AoB9B1GQFXLMzpDe2SDWd">完整支持 LaTeX 数学公式渲染，行内与块级公式都能清晰展示。</p>
+        </div>
+        <div class="group p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:shadow-lg transition-brand" data-page-node-id="6X5HTEP0jkh8inCFRrjZc4">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4" data-page-node-id="kH5mCkz70viNP7oNDxMIoM">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="xsmIgAIm08iJXY1WzlTLo0"><circle cx="5" cy="6" r="2" data-page-node-id="mY6ClsGGKOEi86x1JRu0yL"/><circle cx="19" cy="6" r="2" data-page-node-id="7gsfe2E11FoKHxuLVjpank"/><circle cx="12" cy="18" r="2" data-page-node-id="aReV6eDCMnLnIsU58oOVR6"/><path d="M7 6h10M5 8v8M19 8v8M7 18h10" data-page-node-id="zuJhVOqrsomtJtOqrlf0Yq"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="dpszN3w7Yfz4nxZJqf2AkH">Mermaid 图表</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="tCbBwhHXiTHCHHUpBbMbD8">流程图、时序图、甘特图等 Mermaid 图表直接渲染，无需导出。</p>
+        </div>
+        <div class="group p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:shadow-lg transition-brand" data-page-node-id="kSYGZz689aZlQPbD12WvFI">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4" data-page-node-id="Xt3RHisnycbgMRzy1DvBjT">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="pWsWzHu7HEBzN9smSm6zBC"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l-3 3 3 3M16 9l3 3-3 3M13 5l-2 14" data-page-node-id="flywHq22GB1D8x6ndC6xST"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="u9wxzKPuAG5izvrbeUqPNP">代码语法高亮</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="sGJHJBjScKoyeryAgVpgLQ">集成 Highlight.js，多种编程语言代码块都能获得清晰的高亮着色。</p>
+        </div>
+        <div class="group p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:shadow-lg transition-brand" data-page-node-id="TEgh2KwNDIYLVQB1M06Yc5">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4" data-page-node-id="OeYuYUIBDzgFRpZDX08cRF">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="eS0wl01a3pEDqxnvzCxpXJ"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" data-page-node-id="0qenaj9hz9mb0LCFGheVMO"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="QEtuwezjS8DukcCONaS8n4">文档大纲导航</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="lieInTsot4vM99iCAwLm4H">H1–H6 标题结构一目了然，点击平滑跳转，滚动时自动高亮当前标题。</p>
+        </div>
+        <div class="group p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:shadow-lg transition-brand" data-page-node-id="l5iR8DlBb5r44VxFckkTuE">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4" data-page-node-id="bQb5XhXSVzZYCHOFYMHQew">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="1HizCCSpVfG7aqxKn1uc1m"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.6 2A9 9 0 1 1 12 3a9 9 0 0 1 9 9z" data-page-node-id="zO8F3TVJSvwridfTpRJGmS"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="FtBFLyM91FVtMGmPLK6jvy">主题与布局切换</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="kOepTOsrEZZW6wsqBi651a">浅色 / 深色主题一键切换，居中窄栏 / 全文宽屏两种布局模式。</p>
+        </div>
+        <div class="group p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:shadow-lg transition-brand" data-page-node-id="xWNM8SaZMOhDBofc2ZrUJK">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4" data-page-node-id="sZsfCCJXuxJl0YHJDqisA7">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="jfG7AzBDAj3H2LbDQnRn2F"><path stroke-linecap="round" stroke-linejoin="round" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" data-page-node-id="NDnECAv1icevOIfXrgG7Pi"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="62BtcIopXkdmXE5NoICaCc">Vim 风格键盘导航</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="qwbhkBEuGqCAG5bbBatAGN">j/k 行滚动、d/u 半页、f/b 整页、gg/G 首尾，还有 h/l 横向滚动。</p>
+        </div>
+        <div class="group p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:shadow-lg transition-brand" data-page-node-id="EaIjvEH1k03Q4JusfC4yQc">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4" data-page-node-id="kmIxnJl6cokbtM9EIbOQp1">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="SDOiwLpW3nOL9xUgqEhNTH"><path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M4 4h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H8l-4 4V5a1 1 0 0 1 1-1z" data-page-node-id="O0f0aMwSQ6Uq7Yq77pJq3r"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="te0EAyuUWJWb2YOdL8zhFO">导出 PDF 与链接跳转</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="0PBHDbBgvnh8LEmBX6acBg">按 P 键导出 PDF，点击 Markdown 链接在文件间跳转，外链用默认浏览器打开。</p>
+        </div>
+        <div class="group p-6 rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-primary/50 hover:shadow-lg transition-brand" data-page-node-id="HiaozMXzrRWrI6I25ZIsPU">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4" data-page-node-id="MW0IhjaC2DdoYRPegbDT82">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="QaKjoLEqxGsqn1QfwLEhRy"><rect x="3" y="3" width="18" height="18" rx="2" data-page-node-id="D3LnizVRp7aKR88tPWT9n2"/><circle cx="8.5" cy="8.5" r="1.5" data-page-node-id="eVYxNC4GZ5Th1LKIa1SXxt"/><path d="M21 15l-5-5L5 21" data-page-node-id="YyyeqEeRdasBTPvgsdTZnw"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="f6siRPrY8njiDr7qEK4fKv">图片与阅读体验</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="fOpZJGc5XUcVzCiBU2Umjl">点击图片全屏查看，alt 文本作为标题，顶部渐变蓝色阅读进度条。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 界面预览 -->
+    <section id="demo" class="bg-slate-50 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800" data-page-node-id="yrM9ZQWOa7j4YWU7Yf77PE">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-20" data-page-node-id="ggHHDzPbDboJpXkt1gGYs1">
+        <div class="text-center max-w-2xl mx-auto" data-page-node-id="xiMVFyhqjSe2snj43tfMrj">
+          <h2 class="text-3xl sm:text-4xl font-bold" data-page-node-id="jGggtVL6EX6LMIIeZyFzRj">界面预览</h2>
+          <p class="mt-4 text-lg text-slate-600 dark:text-slate-400" data-page-node-id="sMNDs16eyBCqTKh6a7BYhr">在实际使用中的效果，所见即所得。</p>
+        </div>
+        <div class="mt-12 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl" data-page-node-id="PrByddDpfVqTMLHLBMhNBA">
+          <img src="Doc/viewer.gif" alt="MarkdownViewer 在 Total Commander 中预览 Markdown 文件的演示动画" loading="lazy" class="w-full h-auto" data-page-node-id="wN7OHaB5GUmTaLVAIXvgGU" />
+        </div>
+        <p class="mt-4 text-center text-sm text-slate-500 dark:text-slate-400" data-page-node-id="itHKToEiVIVdQIpOxAH7yH">MarkdownViewer 在 Total Commander 中的实际运行效果</p>
+      </div>
+    </section>
+
+    <!-- 安装 -->
+    <section id="install" class="max-w-6xl mx-auto px-4 sm:px-6 py-20" data-page-node-id="7W6L2nX5cR8SPJflP0VBN6">
+      <div class="text-center max-w-2xl mx-auto" data-page-node-id="1ujrowSrQeAdteJ0qfQlly">
+        <h2 class="text-3xl sm:text-4xl font-bold" data-page-node-id="7OSWQmsrLYuYRToH6wYATt">安装指南</h2>
+        <p class="mt-4 text-lg text-slate-600 dark:text-slate-400" data-page-node-id="rXBs5raB3M7H1EaPeLuJtD">三步完成安装，即刻开始预览 Markdown。</p>
+      </div>
+      <div class="mt-12 grid lg:grid-cols-3 gap-6" data-page-node-id="jX7X67KSjf1QeFQinyxnCj">
+        <div class="relative p-6 rounded-2xl border border-slate-200 dark:border-slate-800" data-page-node-id="M2ClAJ25unnpJB8RnttSyX">
+          <div class="w-10 h-10 rounded-full bg-gradient-brand text-white font-bold flex items-center justify-center mb-4" data-page-node-id="G6kt3ODUW9MN3JlwLfYb1B">1</div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="mqQq35pgxJUSUZgZFomQSH">安装 .NET 运行时</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="zVWAsAkArf7oErda8NyShl">本插件基于 .NET 平台，需要先安装对应的运行时接口。下载并双击运行安装程序即可。</p>
+          <a href="Doc/TcPluginSetup.msi" class="mt-4 inline-flex items-center gap-1.5 text-primary hover:text-primary-dark font-medium text-sm transition-brand" data-page-node-id="I6bz734uWsQ5IQAEE3A6UT">下载 TcPluginSetup.msi <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="13GNTsEMh4Gzfrw9dr4a6u"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" data-page-node-id="TJrO7gGsFzchZVdzvvtNLj"/></svg></a>
+        </div>
+        <div class="relative p-6 rounded-2xl border border-slate-200 dark:border-slate-800" data-page-node-id="HKlq3y5TvasxBnDRNH4wZ8">
+          <div class="w-10 h-10 rounded-full bg-gradient-brand text-white font-bold flex items-center justify-center mb-4" data-page-node-id="XOz3qF7UMWX8mUl7kpF3Ci">2</div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="wJ6vMmu2UHDwX8K5Bib6KS">安装 WebView2 运行时</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="Hq5XjiO6qxBknlN8uRowER">最新版本使用 WebView2 渲染引擎。如果你使用的是较旧的操作系统，需先安装 WebView2 运行时。</p>
+        </div>
+        <div class="relative p-6 rounded-2xl border border-slate-200 dark:border-slate-800" data-page-node-id="kJfF998spa41kjBlBWHSEd">
+          <div class="w-10 h-10 rounded-full bg-gradient-brand text-white font-bold flex items-center justify-center mb-4" data-page-node-id="N9l5vHsG3VDHi2o5O7ideH">3</div>
+          <h3 class="text-lg font-semibold mb-2" data-page-node-id="E55dY3CwSOPglmkLNttaQ8">在 Total Commander 中安装插件</h3>
+          <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="QEOgVVYThlll2tEjCTTfp5">在 Total Commander 中双击打开 <code class="font-mono text-sm" data-page-node-id="o3PUvxH1XZLd52EKLcG7AQ">MarkdownViewer.zip</code>，按提示完成插件安装即可。</p>
+        </div>
+      </div>
+      <div class="mt-10 text-center" data-page-node-id="aOxs72HnUWSSzomDQEh7Tp">
+        <a href="https://github.com/wangzhfeng/MarkdownViewer/releases" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white font-semibold px-8 py-3 rounded-xl shadow-lg shadow-primary/25 transition-brand" data-page-node-id="0zp0F2KV9GEGUDsB9Al37f">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="9jMkqXw9O1LfKfpwO1SVpe"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M7 10l5 5 5-5M12 15V3" data-page-node-id="jDXqsQE7OiH04eyA05gcpv"/></svg>
+          前往 GitHub Releases 下载
+        </a>
+      </div>
+    </section>
+
+    <!-- 快捷键 -->
+    <section id="shortcuts" class="bg-slate-50 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800" data-page-node-id="TlaSzszBwaLTUHNn5zgm4d">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-20" data-page-node-id="rKL8ZBLi7o9w7WeJ0xBLxL">
+        <div class="text-center max-w-2xl mx-auto" data-page-node-id="c5gJYWGMjJJ0ME9lae0mpJ">
+          <h2 class="text-3xl sm:text-4xl font-bold" data-page-node-id="Aj0NdoKfF0rlltNuSGMVMX">快捷键一览</h2>
+          <p class="mt-4 text-lg text-slate-600 dark:text-slate-400" data-page-node-id="rrxQv79fnB20FzBefCPmrA">双手不离键盘，流畅阅读每一份文档。</p>
+        </div>
+        <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-4" data-page-node-id="bwaxDUYsHg9fAXWagReFEE">
+          <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800" data-page-node-id="ZHGsWL6L4yML8oDXD4NIVi">
+            <span class="text-sm text-slate-600 dark:text-slate-400" data-page-node-id="YkAVwC4bkSm0ABzXwGfLSP">切换主题</span>
+            <kbd class="px-2.5 py-1 font-mono text-sm font-semibold bg-slate-100 dark:bg-slate-800 rounded-lg" data-page-node-id="tUVR0C2zHKd7AcBynYilp4">T</kbd>
+          </div>
+          <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800" data-page-node-id="8igQcaaMNKmk6egpxeCHRQ">
+            <span class="text-sm text-slate-600 dark:text-slate-400" data-page-node-id="yEv0WgXGAlSfLogK3tNMEh">切换布局</span>
+            <kbd class="px-2.5 py-1 font-mono text-sm font-semibold bg-slate-100 dark:bg-slate-800 rounded-lg" data-page-node-id="5m2JuEKKly7xARfee3Pumh">M</kbd>
+          </div>
+          <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800" data-page-node-id="A2PCkzGHHCgtQCaQy828Gb">
+            <span class="text-sm text-slate-600 dark:text-slate-400" data-page-node-id="EUf43ueTJrWiEhBHtse2FA">切换大纲</span>
+            <kbd class="px-2.5 py-1 font-mono text-sm font-semibold bg-slate-100 dark:bg-slate-800 rounded-lg" data-page-node-id="rm0R9kwnDLOyQuHUwNsZxk">O</kbd>
+          </div>
+          <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800" data-page-node-id="o9rCUL0Je0Q3K8hrvrBYCd">
+            <span class="text-sm text-slate-600 dark:text-slate-400" data-page-node-id="DiRsPbWyNuq7GgVydgHvQG">导出 PDF</span>
+            <kbd class="px-2.5 py-1 font-mono text-sm font-semibold bg-slate-100 dark:bg-slate-800 rounded-lg" data-page-node-id="9EtwBPoE2Z8p9JCkZCeijJ">P</kbd>
+          </div>
+          <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800" data-page-node-id="ZitI8yVz61Jd5vEGeMQs3q">
+            <span class="text-sm text-slate-600 dark:text-slate-400" data-page-node-id="FejNEwZSHVwB0NlPAiSAXB">快捷键帮助</span>
+            <kbd class="px-2.5 py-1 font-mono text-sm font-semibold bg-slate-100 dark:bg-slate-800 rounded-lg" data-page-node-id="jjSgocwe26eOvp3JZBNgRu">?</kbd>
+          </div>
+          <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800" data-page-node-id="3IxENufREJdDi6ZDzwUB1D">
+            <span class="text-sm text-slate-600 dark:text-slate-400" data-page-node-id="tuHhxHkAN6EZkHBxGzjJy9">行滚动</span>
+            <kbd class="px-2.5 py-1 font-mono text-sm font-semibold bg-slate-100 dark:bg-slate-800 rounded-lg" data-page-node-id="THvQgwEIJr3HuN7ljSh41n">j / k</kbd>
+          </div>
+          <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800" data-page-node-id="tuiLC2ym4aJfZ7WnMVdPsU">
+            <span class="text-sm text-slate-600 dark:text-slate-400" data-page-node-id="h7CdxZkAx1DKBKFGY0locj">半页 / 整页</span>
+            <kbd class="px-2.5 py-1 font-mono text-sm font-semibold bg-slate-100 dark:bg-slate-800 rounded-lg" data-page-node-id="D4SJeII9fiUk0NvnclVZpS">d/u · f/b</kbd>
+          </div>
+          <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800" data-page-node-id="vLuMA1nRy3CXF7agbZlCWE">
+            <span class="text-sm text-slate-600 dark:text-slate-400" data-page-node-id="ZhZN0Cv0mpUDntKXy2czMD">顶部 / 底部</span>
+            <kbd class="px-2.5 py-1 font-mono text-sm font-semibold bg-slate-100 dark:bg-slate-800 rounded-lg" data-page-node-id="qaqWpjx8X8w6kdNcYPn1Zd">gg / G</kbd>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 常见问题 -->
+    <section id="faq" class="max-w-3xl mx-auto px-4 sm:px-6 py-20" data-page-node-id="jVFwxjYmbhNOzMEqutjlXm">
+      <div class="text-center" data-page-node-id="H91awckVUfKJA685yFOxff">
+        <h2 class="text-3xl sm:text-4xl font-bold" data-page-node-id="DSVMNIJRvQETPifh1AlG0e">常见问题</h2>
+      </div>
+      <div class="mt-12 space-y-4" data-page-node-id="Zk5IWcBVGfLcAHszFeuYOa">
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden" data-page-node-id="Ovr1sefQOCfD0Bf4YaxvdI">
+          <summary class="flex items-center justify-between cursor-pointer list-none p-5 font-medium" data-page-node-id="fI5AmjpX532AAKmm1oqPK5">
+            支持哪些 Markdown 文件后缀？
+            <svg class="w-5 h-5 shrink-0 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="JV4UzUtoZmecVD5DqgYDq0"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" data-page-node-id="9YgowLpmB1bDTbIwzwiYD2"/></svg>
+          </summary>
+          <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="CCOeEAHwP1TZgF4MCHbDNE">
+            支持 <code class="font-mono" data-page-node-id="whjG7VMV8HN53KGqWs01PJ">.md</code> 和 <code class="font-mono" data-page-node-id="HtMRp0UDqEXuA5SdMz0U8d">.markdown</code> 后缀的 Markdown 文件。插件通过 DetectString 自动识别并触发预览。
+          </div>
+        </details>
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden" data-page-node-id="kUr2j7K9a73RuizTJ6JChO">
+          <summary class="flex items-center justify-between cursor-pointer list-none p-5 font-medium" data-page-node-id="pGbqHrufhvtO5bsPbsDQ3F">
+            为什么需要安装 WebView2 运行时？
+            <svg class="w-5 h-5 shrink-0 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="XbnYM0mJdZS6UgsACUmoBD"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" data-page-node-id="gBplh7KAIEqyCLVgrhwIc1"/></svg>
+          </summary>
+          <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="ndYdcusJGs5tgwvWBOo6pj">
+            最新版本改用 WebView2（基于 Microsoft Edge 内核）作为渲染引擎，以获得更好的渲染效果和兼容性。较新的 Windows 10/11 系统通常已内置，较旧的系统需要手动安装。
+          </div>
+        </details>
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden" data-page-node-id="2er0MHBgXcnfRV5tIVtKH3">
+          <summary class="flex items-center justify-between cursor-pointer list-none p-5 font-medium" data-page-node-id="KZU4BdDo1McfSTnTb5vedY">
+            支持中文文件吗？会不会乱码？
+            <svg class="w-5 h-5 shrink-0 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="cgAIa4j4Z85C1BF7lvelGK"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" data-page-node-id="GgdTUe7J3hEUNHqdHzv49U"/></svg>
+          </summary>
+          <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="ZXKca80TvJJajGfBx5zdl7">
+            完全支持。v1.0.0 已加入文件编码自动检测（UTF-8 / GBK / GB18030），中文 Markdown 文件不会再出现乱码。
+          </div>
+        </details>
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden" data-page-node-id="qCn1GpqNoLNCiTwxPsQQUX">
+          <summary class="flex items-center justify-between cursor-pointer list-none p-5 font-medium" data-page-node-id="objv0f6aiZmU9n1QGNBhsH">
+            需要联网才能使用吗？
+            <svg class="w-5 h-5 shrink-0 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="coaQW5BdhtYBaI2qr9hT6O"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" data-page-node-id="CD5hOOJ8WdC6WW8wNKEnNR"/></svg>
+          </summary>
+          <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="hL5v4brF9gMaseAnlLgUty">
+            不需要。KaTeX、Mermaid、Highlight.js 等前端库已本地打包，完全离线可用，无需联网加载任何外部资源。
+          </div>
+        </details>
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden" data-page-node-id="sxlEC6Xo8vqprXkIoIdTLI">
+          <summary class="flex items-center justify-between cursor-pointer list-none p-5 font-medium" data-page-node-id="oF7C2CqpRN1J2abypC4G8a">
+            可以自己从源码构建吗？
+            <svg class="w-5 h-5 shrink-0 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="K359vJQ2DI4JOnaunJy5SR"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" data-page-node-id="xGIkKYkDvWdAnWxKTagCHm"/></svg>
+          </summary>
+          <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="PY9iKRjf7EMCJGYxXxbqHG">
+            可以。项目基于 C# 与 .NET Framework 4.8，使用 Visual Studio 2017+ 即可构建。仓库根目录提供了 Makefile，运行 <code class="font-mono" data-page-node-id="ZqF7v8jFgyIq9UQq951J1G">make release</code> 即可生成 Release 版本。
+          </div>
+        </details>
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden" data-page-node-id="ABYTixTCmpd0r08IaHHXgI">
+          <summary class="flex items-center justify-between cursor-pointer list-none p-5 font-medium" data-page-node-id="uI542w6qjXuutP7dOKqQuB">
+            支持哪些渲染特性？
+            <svg class="w-5 h-5 shrink-0 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="eOL3JROixA3hCqhkHCScGI"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" data-page-node-id="H6TZwBarnvKYa41YwKjgeG"/></svg>
+          </summary>
+          <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed" data-page-node-id="eEKXsWXSCRV4WlVzxF2f42">
+            基于 Markdig 渲染管线，支持脚注、Emoji、YAML Front Matter，并集成 KaTeX 数学公式、Mermaid 图表和 Highlight.js 代码高亮。为安全起见，内联 HTML 已禁用，可阻止恶意脚本注入。
+          </div>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50" data-page-node-id="pkEoCUPjMHXbc1lX1Cww9E">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12" data-page-node-id="Jx4dVaZsoOtOG2eFvSFKNA">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6" data-page-node-id="847sXMecOcO1HDXcJcob1Y">
+        <div class="flex items-center gap-2 font-semibold" data-page-node-id="Gd1CS938NwNcPt8XFYSZu5">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-brand text-white font-mono font-bold text-sm" data-page-node-id="tHJXWiigaFMhMPc8KkwM9L">M</span>
+          <span data-page-node-id="pSQJESUByvXRjTJB1BTH2A">Markdown<span class="text-gradient-brand" data-page-node-id="5qJnAq0EZpoSbSVhKQbmtw">Viewer</span></span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400" data-page-node-id="LZNTfencXEa3H2C58CFaCL">
+          <a href="https://github.com/wangzhfeng/MarkdownViewer" target="_blank" rel="noopener" class="hover:text-primary-light transition-brand" data-page-node-id="0AJ2AB2HRLrTfYPEhsWPMJ">GitHub</a>
+          <a href="https://github.com/wangzhfeng/MarkdownViewer/issues" target="_blank" rel="noopener" class="hover:text-primary-light transition-brand" data-page-node-id="ZncnxNgrwWJrKYe7QmiM8E">问题反馈</a>
+          <a href="https://github.com/wangzhfeng/MarkdownViewer/releases" target="_blank" rel="noopener" class="hover:text-primary-light transition-brand" data-page-node-id="geNqk3gUrkmXLBJ4pRCUdn">版本发布</a>
+        </div>
+      </div>
+      <div class="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 dark:text-slate-400" data-page-node-id="H6RI1vOKBOIPLlNZXQE1B3">
+        <p data-page-node-id="KZgkHXmWuJzl3Hqy2yFK8I">© <span id="year" data-page-node-id="5Jr11nOaYLuFvLv5WMKLqn"></span> MarkdownViewer. 基于 MIT License 开源。</p>
+        <p data-page-node-id="1c2h8H1Dpr57eB3GJ1ryUY">Built for Total Commander users.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 主题切换脚本 -->
+  <script>
+    // 主题切换（三态：light / dark / system）
+    (function () {
+      const html = document.documentElement;
+      const toggle = document.getElementById('theme-toggle');
+      const KEY = 'markdownviewer-theme';
+
+      function applyTheme(mode) {
+        const isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        html.classList.toggle('dark', isDark);
+      }
+
+      // 初始化：默认跟随系统
+      let mode = localStorage.getItem(KEY) || 'system';
+      applyTheme(mode);
+
+      toggle.addEventListener('click', () => {
+        if (mode === 'system') {
+          mode = 'light';
+        } else if (mode === 'light') {
+          mode = 'dark';
+        } else {
+          mode = 'system';
+        }
+        localStorage.setItem(KEY, mode);
+        applyTheme(mode);
+      });
+
+      // 系统主题变化时自动跟随（仅在 system 模式）
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        if (mode === 'system') applyTheme(mode);
+      });
+    })();
+
+    // 版权年份自动更新
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
