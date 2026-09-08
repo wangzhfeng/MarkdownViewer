@@ -4,8 +4,7 @@
 
 MarkdownViewer is a Total Commander plugin, using preview markdown file which suffixed with md markdown and mk.
 
-![](./Doc/viewer.png)
-
+![](./Doc/viewer.gif)
 
 # Features
 
@@ -56,6 +55,51 @@ MarkdownViewer is a Total Commander plugin, using preview markdown file which su
 
 - Export to PDF: press `P` key or click PDF button
 - External links open in default browser
+
+## Architecture
+
+```mermaid
+flowchart TB
+    User([User])
+    TC[Total Commander File Manager]
+    MD[Markdown File .md .markdown .mk]
+    Temp[Temp HTML %TEMP%/markdownviewer_*.html]
+    WV[WebView2 Renderer]
+
+    subgraph Plugin["MarkdownViewer Plugin (C# .NET Framework 4.8)"]
+        direction TB
+        Entry["MarkdownViewer.cs<br/>ListerPlugin Entry"]
+        Ctrl["ViewerControl.cs<br/>WebView2 Host · Search · PDF"]
+        Pipeline["Markdig Pipeline<br/>DisableHtml + Extensions<br/>Footnotes / Emoji / YAML / HighlightJs"]
+        Encode["Encoding Detect<br/>BOM -> UTF-8 -> GB18030"]
+    end
+
+    subgraph Assets["Frontend Assets (assets/ local offline)"]
+        direction TB
+        Tmpl["markdown_tmpl.txt<br/>HTML Template · Placeholders 0~3"]
+        CSS[markdown_css.txt]
+        KaTeX[KaTeX · Math]
+        Mermaid[Mermaid · Diagrams]
+        HL[Highlight.js · Code Highlight]
+    end
+
+    User -->|Open / Preview| TC
+    TC -->|DetectString / Load| Entry
+    Entry --> Ctrl
+    Ctrl --> Encode
+    Encode --> MD
+    MD --> Pipeline
+    Pipeline -->|HTML String| Ctrl
+    CSS --> Tmpl
+    Tmpl -->|Replace Placeholders| Ctrl
+    Ctrl --> Temp
+    Temp -->|file:// Load| WV
+    Tmpl -.Reference.-> KaTeX
+    Tmpl -.Reference.-> Mermaid
+    Tmpl -.Reference.-> HL
+    WV -->|Render| User
+    WV <-->|postMessage / hostObject| Ctrl
+```
 
 # About Installation 
 

@@ -2,7 +2,7 @@
 
 MarkdownViewer 是一款 Total Commander 的插件，用于浏览 markdown 文件，支持后缀为 md 和 markdown 的文件。
 
-![](./Doc/viewer.png)
+![](./Doc/viewer.gif)
 
 # 功能
 
@@ -52,6 +52,51 @@ MarkdownViewer 是一款 Total Commander 的插件，用于浏览 markdown 文�
 
 - 导出 PDF：按 `P` 键或点击 PDF 按钮
 - 外部链接使用默认浏览器打开
+
+## 架构
+
+```mermaid
+flowchart TB
+    User([用户])
+    TC[Total Commander 文件管理器]
+    MD[Markdown 源文件 .md .markdown .mk]
+    Temp[临时 HTML 文件 %TEMP%/markdownviewer_*.html]
+    WV[WebView2 渲染引擎]
+
+    subgraph Plugin["MarkdownViewer 插件 (C# .NET Framework 4.8)"]
+        direction TB
+        Entry["MarkdownViewer.cs<br/>ListerPlugin 入口"]
+        Ctrl["ViewerControl.cs<br/>WebView2 宿主 · 搜索 · PDF 导出"]
+        Pipeline["Markdig Pipeline<br/>DisableHtml + 各类扩展<br/>Footnotes / Emoji / YAML / HighlightJs"]
+        Encode["编码探测<br/>BOM -> UTF-8 -> GB18030"]
+    end
+
+    subgraph Assets["前端资源 (assets/ 本地离线可用)"]
+        direction TB
+        Tmpl["markdown_tmpl.txt<br/>HTML 模板 + 占位符 0~3"]
+        CSS[markdown_css.txt]
+        KaTeX[KaTeX · 数学公式]
+        Mermaid[Mermaid · 流程图]
+        HL[Highlight.js · 代码高亮]
+    end
+
+    User -->|打开预览| TC
+    TC -->|DetectString / Load| Entry
+    Entry --> Ctrl
+    Ctrl --> Encode
+    Encode --> MD
+    MD --> Pipeline
+    Pipeline -->|HTML 字符串| Ctrl
+    CSS --> Tmpl
+    Tmpl -->|替换占位符| Ctrl
+    Ctrl --> Temp
+    Temp -->|file:// 加载| WV
+    Tmpl -.引用.-> KaTeX
+    Tmpl -.引用.-> Mermaid
+    Tmpl -.引用.-> HL
+    WV -->|预览结果| User
+    WV <-->|postMessage / hostObject| Ctrl
+```
 
 # 安装说明
 
