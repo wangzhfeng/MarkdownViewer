@@ -51,9 +51,20 @@ namespace MarkdownViewer
             DebugLog.Write("InitializeWebView2() 开始 (控制台句柄: {0})", Handle != IntPtr.Zero ? Handle.ToString() : "(未创建)");
             try
             {
+                // [修复] 显式指定用户数据目录。
+                // 传 null 时 WebView2 默认把用户数据目录建在宿主 exe 旁边
+                // （如 C:\Program Files\totalcmd\TOTALCMD64.EXE.WebView2），
+                // TC 装在 Program Files 下时无写权限，CreateAsync 抛 E_ACCESSDENIED (0x80070005)。
+                // 改为放在 %LOCALAPPDATA%\MarkdownViewer\WebView2（用户级可写）。
+                string userDataFolder = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "MarkdownViewer", "WebView2");
+                Directory.CreateDirectory(userDataFolder);
+                DebugLog.Write("InitializeWebView2: userDataFolder={0}", userDataFolder);
+
                 var options = new CoreWebView2EnvironmentOptions("--allow-file-access-from-files");
                 DebugLog.Write("InitializeWebView2: EnvironmentOptions 已创建，开始 CreateAsync...");
-                webView2Environment = await CoreWebView2Environment.CreateAsync(null, null, options);
+                webView2Environment = await CoreWebView2Environment.CreateAsync(null, userDataFolder, options);
                 DebugLog.Write("InitializeWebView2: CreateAsync 完成, BrowserVersionString={0}", webView2Environment.BrowserVersionString);
 
                 DebugLog.Write("InitializeWebView2: 开始 EnsureCoreWebView2Async（若此处之后无日志，说明创建浏览器进程挂起，多为 WebView2 Runtime 损坏/权限问题）");
@@ -88,6 +99,48 @@ namespace MarkdownViewer
                 TraceLog("WebView2 init error: " + ex.Message);
                 DebugLog.Exception("InitializeWebView2", ex);
                 ShowLoading(false);
+                // [修复] 初始化失败不再静默白屏，在预览区显示错误提示和修复指引
+                ShowError(string.Format(
+                    "WebView2 初始化失败，无法预览 Markdown 文件。\r\n\r\n" +
+                    "错误信息：{0}\r\n\r\n" +
+                    "常见修复方法：\r\n" +
+                    "1. 安装 Microsoft Edge WebView2 Runtime：\r\n" +
+                    "    https://developer.microsoft.com/microsoft-edge/webview2/\r\n" +
+                    "2. 删除目录后重试：%LOCALAPPDATA%\\MarkdownViewer\\WebView2\r\n" +
+                    "3. 检查杀毒软件是否拦截了 msedgewebview2.exe", ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// 在预览区显示错误信息（WebView2 不可用时的降级 UI）
+        /// </summary>
+        private void ShowError(string message)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(() => ShowError(message)));
+                return;
+            }
+            try
+            {
+                var errorLabel = new Label
+                {
+                    Dock = DockStyle.Fill,
+                    Text = message,
+                    TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
+                    BackColor = System.Drawing.SystemColors.Window,
+                    ForeColor = System.Drawing.Color.Firebrick,
+                    Font = new System.Drawing.Font(this.Font.FontFamily, 9.5f),
+                    Padding = new Padding(24)
+                };
+                this.Controls.Add(errorLabel);
+                errorLabel.BringToFront();
+                webView2.Visible = false;
+                DebugLog.Write("ShowError: 错误提示已显示");
+            }
+            catch (Exception ex)
+            {
+                DebugLog.Exception("ShowError", ex);
             }
         }
 
