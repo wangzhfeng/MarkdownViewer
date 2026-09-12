@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text;
+using Microsoft.Web.WebView2.Core;
 
 namespace MarkdownViewer
 {

@@ -26,11 +26,22 @@ namespace MarkdownViewer
 
             // [调试] 插件被 TC 加载时做一次环境自检，结果写入 %TEMP%\MarkdownViewer_debug.log
             DebugLog.Write("========== MarkdownViewer 插件实例化 ==========");
-            DebugLog.Write("Plugin settings: " + (pluginSettings != null
-                ? string.Join(";", pluginSettings.AllKeys.Length > 0 ? ToStringDictionary(pluginSettings) : new string[0])
-                : "(null)"));
             try
             {
+                if (pluginSettings != null)
+                {
+                    var settingList = new System.Collections.Generic.List<string>();
+                    foreach (string key in pluginSettings.Keys)
+                    {
+                        settingList.Add(key + "=" + pluginSettings[key]);
+                    }
+                    DebugLog.Write("Plugin settings: " + (settingList.Count > 0 ? string.Join(";", settingList.ToArray()) : "(空)"));
+                }
+                else
+                {
+                    DebugLog.Write("Plugin settings: (null)");
+                }
+
                 string buildDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 DebugLog.LogEnvironment(buildDir);
             }
@@ -38,16 +49,6 @@ namespace MarkdownViewer
             {
                 DebugLog.Exception("LogEnvironment", ex);
             }
-        }
-
-        private static string[] ToStringDictionary(StringDictionary d)
-        {
-            var list = new System.Collections.Generic.List<string>();
-            foreach (string key in d.AllKeys)
-            {
-                list.Add(key + "=" + d[key]);
-            }
-            return list.ToArray();
         }
 
         private ArrayList controls = new ArrayList();
