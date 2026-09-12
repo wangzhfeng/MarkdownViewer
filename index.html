@@ -369,6 +369,23 @@
             最新版本改用 WebView2（基于 Microsoft Edge 内核）作为渲染引擎，以获得更好的渲染效果和兼容性。较新的 Windows 10/11 系统通常已内置，较旧的系统需要手动安装。
           </div>
         </details>
+        <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden" data-page-node-id="faq-win11-troubleshoot">
+          <summary class="flex items-center justify-between cursor-pointer list-none p-5 font-medium" data-page-node-id="faq-win11-troubleshoot-summary">
+            安装插件后无法预览 Markdown 文件，如何排查？
+            <svg class="w-5 h-5 shrink-0 text-slate-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" data-page-node-id="faq-win11-troubleshoot-arrow"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" data-page-node-id="faq-win11-troubleshoot-arrow-path"/></svg>
+          </summary>
+          <div class="px-5 pb-5 text-slate-600 dark:text-slate-400 text-sm leading-relaxed space-y-2" data-page-node-id="faq-win11-troubleshoot-body">
+            <p><strong class="text-slate-700 dark:text-slate-200">第一步：看调试日志。</strong>按 F3 预览一次后，打开日志文件 <code class="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">%TEMP%\MarkdownViewer_debug.log</code>（在资源管理器地址栏直接输入上面的路径回车即可）。开头有"环境自检"块，会列出 WebView2 Runtime、.NET Framework、插件文件是否就绪；往下翻可以看到 Load / WebView2 初始化 / 文件解析每一步的记录，断在哪里一目了然。</p>
+            <p><strong class="text-slate-700 dark:text-slate-200">第二步：对照常见原因。</strong></p>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>日志显示 <code class="font-mono text-xs">WebView2 Runtime: 未找到</code> → 安装 <a href="https://developer.microsoft.com/microsoft-edge/webview2/" target="_blank" rel="noopener" class="text-primary hover:text-primary-dark transition-brand">Microsoft Edge WebView2 Runtime</a>（选 Evergreen Bootstrapper）。</li>
+              <li>日志显示 <code class="font-mono text-xs">拒绝访问 (E_ACCESSDENIED / 0x80070005)</code> → 旧版本把 WebView2 用户数据目录建在 Total Commander 安装目录旁，TC 装在 <code class="font-mono text-xs">C:\Program Files</code> 下时没有写权限。<strong>升级到 v1.0.1 及以上即可自动修复</strong>（用户数据目录已改到 <code class="font-mono text-xs">%LOCALAPPDATA%\MarkdownViewer\WebView2</code>）。</li>
+              <li>初始化仍失败 → 尝试删除 <code class="font-mono text-xs">%LOCALAPPDATA%\MarkdownViewer\WebView2</code> 目录后重新预览，并检查杀毒软件是否拦截了 <code class="font-mono text-xs">msedgewebview2.exe</code>。</li>
+              <li>.NET Framework Release 低于 528040 → 安装 .NET Framework 4.8 运行时。</li>
+            </ul>
+            <p>若以上都无法解决，欢迎到 <a href="https://github.com/wangzhfeng/MarkdownViewer/issues" target="_blank" rel="noopener" class="text-primary hover:text-primary-dark transition-brand">GitHub Issues</a> 反馈，附上日志文件内容可以大幅加快定位。</p>
+          </div>
+        </details>
         <details class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden" data-page-node-id="2er0MHBgXcnfRV5tIVtKH3">
           <summary class="flex items-center justify-between cursor-pointer list-none p-5 font-medium" data-page-node-id="KZU4BdDo1McfSTnTb5vedY">
             支持中文文件吗？会不会乱码？
