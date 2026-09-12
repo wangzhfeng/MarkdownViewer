@@ -6,6 +6,7 @@ on:
     tags: [ 'v*' ]
   pull_request:
     branches: [ master, main ]
+  workflow_dispatch:  # 允许在任意分支上从 Actions 页面手动触发构建（产物仅上传 artifact，不会发 Release）
 
 jobs:
   build:
