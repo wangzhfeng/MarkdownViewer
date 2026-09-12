@@ -24,6 +24,30 @@ namespace MarkdownViewer
 
             DetectString = "EXT=\"MD\" | EXT=\"MARKDOWN\" | EXT=\"MK\"";
 
+            // [调试] 插件被 TC 加载时做一次环境自检，结果写入 %TEMP%\MarkdownViewer_debug.log
+            DebugLog.Write("========== MarkdownViewer 插件实例化 ==========");
+            DebugLog.Write("Plugin settings: " + (pluginSettings != null
+                ? string.Join(";", pluginSettings.AllKeys.Length > 0 ? ToStringDictionary(pluginSettings) : new string[0])
+                : "(null)"));
+            try
+            {
+                string buildDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                DebugLog.LogEnvironment(buildDir);
+            }
+            catch (Exception ex)
+            {
+                DebugLog.Exception("LogEnvironment", ex);
+            }
+        }
+
+        private static string[] ToStringDictionary(StringDictionary d)
+        {
+            var list = new System.Collections.Generic.List<string>();
+            foreach (string key in d.AllKeys)
+            {
+                list.Add(key + "=" + d[key]);
+            }
+            return list.ToArray();
         }
 
         private ArrayList controls = new ArrayList();
@@ -33,7 +57,9 @@ namespace MarkdownViewer
         /// </summary>
         public void Log(string message)
         {
+            // [调试] 双写：TC 插件日志 + 文件日志
             TraceProc(System.Diagnostics.TraceLevel.Info, message);
+            DebugLog.Write("[ViewerControl] " + message);
         }
 
         /// <summary>
@@ -45,6 +71,7 @@ namespace MarkdownViewer
         public override object Load(string fileToLoad, ShowFlags showFlags)
         {
             ViewerControl viewerControl = null;
+            DebugLog.Write("Load() 进入: fileToLoad=\"{0}\", showFlags={1}", fileToLoad, showFlags);
             if (!String.IsNullOrEmpty(fileToLoad))
             {
 
@@ -52,22 +79,38 @@ namespace MarkdownViewer
                 String fileName = Path.GetFileNameWithoutExtension(fileToLoad);
 
                 TraceProc(System.Diagnostics.TraceLevel.Info, "fileName: " + fileName + ", ext: " + ext);
+                DebugLog.Write("Load() 扩展名检查: ext=\"{0}\", 支持列表=\"{1}\"", ext, AllowedExtensions);
 
                 // 如果文件扩展名不在支持之列则直接返回
                 if (AllowedExtensions.IndexOf(ext, StringComparison.InvariantCultureIgnoreCase) < 0)
                 {
+                    DebugLog.Write("Load() 扩展名不支持，返回 null（如果 TC 调用了本插件，说明 DetectString/关联配置有问题）");
                     return null;
                 }
 
-                viewerControl = new ViewerControl(this);
-                viewerControl.FileLoad(fileToLoad);
-                FocusedControl = viewerControl.webView2;
-                viewerControl.Focus();
+                try
+                {
+                    viewerControl = new ViewerControl(this);
+                    viewerControl.FileLoad(fileToLoad);
+                    FocusedControl = viewerControl.webView2;
+                    viewerControl.Focus();
 
-                controls.Add(viewerControl);
-             
+                    controls.Add(viewerControl);
+                    DebugLog.Write("Load() 完成，返回 ViewerControl");
+                }
+                catch (Exception ex)
+                {
+                    // [调试] Load 阶段抛异常会被 TC 静默吞掉，表现为"无法预览"——必须记录
+                    DebugLog.Exception("Load() 创建 ViewerControl 或 FileLoad", ex);
+                    TraceProc(System.Diagnostics.TraceLevel.Error, "Load error: " + ex.Message);
+                    viewerControl = null;
+                }
             }
-            
+            else
+            {
+                DebugLog.Write("Load() fileToLoad 为空");
+            }
+
             return viewerControl;
         }
 
