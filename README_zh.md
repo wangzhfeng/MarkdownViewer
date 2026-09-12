@@ -145,6 +145,17 @@ msbuild MarkdownViewer.sln -p:Configuration=Release -p:Platform="Any CPU"
 
 # 版本历史
 
+## v1.0.1 (2026-09-13)
+
+### 修复
+
+- Total Commander 安装在 `Program Files` 下时预览失败（WebView2 `E_ACCESSDENIED` 0x80070005）——WebView2 用户数据目录改到 `%LOCALAPPDATA%\MarkdownViewer\WebView2`
+- WebView2 初始化失败时不再静默白屏，显示错误信息与修复指引
+
+### 新增
+
+- 文件级调试日志（`%TEMP%\MarkdownViewer_debug.log`），插件加载时自动执行环境自检（WebView2 Runtime / .NET Framework / 插件文件）
+
 ## v1.0.0 (2026-09-08)
 
 ### 安全

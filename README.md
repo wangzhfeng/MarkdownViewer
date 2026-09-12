@@ -149,6 +149,17 @@ msbuild MarkdownViewer.sln -p:Configuration=Release -p:Platform="Any CPU"
 
 # Version
 
+## v1.0.1 (2026-09-13)
+
+### Fixed
+
+- WebView2 preview failing with `E_ACCESSDENIED` (0x80070005) when Total Commander is installed under `Program Files` — the WebView2 user data folder now lives in `%LOCALAPPDATA%\MarkdownViewer\WebView2`
+- Blank preview with no feedback when WebView2 initialization fails — an error message with fix instructions is now shown
+
+### Added
+
+- File-based debug logging to `%TEMP%\MarkdownViewer_debug.log`, with an environment self-check (WebView2 Runtime / .NET Framework / plugin files) on plugin load
+
 ## v1.0.0 (2026-09-08)
 
 ### Security
